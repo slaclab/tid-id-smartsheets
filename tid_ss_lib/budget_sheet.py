@@ -52,10 +52,6 @@ def check_parent_row(*, client, sheet, rowIdx, sumCols, titles):
 def check_task_row(*, client, sheet, rowIdx, inMS):
     row = sheet.rows[rowIdx]
 
-    # Skip rows with missing text
-    if (not hasattr(row.cells[0],'value')) or row.cells[0].value is None:
-        return
-
     # Setup row update structure just in case
     new_row = smartsheet.models.Row()
     new_row.id = row.id
@@ -91,6 +87,7 @@ def check_task_row(*, client, sheet, rowIdx, inMS):
 
 
 def check(*, client, sheet):
+    labor = []
 
     check_parent_row(client=client,
                   sheet=sheet,
@@ -137,16 +134,24 @@ def check(*, client, sheet):
 
             # Labor Parent Rows
             else:
+
+                labor.append({'data': sheet.rows[rowIdx], 'parent' : True})
+
                 check_parent_row(client=client,
                                  sheet=sheet,
                                  rowIdx=rowIdx,
                                  sumCols=set([6, 7, 12, 13, 14, 15, 16, 17, 18, 19]),
                                  titles=[])
 
-        else:
+        # Skip rows with missing text
+        elif hasattr(sheet.rows[rowIdx].cells[0],'value') and sheet.rows[rowIdx].cells[0].value is not None:
+
+            if not inMS:
+                labor.append({'data': sheet.rows[rowIdx], 'parent' : False})
+
             check_task_row(client=client,
                            sheet=sheet,
                            rowIdx=rowIdx,
                            inMS=inMS)
 
-
+    return labor

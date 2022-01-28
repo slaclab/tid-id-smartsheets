@@ -1,6 +1,7 @@
 
 import smartsheet
 from . import budget_sheet
+from . import schedule_sheet
 
 TID_WORKSPACE          = 4728845933799300
 TID_ID_ACTIVE_FOLDER   = 1039693589571460
@@ -61,13 +62,14 @@ def check_project(*, client, folderId):
     if len(budget.columns) != 21:
         raise Exception("Wrong number of columns in budget file")
 
-    # Iterate through each row
-    budget_sheet.check(client=client, sheet=budget)
+    # Fix internal budget file references
+    laborRows = budget_sheet.check(client=client, sheet=budget)
+
+    # Check schedule file
+    schedule_sheet.check(client=client, sheet=schedule, laborRows=laborRows, laborSheet=budget)
 
 
-
-
-def walk_folders(*, path, folderId):
+def walk_folders(*, client, path, folderId):
     folder = client.Folders.get_folder(folderId)
     ret = {}
 
