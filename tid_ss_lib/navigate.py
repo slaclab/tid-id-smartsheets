@@ -60,13 +60,20 @@ def check_project(*, client, folderId):
 
     # Check column count
     if len(budget.columns) != 21:
-        raise Exception("Wrong number of columns in budget file")
+        raise Exception(f"Wrong number of columns in budget file: Got {len(budget.columns)}.")
+
+    # Check column count
+    if len(schedule.columns) != 17:
+        raise Exception(f"Wrong number of columns in schedule file: Got {len(schedule.columns)}.")
 
     # Fix internal budget file references
     laborRows = budget_sheet.check(client=client, sheet=budget)
 
     # Check schedule file
     schedule_sheet.check(client=client, sheet=schedule, laborRows=laborRows, laborSheet=budget)
+
+    # Final fix of links in budget file
+    budget_sheet.check_task_links(client=client, sheet=budget, laborRows=laborRows, scheduleSheet=schedule)
 
 
 def walk_folders(*, client, path, folderId):
