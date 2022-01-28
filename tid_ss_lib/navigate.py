@@ -1,6 +1,6 @@
 
 import smartsheet
-import budget_first_row
+from . import budget_sheet
 
 TID_WORKSPACE          = 4728845933799300
 TID_ID_ACTIVE_FOLDER   = 1039693589571460
@@ -21,8 +21,8 @@ def build_template(*, client):
     return temp
 
 
-def check_project(*, client, folder_id):
-    folder = client.Folders.get_folder(folder_id)
+def check_project(*, client, folderId):
+    folder = client.Folders.get_folder(folderId)
 
     print(f"Processing project {folder.name}")
 
@@ -42,29 +42,33 @@ def check_project(*, client, folder_id):
         # Copy file if it is missing
         if v is None:
             print(f"   Project is missing '{k}' file. Copying.")
-            #client.Sheets.copy_sheet(tempList[k], # Source sheet
-            #                         smartsheet.models.ContainerDestination({'destination_type': 'folder',
-            #                                                                'destination_id': folder.id,
-            #                                                                'new_name': folder.name + ' ' + k}))
+            client.Sheets.copy_sheet(tempList[k], # Source sheet
+                                     smartsheet.models.ContainerDestination({'destination_type': 'folder',
+                                                                            'destination_id': folder.id,
+                                                                            'new_name': folder.name + ' ' + k}))
 
         # Check for valid naming, rename if need be
         elif not v.name.startswith(folder.name):
             print(f"   Bad sheet name {v.name} Renaming")
-            #client.Sheets.update_sheet(v.id, smartsheet.models.Sheet({'name': folder.name + ' ' + k}))
+            client.Sheets.update_sheet(v.id, smartsheet.models.Sheet({'name': folder.name + ' ' + k}))
 
 
     # First process budget sheet:
     budget   = client.Sheets.get_sheet(foundList['Budget'].id)
     schedule = client.Sheets.get_sheet(foundList['Schedule'].id)
 
+    # Check column count
+    if len(budget.columns) != 21:
+        raise Exception("Wrong number of columns in budget file")
+
     # Iterate through each row
-    budget_first_row.check(row=budget.rows[0])
+    budget_sheet.check(client=client, sheet=budget)
 
 
 
 
-def walk_folders(*, path, folder_id):
-    folder = client.Folders.get_folder(folder_id)
+def walk_folders(*, path, folderId):
+    folder = client.Folders.get_folder(folderId)
     ret = {}
 
     path = path + '/' + folder.name
@@ -74,11 +78,11 @@ def walk_folders(*, path, folder_id):
 
         # Skip projects with no sheets
         if len(folder.sheets) != 0:
-            ret[path] = folder_id
+            ret[path] = folderId
 
     else:
         for sub in folder.folders:
-            ret.update(walk_folders(path=path, folder_id=sub.id))
+            ret.update(walk_folders(path=path, folderId=sub.id))
 
     return ret
 
