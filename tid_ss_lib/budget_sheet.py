@@ -13,7 +13,6 @@ import smartsheet
 from . import navigate
 
 # TODO:
-#    Remove uneccessary links, particulary in parent rows
 #    Color format parent rows
 
 
@@ -94,7 +93,15 @@ def check_parent_row(*, client, sheet, rowIdx, sumCols, titles, doFixes):
                 new_row.cells.append(new_cell)
 
         else:
-            if row.cells[i].value is not None:
+            if row.cells[i].link_in_from_cell is not None:
+                print(f"   Invalid sheet link in row {rowIdx+1} cell {i+1} in budget file.")
+                new_cell = smartsheet.models.Cell()
+                new_cell.column_id = sheet.columns[i].id
+                new_cell.value = ''
+                new_cell.strict = False
+                new_row.cells.append(new_cell)
+
+            elif row.cells[i].value is not None:
                 print(f"   Invalid value in row {rowIdx+1} cell {i+1} in budget file. Expected ''. Got '{row.cells[i].value}'.")
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = sheet.columns[i].id
@@ -155,40 +162,48 @@ def check_task_links(*, client, sheet, laborRows, scheduleSheet, doFixes):
         if not rowData['parent']:
             row = rowData['data']
 
-            # Setup row update structure just in case
-            new_row = smartsheet.models.Row()
-            new_row.id = row.id
+            if rowData['link'] is None:
+                print(f"   Missing budget link for row {row.row_number} column {k+1}.")
+            else:
 
-            for k,v in links.items():
-                if rowData['link'] is None:
-                    print(f"   Missing budget link for row {row.row_number} column {k+1}.")
-                else:
+                # Setup row update structure just in case
+                new_row = smartsheet.models.Row()
+                new_row.id = row.id
 
-                    rowIdTar = rowData['link'].id
-                    colIdTar = rowData['link'].cells[v].column_id
-                    shtIdTar = scheduleSheet.id
+                for i in range(1,len(row.cells)):
+                    if i in links:
+                        rowIdTar = rowData['link'].id
+                        colIdTar = rowData['link'].cells[links[i]].column_id
+                        shtIdTar = scheduleSheet.id
 
-                    if row.cells[k].link_in_from_cell is None or \
-                        row.cells[k].link_in_from_cell.row_id != rowIdTar or \
-                        row.cells[k].link_in_from_cell.column_id != colIdTar or \
-                        row.cells[k].link_in_from_cell.sheet_id != shtIdTar:
+                        if row.cells[i].link_in_from_cell is None or \
+                            row.cells[i].link_in_from_cell.row_id != rowIdTar or \
+                            row.cells[i].link_in_from_cell.column_id != colIdTar or \
+                            row.cells[i].link_in_from_cell.sheet_id != shtIdTar:
 
-                        print(f"   Incorrect budget link for row {row.row_number} column {k+1}.")
+                            print(f"   Incorrect budget link for row {row.row_number} column {i+1}.")
 
-                        cell_link = smartsheet.models.CellLink()
-                        cell_link.sheet_id = shtIdTar
-                        cell_link.row_id = rowIdTar
-                        cell_link.column_id = colIdTar
+                            cell_link = smartsheet.models.CellLink()
+                            cell_link.sheet_id = shtIdTar
+                            cell_link.row_id = rowIdTar
+                            cell_link.column_id = colIdTar
 
+                            new_cell = smartsheet.models.Cell()
+                            new_cell.column_id = row.cells[i].column_id
+                            new_cell.value = smartsheet.models.ExplicitNull()
+                            new_cell.link_in_from_cell = cell_link
+                            new_row.cells.append(new_cell)
+
+                    elif row.cells[i].link_in_from_cell is not None:
+                        print(f"   Invalid budget link for row {row.row_number} column {i+1}.")
                         new_cell = smartsheet.models.Cell()
-                        new_cell.column_id = row.cells[k].column_id
-                        new_cell.value = smartsheet.models.ExplicitNull()
-                        new_cell.link_in_from_cell = cell_link
+                        new_cell.column_id = row.cells[i].column_id
+                        new_cell.value = ''
                         new_row.cells.append(new_cell)
 
-            if doFixes and len(new_row.cells) != 0:
-                print(f"   Applying fixes to row {row.row_number}.")
-                client.Sheets.update_rows(sheet.id, [new_row])
+                if doFixes and len(new_row.cells) != 0:
+                    print(f"   Applying fixes to row {row.row_number}.")
+                    client.Sheets.update_rows(sheet.id, [new_row])
 
 
 def check(*, client, sheet, doFixes):

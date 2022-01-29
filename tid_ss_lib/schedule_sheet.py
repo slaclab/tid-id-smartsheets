@@ -13,7 +13,6 @@
 import smartsheet
 
 # TODO:
-#    Remove uneccessary links, particulary in parent rows
 #    Color format parent rows
 #    Fix indent issue
 
@@ -67,9 +66,8 @@ def check_parent_row(*, client, sheet, rowIdx, doFixes):
     new_row = smartsheet.models.Row()
     new_row.id = row.id
 
-    for i in range(len(row.cells)):
+    for i in range(1,len(row.cells)):
         if i in formulas:
-
             if not hasattr(row.cells[i],'formula') or row.cells[i].formula != formulas[i]:
                 print(f"   Invalid value in row {rowIdx+1} col {i+1} in schedule file. Expected '{formulas[i]}'. Got '{row.cells[i].formula}'.")
                 new_cell = smartsheet.models.Cell()
@@ -77,6 +75,14 @@ def check_parent_row(*, client, sheet, rowIdx, doFixes):
                 new_cell.formula = formulas[i]
                 new_cell.strict = False
                 new_row.cells.append(new_cell)
+
+        elif row.cells[i].link_in_from_cell is not None:
+            print(f"   Invalid sheet link in row {rowIdx+1} cell {i+1} in schedule file.")
+            new_cell = smartsheet.models.Cell()
+            new_cell.column_id = sheet.columns[i].id
+            new_cell.value = ''
+            new_cell.strict = False
+            new_row.cells.append(new_cell)
 
     if doFixes and len(new_row.cells) != 0:
         print(f"   Applying fixes to row {rowIdx}.")
@@ -119,27 +125,35 @@ def check_task_links(*, client, sheet, rowIdx, laborRows, laborSheet, doFixes):
     new_row = smartsheet.models.Row()
     new_row.id = row.id
 
-    for k,v in links.items():
-        rowIdTar = laborRows[rowIdx-1]['data'].id
-        colIdTar = laborRows[rowIdx-1]['data'].cells[v].column_id
-        shtIdTar = laborSheet.id
+    for i in range(1,len(row.cells)):
+        if i in links:
+            rowIdTar = laborRows[rowIdx-1]['data'].id
+            colIdTar = laborRows[rowIdx-1]['data'].cells[links[i]].column_id
+            shtIdTar = laborSheet.id
 
-        if row.cells[k].link_in_from_cell is None or \
-            row.cells[k].link_in_from_cell.row_id != rowIdTar or \
-            row.cells[k].link_in_from_cell.column_id != colIdTar or \
-            row.cells[k].link_in_from_cell.sheet_id != shtIdTar:
+            if row.cells[i].link_in_from_cell is None or \
+                row.cells[i].link_in_from_cell.row_id != rowIdTar or \
+                row.cells[i].link_in_from_cell.column_id != colIdTar or \
+                row.cells[i].link_in_from_cell.sheet_id != shtIdTar:
 
-            print(f"   Incorrect schedule link for row {rowIdx+1} column {k+1}.")
+                print(f"   Incorrect schedule link for row {rowIdx+1} column {i+1}.")
 
-            cell_link = smartsheet.models.CellLink()
-            cell_link.sheet_id = shtIdTar
-            cell_link.row_id = rowIdTar
-            cell_link.column_id = colIdTar
+                cell_link = smartsheet.models.CellLink()
+                cell_link.sheet_id = shtIdTar
+                cell_link.row_id = rowIdTar
+                cell_link.column_id = colIdTar
 
+                new_cell = smartsheet.models.Cell()
+                new_cell.column_id = row.cells[i].column_id
+                new_cell.value = smartsheet.models.ExplicitNull()
+                new_cell.link_in_from_cell = cell_link
+                new_row.cells.append(new_cell)
+
+        elif row.cells[i].link_in_from_cell is not None:
+            print(f"   Invalid schedule link for row {rowIdx+1} column {i+1}.")
             new_cell = smartsheet.models.Cell()
-            new_cell.column_id = row.cells[k].column_id
-            new_cell.value = smartsheet.models.ExplicitNull()
-            new_cell.link_in_from_cell = cell_link
+            new_cell.column_id = row.cells[i].column_id
+            new_cell.value = ''
             new_row.cells.append(new_cell)
 
     if doFixes and len(new_row.cells) != 0:

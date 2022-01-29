@@ -41,9 +41,9 @@ def check_project(*, client, folderId, doFixes, path=None):
     folder = client.Folders.get_folder(folderId)
 
     if path is not None:
-        print(f"Processing project {path}")
+        print(f"Processing project {path} : {folderId}")
     else:
-        print(f"Processing project {folder.name}")
+        print(f"Processing project {folder.name} : {folderId}")
 
     ##########################################################
     # First Make sure folder has all of the neccessary files
