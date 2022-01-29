@@ -82,8 +82,8 @@ def check_project(*, client, folderId, doFixes, path=None):
     else:
 
         # First process budget sheet:
-        budget   = client.Sheets.get_sheet(foundList['Budget'].id)
-        schedule = client.Sheets.get_sheet(foundList['Schedule'].id)
+        budget   = client.Sheets.get_sheet(foundList['Budget'].id) #,include='format')
+        schedule = client.Sheets.get_sheet(foundList['Schedule']) #.id,include='format')
 
         if budget_sheet.check_structure(sheet=budget) and schedule_sheet.check_structure(sheet=schedule):
 

@@ -206,6 +206,8 @@ def check_task_links(*, client, sheet, laborRows, scheduleSheet, doFixes):
                     client.Sheets.update_rows(sheet.id, [new_row])
 
 
+
+
 def check(*, client, sheet, doFixes):
     labor = []
 
