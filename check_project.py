@@ -34,6 +34,14 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--colors",
+    action   = 'store_true',
+    required = False,
+    default  = False,
+    help     = "Use to enable sheet color coding.",
+)
+
+parser.add_argument(
     "--folder",
     action   = 'append',
     required = True,
@@ -44,9 +52,8 @@ parser.add_argument(
 args = parser.parse_args()
 
 client = smartsheet.Smartsheet(args.key)
-
-print(f"\nProcessing folder(s) {args.folder} with key {args.key}. Fix = {args.fix}\n")
+print("")
 
 for p in args.folder:
-    tid_ss_lib.navigate.check_project(client=client,folderId=int(p), doFixes=args.fix)
+    tid_ss_lib.navigate.check_project(client=client,folderId=int(p), doFixes=args.fix, doColors=args.colors)
 

@@ -82,16 +82,16 @@ def check_project(*, client, folderId, doFixes, path=None):
     else:
 
         # First process budget sheet:
-        budget   = client.Sheets.get_sheet(foundList['Budget'].id) #,include='format')
-        schedule = client.Sheets.get_sheet(foundList['Schedule'].id) #.id,include='format')
+        budget   = client.Sheets.get_sheet(foundList['Budget'].id, include='format')
+        schedule = client.Sheets.get_sheet(foundList['Schedule'].id, include='format')
 
         if budget_sheet.check_structure(sheet=budget) and schedule_sheet.check_structure(sheet=schedule):
 
             # Fix internal budget file references
-            laborRows = budget_sheet.check(client=client, sheet=budget, doFixes=doFixes)
+            laborRows = budget_sheet.check(client=client, sheet=budget, doFixes=doFixes )
 
             # Check schedule file
-            schedule_sheet.check(client=client, sheet=schedule, laborRows=laborRows, laborSheet=budget, doFixes=doFixes)
+            schedule_sheet.check(client=client, sheet=schedule, laborRows=laborRows, laborSheet=budget, doFixes=doFixes )
 
             # Final fix of links in budget file
             budget_sheet.check_task_links(client=client, sheet=budget, laborRows=laborRows, scheduleSheet=schedule, doFixes=doFixes)

@@ -16,10 +16,17 @@ import smartsheet
 
 client = smartsheet.Smartsheet(secrets.API_KEY)
 
-if False:
-    tid_ss_lib.navigate.check_folders(client=client, doFixes=False)
-else:
-    stable = { #1120559233820548: True,  # UCSC PET
+#info = client.Server.server_info()
+
+#print(info)
+
+#exit(1)
+
+
+#if False:
+    #tid_ss_lib.navigate.check_folders(client=client, doFixes=False)
+#else:
+    #stable = { #1120559233820548: True,  # UCSC PET
                #8701540509738884: True,  # 4D Tracking
                #7854891323418500: True,  # Mathusula
                #8002176489416580: True,  # Fabulous
@@ -34,8 +41,14 @@ else:
                #7531399218521988: True # LDRD Frisch
                #2705714624915332: True, # Cryo diamond
                #4260424066590596: True, # FDSOI
-               6389267556525956: True, # LGAD
-             }
+               #6389267556525956: True, # LGAD
+             #}
 
-    for k,v in stable.items():
-        tid_ss_lib.navigate.check_project(client=client,folderId=k, doFixes=v)
+    #for k,v in stable.items():
+        #tid_ss_lib.navigate.check_project(client=client,folderId=k, doFixes=v)
+
+
+#tid_ss_lib.navigate.check_project(client=client,folderId=2705714624915332, doFixes=False)
+
+tid_ss_lib.navigate.check_project(client=client,folderId=6317030501574532, doFixes=True)
+
