@@ -94,6 +94,9 @@ def check_task_row(*, client, sheet, rowIdx, doFixes):
                  10: '=([Planned Labor Hours From Budget]@row / 8) / [Baseline Duration (days)]@row',
                  12: '=Duration@row - [Baseline Duration (days)]@row', }
 
+    init = { 13 : '0',
+             14 : '0' }
+
     row = sheet.rows[rowIdx]
 
     # Setup row update structure just in case
@@ -108,6 +111,15 @@ def check_task_row(*, client, sheet, rowIdx, doFixes):
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = sheet.columns[i].id
                 new_cell.formula = formulas[i]
+                new_cell.strict = False
+                new_row.cells.append(new_cell)
+
+        if i in init:
+            if row.cells[i].value is None or row.cells[i].value == '':
+                print(f"   Missing default value in row {rowIdx+1} col {i+1} in schedule file.")
+                new_cell = smartsheet.models.Cell()
+                new_cell.column_id = sheet.columns[i].id
+                new_cell.value = init[i]
                 new_cell.strict = False
                 new_row.cells.append(new_cell)
 

@@ -146,6 +146,17 @@ def check_task_row(*, client, sheet, rowIdx, inMS, doFixes):
                 new_cell.strict = False
                 new_row.cells.append(new_cell)
 
+    # Check initial percent complete for M&S lines
+    if inMS:
+        k = 11
+        if row.cells[k].value is None or row.cells[k].value == '':
+            print(f"   Missing default value in row {rowIdx+1} col {k+1} in budget file.")
+            new_cell = smartsheet.models.Cell()
+            new_cell.column_id = sheet.columns[k].id
+            new_cell.value = '0'
+            new_cell.strict = False
+            new_row.cells.append(new_cell)
+
     if doFixes and len(new_row.cells) != 0:
         print(f"   Applying fixes to row {rowIdx+1}.")
         client.Sheets.update_rows(sheet.id, [new_row])
@@ -163,7 +174,7 @@ def check_task_links(*, client, sheet, laborRows, scheduleSheet, doFixes):
             row = rowData['data']
 
             if rowData['link'] is None:
-                print(f"   Missing budget link for row {row.row_number} column {k+1}.")
+                print(f"   Missing budget link for row {row.row_number}.")
             else:
 
                 # Setup row update structure just in case
