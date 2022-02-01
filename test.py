@@ -10,11 +10,11 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
-import tid_ss_lib.secrets
+import secrets
 import tid_ss_lib.navigate
 import smartsheet
 
-client = smartsheet.Smartsheet(tid_ss_lib.secrets.API_KEY)
+client = smartsheet.Smartsheet(secrets.API_KEY)
 
 if False:
     tid_ss_lib.navigate.check_folders(client=client, doFixes=False)
