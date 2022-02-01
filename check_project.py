@@ -45,7 +45,8 @@ args = parser.parse_args()
 
 client = smartsheet.Smartsheet(args.key)
 
-print(f"\nProcessing folder(s) {args.folder} with key {args.key}. Fix = {args.fix}\n")
+print("")
+#print(f"Processing folder(s) {args.folder} with key {args.key}. Fix = {args.fix}\n")
 
 for p in args.folder:
     tid_ss_lib.navigate.check_project(client=client,folderId=int(p), doFixes=args.fix)
