@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------
-# Title      : Test Scripts
+# Title      : Check Project Script
 #-----------------------------------------------------------------------------
 # This file is part of the TID ID Smartsheets software platform. It is subject to
 # the license terms in the LICENSE.txt file found in the top-level directory
