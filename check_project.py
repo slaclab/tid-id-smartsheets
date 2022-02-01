@@ -16,7 +16,7 @@ import smartsheet
 import argparse
 
 # Set the argument parser
-parser = argparse.ArgumentParser('Test Server')
+parser = argparse.ArgumentParser('Smartsheets Project Check & Fix')
 
 parser.add_argument(
     "--key",
