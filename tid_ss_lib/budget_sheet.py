@@ -12,11 +12,40 @@
 import smartsheet
 from . import navigate
 
-formGray  = ",,,,,,,,,18,,,,,,,"
-formDGray = ",,,,,,,,,26,,,,,,,"
-formWhite = ",,,,,,,,,,,,,,,1,"
-formBlue  = ",,,,,,,,,23,,,,,,,"
-formDBlue = ",,1,,,,,,,31,,,,,,1,"
+# Set formats for columns looking at major, minor and task rows
+#
+# https://smartsheet-platform.github.io/api-docs/#formatting
+#
+# Colors 31 = Dark Blue
+#        26 = Dark Gray
+#        23 = Blue
+#        18 - Gray
+#           = White
+
+formatMajor = [ ",,1,,,,,,,31,,,,,,1,",     ",,1,,,,,,,31,,,,,,1,",     ",,1,,,,,,,31,,,,,,1,",     ",,1,,,,,,,31,,,,,,1,",     ",,1,,,,,,,31,,,,,,1,",
+                ",,1,,,,,,,31,,,,,,1,",     ",,1,,,,,,,31,,13,2,1,2,,", ",,1,,,,,,,31,,13,2,1,2,,", ",,1,,,,,,,31,,,,,,1,",     ",,1,,,,,,,31,,,,,,1,",
+                ",,1,,,,,,,31,,,,,,1,",     ",,1,,,,,,,31,,,,,,1,",     ",,1,,,,,,,31,,13,2,1,2,,", ",,1,,,,,,,31,,13,2,1,2,,", ",,1,,,,,,,31,,,,,,1,",
+                ",,1,,,,,,,31,,13,2,1,2,,", ",,1,,,,,,,31,,13,2,1,2,,", ",,1,,,,,,,31,,13,2,1,2,,", ",,1,,,,,,,31,,,0,,,1,",    ",,1,,,,,,,31,,,0,,,1,",
+                ",,1,,,,,,,31,,,,,,1," ]
+
+formatMinor = [ ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,,",
+                ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,,",
+                ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,1,",     ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,,,,,,",
+                ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,,0,,,,",     ",,,,,,,,,23,,,0,,,,",
+                ",,,,,,,,,23,,,,,,," ]
+
+formatMAndS = [ ",,,,,,,,,,,,,,,1,",      ",,,,,,,,,,,,,,,1,",       ",,,,,,,,,,,,,,,1,",       ",,,,,,,,,,,13,2,1,2,,",   ",,,,,,,,,,,,,,,,",
+                ",,,,,,,,,18,,,,,3,,",    ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,26,,,,,,,",      ",,,,,,,,,26,,,,,,,",
+                ",,,,,,,,,26,,,,,,,",     ",,,,,,,,,,,,,,3,,",       ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,26,,,,,,,",
+                ",,,,,,,,,,,13,2,1,2,,",  ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,26,,,,,,,",      ",,,,,,,,,26,,,,,,,",
+                ",,,,,,,,,,,,,,,," ]
+
+formatTask  = [ ",,,,,,,,,,,,,,,,",        ",,,,,,,,,,,,,,,,",        ",,,,,,,,,,,,,,,,",        ",,,,,,,,,,,13,2,1,2,,",   ",,,,,,,,,,,,,,,,",
+                ",,,,,,,,,18,,,,,3,,",     ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,,,,,,",      ",,,,,,,,,18,,,0,,,,",
+                ",,,,,,,,,18,,,,,,,",      ",,,,,,,,,18,,,,,3,,",     ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,,,,,,",
+                ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,,0,,,,",     ",,,,,,,,,18,,,0,,,,",
+                ",,,,,,,,,,,,,,,," ]
+
 
 def check_structure(*, sheet):
 
@@ -68,51 +97,51 @@ def check_parent_row(*, client, sheet, rowIdx, sumCols, titles, doFixes):
 
     if len(titles) == 0:
         startIdx = 1
-        form = formBlue
+        form = formatMinor
     else:
         startIdx = len(titles)
-        form = formDBlue
+        form = formatMajor
 
     for i in range(len(titles)):
-        if row.cells[i].value != titles[i] or row.cells[i].format != form:
-            print(f"   Incorrect row {rowIdx+1}, col {i+1} value or shading in budget file. Got '{row.cells[i].value}'. Expected '{titles[i]}'.")
+        if row.cells[i].value != titles[i] or row.cells[i].format != form[i]:
+            print(f"   Incorrect row {rowIdx+1}, col {i+1} value or format in budget file.")
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[i].id
             new_cell.value = titles[i]
-            new_cell.format = form
+            new_cell.format = form[i]
             new_cell.strict = False
             new_row.cells.append(new_cell)
 
-    # Check shading in earlier columns
+    # Check format in earlier columns
     for i in range(len(titles),startIdx):
-        if row.cells[i].format != form:
-            print(f"   Incorrect row {rowIdx+1}, col {i+1} shading in budget file.")
+        if row.cells[i].format != form[i]:
+            print(f"   Incorrect row {rowIdx+1}, col {i+1} format in budget file.")
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[i].id
             new_cell.value = row.cells[i].value
-            new_cell.format = form
+            new_cell.format = form[i]
             new_cell.strict = False
             new_row.cells.append(new_cell)
 
     for i in range(startIdx,len(row.cells)):
 
         if i in sumCols:
-            if not hasattr(row.cells[i],'formula') or row.cells[i].formula != sumChildrenValue or row.cells[i].format != form:
-                print(f"   Invalid value or shading in row {rowIdx+1} cell {i+1} in budget file. Expected '{sumChildrenValue}'. Got '{row.cells[i].formula}'.")
+            if not hasattr(row.cells[i],'formula') or row.cells[i].formula != sumChildrenValue or row.cells[i].format != form[i]:
+                print(f"   Invalid value or format in row {rowIdx+1} cell {i+1} in budget file.")
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = sheet.columns[i].id
                 new_cell.formula = sumChildrenValue
                 new_cell.strict = False
-                new_cell.format = form
+                new_cell.format = form[i]
                 new_row.cells.append(new_cell)
 
-        elif row.cells[i].link_in_from_cell is not None or row.cells[i].format != form or (row.cells[i].value is not None and row.cells[i].value != ''):
-            print(f"   Invalid sheet link, shading '{row.cells[i].format}' or value '{row.cells[i].value}' in row {rowIdx+1} cell {i+1} in budget file.")
+        elif row.cells[i].link_in_from_cell is not None or row.cells[i].format != form[i] or (row.cells[i].value is not None and row.cells[i].value != ''):
+            print(f"   Invalid sheet link, format or value in row {rowIdx+1} cell {i+1} in budget file.")
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[i].id
             new_cell.value = ''
             new_cell.strict = False
-            new_cell.format = form
+            new_cell.format = form[i]
             new_row.cells.append(new_cell)
 
     if doFixes and len(new_row.cells) != 0:
@@ -155,38 +184,40 @@ def check_task_row(*, client, sheet, rowIdx, inMS, doFixes):
         empty.append(19)
         defV.append(11)
         defV.append(15)
+        form = formatMAndS
     else:
         rowVals[9]  = '=[Contingency Factor]@row * [Planned Duration From Schedule (days)]@row'
         rowVals[15] = '=[Cost per Item Fully Burdened]@row * [Actual Hours From Schedule]@row'
         rowVals[19] = '=[Duration Variance From Schedule]@row - (([Contingency Factor]@row - 1) * [Planned Duration From Schedule (days)]@row)'
+        form = formatTask
 
     for k,v in rowVals.items():
-        if ((not hasattr(row.cells[k],'formula')) or row.cells[k].formula != v) or row.cells[k].format != formGray:
-            print(f"   Invalid value or shading in row {rowIdx+1} cell {k+1} in budget file. Expected '{v}'. Got '{row.cells[k].formula}'.")
+        if ((not hasattr(row.cells[k],'formula')) or row.cells[k].formula != v) or row.cells[k].format != form[k]:
+            print(f"   Invalid value or format in row {rowIdx+1} cell {k+1} in budget file.")
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[k].id
             new_cell.formula = v
-            new_cell.format = formGray
+            new_cell.format = form[k]
             new_cell.strict = False
             new_row.cells.append(new_cell)
 
     for k in empty:
-        if (row.cells[k].value is not None and row.cells[k].value != '') or row.cells[k].format != formDGray:
-            print(f"   Bad value '{row.cells[k].value}' or shading '{row.cells[k].format}' in row {rowIdx+1} col {k+1} in budget file. Expected ''")
+        if (row.cells[k].value is not None and row.cells[k].value != '') or row.cells[k].format != form[k]:
+            print(f"   Bad value '{row.cells[k].value}' or format '{row.cells[k].format}' in row {rowIdx+1} col {k+1} in budget file.")
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[k].id
             new_cell.value = ''
-            new_cell.format = formDGray
+            new_cell.format = form[k]
             new_cell.strict = False
             new_row.cells.append(new_cell)
 
     for k in defV:
         if row.cells[k].value is None or row.cells[k].value == '':
-            print(f"   Missing default value or shading in row {rowIdx+1} col {k+1} in budget file.")
+            print(f"   Missing default value or format in row {rowIdx+1} col {k+1} in budget file.")
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[k].id
             new_cell.value = '0'
-            new_cell.format = formWhite
+            new_cell.format = form[k]
             new_cell.strict = False
             new_row.cells.append(new_cell)
 
@@ -205,7 +236,9 @@ def check_task_links(*, client, sheet, laborRows, scheduleSheet, doFixes):
     # Need re-link
     relink = set()
 
-    # First check shading
+    form = formatTask
+
+    # First check format
     for rowData in laborRows:
         if not rowData['parent']:
             row = rowData['data']
@@ -217,13 +250,13 @@ def check_task_links(*, client, sheet, laborRows, scheduleSheet, doFixes):
             for i in range(1,len(row.cells)):
                 if i in links:
 
-                    if row.cells[i].format != formGray:
-                        print(f"   Incorrect shading for row {row.row_number} column {i+1}.")
+                    if row.cells[i].format != form[i]:
+                        print(f"   Incorrect format for row {row.row_number} column {i+1}.")
                         relink.add(i)
                         new_cell = smartsheet.models.Cell()
                         new_cell.column_id = row.cells[i].column_id
                         new_cell.value = smartsheet.models.ExplicitNull()
-                        new_cell.format = formGray
+                        new_cell.format = form[i]
                         new_row.cells.append(new_cell)
 
             if doFixes and len(new_row.cells) != 0:
@@ -271,7 +304,7 @@ def check_task_links(*, client, sheet, laborRows, scheduleSheet, doFixes):
                         new_cell = smartsheet.models.Cell()
                         new_cell.column_id = row.cells[i].column_id
                         new_cell.value = ''
-                        new_cell.format = formWhite
+                        new_cell.format = form[i]
                         new_row.cells.append(new_cell)
 
                 if doFixes and len(new_row.cells) != 0:
