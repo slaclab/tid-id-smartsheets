@@ -21,7 +21,7 @@ TID_ID_LIST_SHEET      = 2931334483076996
 TID_ID_FOLDER_PREFIX   = 'TID/ID'
 
 OVERHEAD_NOTE = '12.25% Overhead'
-LABOR_RATE_NOTE = 'SLAC Labor Rate FY21 (loaded): $274.63; Slac Tech Rate FY21 (loaded): $163.47'
+LABOR_RATE_NOTE = 'SLAC Labor Rate FY22 (loaded): $274.63; Slac Tech Rate FY21 (loaded): $163.47'
 
 TEMPLATE_PREFIX = '[Project] '
 
@@ -82,16 +82,16 @@ def check_project(*, client, folderId, doFixes, path=None):
     else:
 
         # First process budget sheet:
-        budget   = client.Sheets.get_sheet(foundList['Budget'].id) #,include='format')
-        schedule = client.Sheets.get_sheet(foundList['Schedule'].id) #.id,include='format')
+        budget   = client.Sheets.get_sheet(foundList['Budget'].id, include='format')
+        schedule = client.Sheets.get_sheet(foundList['Schedule'].id, include='format')
 
         if budget_sheet.check_structure(sheet=budget) and schedule_sheet.check_structure(sheet=schedule):
 
             # Fix internal budget file references
-            laborRows = budget_sheet.check(client=client, sheet=budget, doFixes=doFixes)
+            laborRows = budget_sheet.check(client=client, sheet=budget, doFixes=doFixes )
 
             # Check schedule file
-            schedule_sheet.check(client=client, sheet=schedule, laborRows=laborRows, laborSheet=budget, doFixes=doFixes)
+            schedule_sheet.check(client=client, sheet=schedule, laborRows=laborRows, laborSheet=budget, doFixes=doFixes )
 
             # Final fix of links in budget file
             budget_sheet.check_task_links(client=client, sheet=budget, laborRows=laborRows, scheduleSheet=schedule, doFixes=doFixes)
