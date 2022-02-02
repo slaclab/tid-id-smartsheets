@@ -38,6 +38,9 @@ formatTask  = [ ",,,,,,,,,,,,,,,,",      ",,,,,,,,,,,,,,,,",      None,         
                 ",,,,,,,,,18,,,,,3,,",   None,                    ",,,,,,,,,18,,,0,,,,",   ",,,,,,,,,22,,,0,,,,", ",,,,,,,,,22,,,,,3,,",
                 ",,,,,,,,,22,,,,,,1,",   ",,,,,,,,,18,,,,,,,"]
 
+# Due to a limitation in the API the following columns can't be reformatted through the API:
+# Column 3, 4, 5, 6, 7, 11, 12
+
 def check_structure(*, sheet):
 
     columns = ['Task Name From Budget',
@@ -83,7 +86,7 @@ def check_parent_row(*, client, sheet, rowIdx, doFixes, title):
     noValue = set([8, 9, 15, 16])
 
     # Preserve Values
-    noChange = set([1])
+    noChange = set([1, 15])
 
     row = sheet.rows[rowIdx]
 
