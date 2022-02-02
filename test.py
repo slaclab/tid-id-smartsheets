@@ -30,7 +30,7 @@ if False:
     stable = { 2771110870706052: True,  # LDMX
                6454609309919108: True,  # E-Band Phase 1
                3024133031257988: True,  # E-Band Phase 2
-               8701540509738884: False, # 4D Tracking
+               8701540509738884: True, # 4D Tracking
                #2705714624915332: True,  # Cryo diamond
                #4260424066590596: True,  # FDSOI
                #8002176489416580: True,  # Fabulous
@@ -59,5 +59,8 @@ if False:
 
 #tid_ss_lib.navigate.check_project(client=client,folderId=2705714624915332, doFixes=False)
 #tid_ss_lib.navigate.check_project(client=client,folderId=6317030501574532, doFixes=True)
-tid_ss_lib.navigate.check_project(client=client,folderId=8359766339676036, doFixes=True)
+tid_ss_lib.navigate.check_project(client=client,folderId=8346297322235780, doFixes=True)
+tid_ss_lib.navigate.check_project(client=client,folderId=2083479090423684, doFixes=True)
+
+
 
