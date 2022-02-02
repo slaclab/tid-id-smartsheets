@@ -48,7 +48,7 @@ if True:
                8244071731881860: True,  # LSST
                #4312801192765316: True, # Magnetron
                2059817041848196: True,  # NASA
-               #1592107988215684: True,  # Smurf
+               1592107988215684: True,  # Smurf
                3218618545661828: True,  # Retinal P.
                1120559233820548: True,  # UCSC PET
              }

@@ -206,7 +206,7 @@ def check_task_row(*, client, sheet, rowIdx, inMS, doFixes):
 
     for k in empty:
         if (row.cells[k].value is not None and row.cells[k].value != '') or row.cells[k].format != form[k]:
-            print(f"   Bad value '{row.cells[k].value}' or format '{row.cells[k].format}' in row {rowIdx+1} col {k+1} in budget file.")
+            print(f"   Bad value or format in row {rowIdx+1} col {k+1} in budget file.")
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[k].id
             new_cell.value = ''

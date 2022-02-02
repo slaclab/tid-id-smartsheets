@@ -86,7 +86,7 @@ def check_parent_row(*, client, sheet, rowIdx, doFixes, title):
     noValue = set([8, 9, 15, 16])
 
     # Preserve Values, but apply formatting
-    noChange = set([1, 14])
+    noChange = set([14])
 
     row = sheet.rows[rowIdx]
 
