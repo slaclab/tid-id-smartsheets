@@ -21,7 +21,7 @@ TID_ID_LIST_SHEET      = 2931334483076996
 TID_ID_FOLDER_PREFIX   = 'TID/ID'
 
 OVERHEAD_NOTE = '12.25% Overhead'
-LABOR_RATE_NOTE = 'SLAC Labor Rate FY21 (loaded): $274.63; Slac Tech Rate FY21 (loaded): $163.47'
+LABOR_RATE_NOTE = 'SLAC Labor Rate FY22 (loaded): $274.63; Slac Tech Rate FY21 (loaded): $163.47'
 
 TEMPLATE_PREFIX = '[Project] '
 

@@ -34,17 +34,17 @@ formatMinor = [ ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,
                 ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,,0,,,,",     ",,,,,,,,,23,,,0,,,,",
                 ",,,,,,,,,23,,,,,,," ]
 
-formatMAndS = [ ",,,,,,,,,,,,,,,1,",      ",,,,,,,,,,,,,,,1,",       ",,,,,,,,,,,,,,,1,",       ",,,,,,,,,,,13,2,1,2,,",   ",,,,,,,,,,,,,,,,",
+formatMAndS = [ ",,,,,,,,,2,,,,,,1,",     ",,,,,,,,,2,,,,,,1,",      ",,,,,,,,,2,,,,,,1,",      ",,,,,,,,,2,,13,2,1,2,,",  ",,,,,,,,,2,,,,,,,",
                 ",,,,,,,,,18,,,,,3,,",    ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,26,,,,,,,",      ",,,,,,,,,26,,,,,,,",
-                ",,,,,,,,,26,,,,,,,",     ",,,,,,,,,,,,,,3,,",       ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,26,,,,,,,",
-                ",,,,,,,,,,,13,2,1,2,,",  ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,26,,,,,,,",      ",,,,,,,,,26,,,,,,,",
-                ",,,,,,,,,,,,,,,," ]
+                ",,,,,,,,,26,,,,,,,",     ",,,,,,,,,2,,,,,3,,",      ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,26,,,,,,,",
+                ",,,,,,,,,2,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,26,,,,,,,",      ",,,,,,,,,26,,,,,,,",
+                ",,,,,,,,,2,,,,,,," ]
 
-formatTask  = [ ",,,,,,,,,,,,,,,,",        ",,,,,,,,,,,,,,,,",        ",,,,,,,,,,,,,,,,",        ",,,,,,,,,,,13,2,1,2,,",   ",,,,,,,,,,,,,,,,",
+formatTask  = [ ",,,,,,,,,2,,,,,,,",       ",,,,,,,,,2,,,,,,,",       ",,,,,,,,,2,,,,,,,",       ",,,,,,,,,2,,13,2,1,2,,",  ",,,,,,,,,2,,,,,,,",
                 ",,,,,,,,,18,,,,,3,,",     ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,,,,,,",      ",,,,,,,,,18,,,0,,,,",
                 ",,,,,,,,,18,,,,,,,",      ",,,,,,,,,18,,,,,3,,",     ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,,,,,,",
                 ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,,0,,,,",     ",,,,,,,,,18,,,0,,,,",
-                ",,,,,,,,,,,,,,,," ]
+                ",,,,,,,,,2,,,,,,," ]
 
 
 def check_structure(*, sheet):
@@ -127,7 +127,7 @@ def check_parent_row(*, client, sheet, rowIdx, sumCols, titles, doFixes):
 
         if i in sumCols:
             if not hasattr(row.cells[i],'formula') or row.cells[i].formula != sumChildrenValue or row.cells[i].format != form[i]:
-                print(f"   Invalid value or format in row {rowIdx+1} cell {i+1} in budget file.")
+                print(f"   Incorrect value or format in row {rowIdx+1} cell {i+1} in budget file.")
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = sheet.columns[i].id
                 new_cell.formula = sumChildrenValue
@@ -135,8 +135,8 @@ def check_parent_row(*, client, sheet, rowIdx, sumCols, titles, doFixes):
                 new_cell.format = form[i]
                 new_row.cells.append(new_cell)
 
-        elif row.cells[i].link_in_from_cell is not None or row.cells[i].format != form[i] or (row.cells[i].value is not None and row.cells[i].value != ''):
-            print(f"   Invalid sheet link, format or value in row {rowIdx+1} cell {i+1} in budget file.")
+        elif row.cells[i].format != form[i] or (row.cells[i].value is not None and row.cells[i].value != ''):
+            print(f"   Incorrect format or value in row {rowIdx+1} cell {i+1} in budget file.")
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[i].id
             new_cell.value = ''
@@ -175,6 +175,9 @@ def check_task_row(*, client, sheet, rowIdx, inMS, doFixes):
     # Cells that should have defaults
     defV  = []
 
+    # Preserve Values, but apply formatting
+    noChange = [0, 1, 2, 3, 4, 20]
+
     if inMS:
         empty.append(8)
         empty.append(9)
@@ -193,7 +196,7 @@ def check_task_row(*, client, sheet, rowIdx, inMS, doFixes):
 
     for k,v in rowVals.items():
         if ((not hasattr(row.cells[k],'formula')) or row.cells[k].formula != v) or row.cells[k].format != form[k]:
-            print(f"   Invalid value or format in row {rowIdx+1} cell {k+1} in budget file.")
+            print(f"   Incorrect value or format in row {rowIdx+1} cell {k+1} in budget file.")
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[k].id
             new_cell.formula = v
@@ -212,11 +215,31 @@ def check_task_row(*, client, sheet, rowIdx, inMS, doFixes):
             new_row.cells.append(new_cell)
 
     for k in defV:
-        if row.cells[k].value is None or row.cells[k].value == '':
+        if row.cells[k].value is None or row.cells[k].value == '' or row.cells[k].format != form[k]:
             print(f"   Missing default value or format in row {rowIdx+1} col {k+1} in budget file.")
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[k].id
             new_cell.value = '0'
+            new_cell.format = form[k]
+            new_cell.strict = False
+
+            if row.cells[k].value is not None and row.cells[k].value != '':
+                new_cell.value = row.cells[k].value
+            else:
+                new_cell.value = '0'
+
+            new_row.cells.append(new_cell)
+
+    for k in noChange:
+        if form[k] is not None and row.cells[k].format != form[k]:
+            print(f"   Incorrect sheet format in row {rowIdx+1} cell {k+1} in budget file.")
+            new_cell = smartsheet.models.Cell()
+            new_cell.column_id = sheet.columns[k].id
+
+            if row.cells[k].value is None:
+                new_cell.value = ''
+            else:
+                new_cell.value = row.cells[k].value
             new_cell.format = form[k]
             new_cell.strict = False
             new_row.cells.append(new_cell)
@@ -298,14 +321,6 @@ def check_task_links(*, client, sheet, laborRows, scheduleSheet, doFixes):
                             new_cell.value = smartsheet.models.ExplicitNull()
                             new_cell.link_in_from_cell = cell_link
                             new_row.cells.append(new_cell)
-
-                    elif row.cells[i].link_in_from_cell is not None:
-                        print(f"   Invalid budget link for row {row.row_number} column {i+1}.")
-                        new_cell = smartsheet.models.Cell()
-                        new_cell.column_id = row.cells[i].column_id
-                        new_cell.value = ''
-                        new_cell.format = form[i]
-                        new_row.cells.append(new_cell)
 
                 if doFixes and len(new_row.cells) != 0:
                     print(f"   Applying fixes to budget row {row.row_number}.")
