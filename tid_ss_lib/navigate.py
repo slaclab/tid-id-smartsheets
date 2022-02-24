@@ -10,7 +10,7 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
-import smartsheet
+import smartsheet  # pip3 install smartsheet-python-sdk
 from . import budget_sheet
 from . import schedule_sheet
 
@@ -70,7 +70,7 @@ def check_project(*, client, folderId, doFixes, path=None):
                                                                                 'new_name': folder.name + ' ' + k}))
 
         # Check for valid naming, rename if need be
-        elif not v.name.startswith(folder.name):
+        elif 'Template Set ' not in folder.name and not v.name.startswith(folder.name):
             print(f"   Bad sheet name {v.name}.")
 
             if doFixes:

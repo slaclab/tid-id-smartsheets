@@ -88,6 +88,9 @@ def check_parent_row(*, client, sheet, rowIdx, doFixes, title):
     # Preserve Values, but apply formatting
     noChange = set([14])
 
+    if rowIdx >= len(sheet.rows):
+        return
+
     row = sheet.rows[rowIdx]
 
     # Setup row update structure just in case
@@ -99,7 +102,7 @@ def check_parent_row(*, client, sheet, rowIdx, doFixes, title):
         form = formatMajor
 
         if row.cells[0].value != title or row.cells[0].format != form[0]:
-            print(f"   Incorrect row {rowIdx+1}, col 1 value or format in schedule file.")
+            print(f"   Incorrect format in row {rowIdx+1} cell 1 in schedule file. Got '{row.cells[0].format}' Exp '{form[0]}'")
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[0].id
             new_cell.value = title
@@ -116,7 +119,13 @@ def check_parent_row(*, client, sheet, rowIdx, doFixes, title):
         if i in formulas:
 
             if not hasattr(row.cells[i],'formula') or row.cells[i].formula != formulas[i] or (form[i] is not None and row.cells[i].format != form[i]):
-                print(f"   Incorrect value or format in row {rowIdx+1} col {i+1} in schedule file.")
+
+                if not hasattr(row.cells[i],'formula') or row.cells[i].formula != formulas[i]:
+                    print(f"   Incorrect formula in row {rowIdx+1} cell {i+1} in schedule file.")
+
+                if (form[i] is not None and row.cells[i].format != form[i]):
+                    print(f"   Incorrect format in row {rowIdx+1} cell {i+1} in schedule file. Got '{row.cells[i].format}' Exp '{form[i]}'")
+
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = sheet.columns[i].id
                 new_cell.formula = formulas[i]
@@ -129,7 +138,13 @@ def check_parent_row(*, client, sheet, rowIdx, doFixes, title):
 
         if i in noValue:
             if (form[i] is not None and row.cells[i].format != form[i]) or (row.cells[i].value is not None and row.cells[i].value != ''):
-                print(f"   Incorrect format or value in row {rowIdx+1} cell {i+1} in schedule file.")
+
+                if (row.cells[i].value is not None and row.cells[i].value != ''):
+                    print(f"   Incorrect value in row {rowIdx+1} cell {i+1} in schedule file. Got '{row.cells[i].value}' Exp ''.")
+
+                if (form[i] is not None and row.cells[i].format != form[i]):
+                    print(f"   Incorrect format in row {rowIdx+1} cell {i+1} in schedule file. Got '{row.cells[i].format}' Exp '{form[i]}'")
+
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = sheet.columns[i].id
                 new_cell.value = ''
@@ -142,7 +157,7 @@ def check_parent_row(*, client, sheet, rowIdx, doFixes, title):
 
         if i in noChange:
             if form[i] is not None and row.cells[i].format != form[i]:
-                print(f"   Incorrect sheet format in row {rowIdx+1} cell {i+1} in schedule file.")
+                print(f"   Incorrect format in row {rowIdx+1} cell {i+1} in schedule file. Got '{row.cells[i].format}' Exp '{form[i]}'")
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = sheet.columns[i].id
 
@@ -171,6 +186,9 @@ def check_task_row(*, client, sheet, rowIdx, doFixes):
     # Preserve Values, but apply formatting
     noChange = set([9, 15])
 
+    if rowIdx >= len(sheet.rows):
+        return
+
     row = sheet.rows[rowIdx]
     form = formatTask
 
@@ -182,7 +200,13 @@ def check_task_row(*, client, sheet, rowIdx, doFixes):
         if i in formulas:
 
             if not hasattr(row.cells[i],'formula') or row.cells[i].formula != formulas[i] or (form[i] is not None and row.cells[i].format != form[i]):
-                print(f"   Incorrect value or format in row {rowIdx+1} col {i+1} in schedule file.")
+
+                if not hasattr(row.cells[i],'formula') or row.cells[i].formula != formulas[i]:
+                    print(f"   Incorrect formula in row {rowIdx+1} cell {i+1} in schedule file. Got '{row.cells[i].value}' Exp '{formulas[i]}'.")
+
+                if (form[i] is not None and row.cells[i].format != form[i]):
+                    print(f"   Incorrect format in row {rowIdx+1} cell {i+1} in schedule file. Got '{row.cells[i].format}' Exp '{form[i]}'")
+
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = sheet.columns[i].id
                 new_cell.formula = formulas[i]
@@ -192,7 +216,13 @@ def check_task_row(*, client, sheet, rowIdx, doFixes):
 
         if i in init:
             if row.cells[i].value is None or row.cells[i].value == '' or (form[i] is not None and row.cells[i].format != form[i]):
-                print(f"   Missing default value or format in row {rowIdx+1} col {i+1} in schedule file.")
+
+                if row.cells[i].value is None or row.cells[i].value == '':
+                    print(f"   Incorrect default value in row {rowIdx+1} cell {i+1} in schedule file.")
+
+                if (form[i] is not None and row.cells[i].format != form[i]):
+                    print(f"   Incorrect format in row {rowIdx+1} cell {i+1} in schedule file. Got '{row.cells[i].format}' Exp '{form[i]}'")
+
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = sheet.columns[i].id
                 new_cell.format = form[i]
@@ -207,7 +237,7 @@ def check_task_row(*, client, sheet, rowIdx, doFixes):
 
         if i in noChange:
             if form[i] is not None and row.cells[i].format != form[i]:
-                print(f"   Missing format in row {rowIdx+1} col {i+1} in schedule file. {row.cells[i].format}")
+                print(f"   Incorrect format in row {rowIdx+1} cell {i+1} in schedule file. Got '{row.cells[i].format}' Exp '{form[i]}'")
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = sheet.columns[i].id
 
@@ -228,6 +258,9 @@ def check_task_row(*, client, sheet, rowIdx, doFixes):
 def check_parent_links(*, client, sheet, rowIdx, laborRows, laborSheet, doFixes):
     links = { 0: 0 }
 
+    if rowIdx >= len(sheet.rows):
+        return
+
     row = sheet.rows[rowIdx]
     form = formatMinor
 
@@ -243,7 +276,7 @@ def check_parent_links(*, client, sheet, rowIdx, laborRows, laborSheet, doFixes)
         if i in links:
 
             if form[i] is not None and row.cells[i].format != form[i]:
-                print(f"   Incorrect format for row {row.row_number} column {i+1}.")
+                print(f"   Incorrect format in row {row.row_number} cell {i+1} in schedule file. Got '{row.cells[i].format}' Exp '{form[i]}'")
                 relink.add(i)
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = row.cells[i].column_id
@@ -291,6 +324,9 @@ def check_parent_links(*, client, sheet, rowIdx, laborRows, laborSheet, doFixes)
 def check_task_links(*, client, sheet, rowIdx, laborRows, laborSheet, doFixes):
     links = { 8: 2, 16: 20 }
 
+    if rowIdx >= len(sheet.rows):
+        return
+
     row = sheet.rows[rowIdx]
     form = formatTask
 
@@ -306,7 +342,7 @@ def check_task_links(*, client, sheet, rowIdx, laborRows, laborSheet, doFixes):
         if i in links:
 
             if form[i] is not None and row.cells[i].format != form[i]:
-                print(f"   Incorrect format for row {row.row_number} column {i+1}.")
+                print(f"   Incorrect format in row {row.row_number} cell {i+1} in schedule file. Got '{row.cells[i].format}' Exp '{form[i]}'")
                 relink.add(i)
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = row.cells[i].column_id

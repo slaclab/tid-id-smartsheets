@@ -12,7 +12,7 @@
 
 import secrets
 import tid_ss_lib.navigate
-import smartsheet
+import smartsheet  # pip3 install smartsheet-python-sdk
 
 client = smartsheet.Smartsheet(secrets.API_KEY)
 
@@ -27,12 +27,14 @@ if False:
     tid_ss_lib.navigate.check_folders(client=client, doFixes=False)
 
 if True:
-    stable = { 2771110870706052: False,  # LDMX
+    stable = { 4013014891423620: False,  # Template
+               2771110870706052: False,  # LDMX
                6454609309919108: False,  # E-Band Phase 1
                3024133031257988: False,  # E-Band Phase 2
+               5311293042255748: False,  # Edge ML
                8701540509738884: False,  # 4D Tracking
-               #2705714624915332: False,  # Cryo diamond
-               #4260424066590596: False,  # FDSOI
+               2705714624915332: False,  # Cryo diamond
+               4260424066590596: False,  # FDSOI
                8002176489416580: False,  # Fabulous
                7854891323418500: False,  # Mathusula
                6382760681072516: False,  # HDL Cores
@@ -45,10 +47,11 @@ if True:
                2715125972002692: False,  # LCLS AIP
                7531399218521988: False,  # LDRD Frisch
                8935475567191940: False,  # LDRD Herbst
+               #6826647564380036: False,  # LDRD Rota
                8244071731881860: False,  # LSST
-               #4312801192765316: False, # Magnetron
+               4312801192765316: False,  # Magnetron  # Errors
                2059817041848196: False,  # NASA
-               1592107988215684: False,  # Smurf
+               1592107988215684: False,  # Smurf  # Errors
                3218618545661828: False,  # Retinal P.
                1120559233820548: False,  # UCSC PET
              }

@@ -22,11 +22,11 @@ from . import navigate
 #        18 - Gray
 #           = White
 
-formatMajor = [ ",,1,,,,,,,31,,,,,,1,",     ",,1,,,,,,,31,,,,,,1,",     ",,1,,,,,,,31,,,,,,1,",     ",,1,,,,,,,31,,,,,,1,",     ",,1,,,,,,,31,,,,,,1,",
-                ",,1,,,,,,,31,,,,,,1,",     ",,1,,,,,,,31,,13,2,1,2,,", ",,1,,,,,,,31,,13,2,1,2,,", ",,1,,,,,,,31,,,,,,1,",     ",,1,,,,,,,31,,,,,,1,",
-                ",,1,,,,,,,31,,,,,,1,",     ",,1,,,,,,,31,,,,,,1,",     ",,1,,,,,,,31,,13,2,1,2,,", ",,1,,,,,,,31,,13,2,1,2,,", ",,1,,,,,,,31,,,,,,1,",
-                ",,1,,,,,,,31,,13,2,1,2,,", ",,1,,,,,,,31,,13,2,1,2,,", ",,1,,,,,,,31,,13,2,1,2,,", ",,1,,,,,,,31,,,0,,,1,",    ",,1,,,,,,,31,,,0,,,1,",
-                ",,1,,,,,,,31,,,,,,1," ]
+formatMajor = [ ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,,,,,1,",
+                ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,,,,,1,",
+                ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,,,,,1,",
+                ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,,0,,,1,",    ",,1,,,,,,2,31,,,0,,,1,",
+                ",,1,,,,,,2,31,,,,,,1," ]
 
 formatMinor = [ ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,,",
                 ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,,",
@@ -73,7 +73,7 @@ def check_structure(*, sheet):
 
     # Check column count
     if len(sheet.columns) != len(columns):
-        print(f"   Wrong number of columns in budget file: Got {len(sheet.columns)}.")
+        print(f"   Wrong number of columns in budget file: Got {len(sheet.columns)} Expect {len(columns)}.")
         return False
 
     else:
@@ -104,7 +104,13 @@ def check_parent_row(*, client, sheet, rowIdx, sumCols, titles, doFixes):
 
     for i in range(len(titles)):
         if row.cells[i].value != titles[i] or row.cells[i].format != form[i]:
-            print(f"   Incorrect row {rowIdx+1}, col {i+1} value or format in budget file.")
+
+            if row.cells[i].value != titles[i]:
+                print(f"   Incorrect title in row {rowIdx+1} cell {i+1} in budget file. Got '{row.cells[i].value}' Expect '{titles[i]}'.")
+
+            if row.cells[i].format != form[i]:
+                print(f"   Incorrect format in row {rowIdx+1} cell {i+1} in budget file. Got '{row.cells[i].format}' Expect '{form[i]}'.")
+
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[i].id
             new_cell.value = titles[i]
@@ -113,9 +119,9 @@ def check_parent_row(*, client, sheet, rowIdx, sumCols, titles, doFixes):
             new_row.cells.append(new_cell)
 
     # Check format in earlier columns
-    for i in range(len(titles),startIdx):
+    for i in range(len(titles), startIdx):
         if row.cells[i].format != form[i]:
-            print(f"   Incorrect row {rowIdx+1}, col {i+1} format in budget file.")
+            print(f"   Incorrect format in row {rowIdx+1} cell {i+1} in budget file.. Got '{row.cells[i].format}' Expect '{form[i]}'")
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[i].id
             new_cell.value = row.cells[i].value
@@ -123,11 +129,17 @@ def check_parent_row(*, client, sheet, rowIdx, sumCols, titles, doFixes):
             new_cell.strict = False
             new_row.cells.append(new_cell)
 
-    for i in range(startIdx,len(row.cells)):
+    for i in range(startIdx, len(row.cells)):
 
         if i in sumCols:
             if not hasattr(row.cells[i],'formula') or row.cells[i].formula != sumChildrenValue or row.cells[i].format != form[i]:
-                print(f"   Incorrect value or format in row {rowIdx+1} cell {i+1} in budget file.")
+
+                if not hasattr(row.cells[i],'formula') or row.cells[i].formula != sumChildrenValue:
+                    print(f"   Incorrect formula in row {rowIdx+1} cell {i+1} in budget file. Expect '{sumChildrenValue}'")
+
+                if row.cells[i].format != form[i]:
+                    print(f"   Incorrect format in row {rowIdx+1} cell {i+1} in budget file. Got '{row.cells[i].format}' Expect '{form[i]}'")
+
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = sheet.columns[i].id
                 new_cell.formula = sumChildrenValue
@@ -136,7 +148,13 @@ def check_parent_row(*, client, sheet, rowIdx, sumCols, titles, doFixes):
                 new_row.cells.append(new_cell)
 
         elif row.cells[i].format != form[i] or (row.cells[i].value is not None and row.cells[i].value != ''):
-            print(f"   Incorrect format or value in row {rowIdx+1} cell {i+1} in budget file.")
+
+            if row.cells[i].format != form[i]:
+                print(f"   Incorrect format in row {rowIdx+1} cell {i+1} in budget file. Got '{row.cells[i].format}' Expect '{form[i]}'")
+
+            if (row.cells[i].value is not None and row.cells[i].value != ''):
+                print(f"   Incorrect value in row {rowIdx+1} cell {i+1} in budget file. Got '{row.cells[i].value}' Exp ''")
+
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[i].id
             new_cell.value = ''
@@ -196,7 +214,13 @@ def check_task_row(*, client, sheet, rowIdx, inMS, doFixes):
 
     for k,v in rowVals.items():
         if ((not hasattr(row.cells[k],'formula')) or row.cells[k].formula != v) or row.cells[k].format != form[k]:
-            print(f"   Incorrect value or format in row {rowIdx+1} cell {k+1} in budget file.")
+
+            if ((not hasattr(row.cells[k],'formula')) or row.cells[k].formula != v):
+                print(f"   Incorrect formula in row {rowIdx+1} cell {k+1} in budget file.")
+
+            if row.cells[k].format != form[k]:
+                print(f"   Incorrect format in row {rowIdx+1} cell {k+1} in budget file. Got '{row.cells[k].format}' Expect '{form[k]}'")
+
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[k].id
             new_cell.formula = v
@@ -206,7 +230,13 @@ def check_task_row(*, client, sheet, rowIdx, inMS, doFixes):
 
     for k in empty:
         if (row.cells[k].value is not None and row.cells[k].value != '') or row.cells[k].format != form[k]:
-            print(f"   Bad value or format in row {rowIdx+1} col {k+1} in budget file.")
+
+            if (row.cells[k].value is not None and row.cells[k].value != ''):
+                print(f"   Bad value in row {rowIdx+1} col {k+1} in budget file. Got '{row.cells[k].value}' Exp ''")
+
+            if row.cells[k].format != form[k]:
+                print(f"   Incorrect format in row {rowIdx+1} cell {k+1} in budget file. Got '{row.cells[k].format}' Expect '{form[k]}'")
+
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[k].id
             new_cell.value = ''
@@ -216,7 +246,13 @@ def check_task_row(*, client, sheet, rowIdx, inMS, doFixes):
 
     for k in defV:
         if row.cells[k].value is None or row.cells[k].value == '' or row.cells[k].format != form[k]:
-            print(f"   Missing default value or format in row {rowIdx+1} col {k+1} in budget file.")
+
+            if row.cells[k].value is None or row.cells[k].value == '':
+                print(f"   Missing default value in row {rowIdx+1} col {k+1} in budget file.")
+
+            if row.cells[k].format != form[k]:
+                print(f"   Incorrect format in row {rowIdx+1} cell {k+1} in budget file. Got '{row.cells[k].format}' Expect '{form[k]}'")
+
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[k].id
             new_cell.value = '0'
@@ -232,7 +268,7 @@ def check_task_row(*, client, sheet, rowIdx, inMS, doFixes):
 
     for k in noChange:
         if form[k] is not None and row.cells[k].format != form[k]:
-            print(f"   Incorrect sheet format in row {rowIdx+1} cell {k+1} in budget file.")
+            print(f"   Incorrect format in row {rowIdx+1} cell {k+1} in budget file. Got '{row.cells[k].format}' Expect '{form[k]}'")
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[k].id
 
@@ -274,7 +310,7 @@ def check_task_links(*, client, sheet, laborRows, scheduleSheet, doFixes):
                 if i in links:
 
                     if row.cells[i].format != form[i]:
-                        print(f"   Incorrect format for row {row.row_number} column {i+1}.")
+                        print(f"   Incorrect format in row {row.row_number} cell {i+1} in budget file. Got '{row.cells[i].format}' Expect '{form[i]}'")
                         relink.add(i)
                         new_cell = smartsheet.models.Cell()
                         new_cell.column_id = row.cells[i].column_id
