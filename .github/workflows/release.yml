@@ -63,7 +63,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install sip matplotlib pyserial pyqt5 pyinstaller
+          pip install sip pyqt5 pyinstaller smartsheet-python-sdk
 
       - name: Get Image Information
         id: get_image_info
@@ -103,7 +103,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install sip matplotlib pyserial pyqt5 pyinstaller
+          pip install sip pyqt5 pyinstaller smartsheet-python-sdk
 
       - name: Get Image Information
         id: get_image_info
