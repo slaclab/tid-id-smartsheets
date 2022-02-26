@@ -13,6 +13,7 @@
 import smartsheet  # pip3 install smartsheet-python-sdk
 from . import budget_sheet
 from . import schedule_sheet
+from . import tracking_sheet
 
 TID_WORKSPACE          = 4728845933799300
 TID_ID_ACTIVE_FOLDER   = 1039693589571460
@@ -84,6 +85,7 @@ def check_project(*, client, folderId, doFixes, path=None):
         # First process budget sheet:
         budget   = client.Sheets.get_sheet(foundList['Budget'].id, include='format')
         schedule = client.Sheets.get_sheet(foundList['Schedule'].id, include='format')
+        tracking = client.Sheets.get_sheet(foundList['Tracking'].id, include='format')
 
         if budget_sheet.check_structure(sheet=budget) and schedule_sheet.check_structure(sheet=schedule):
 
@@ -95,6 +97,10 @@ def check_project(*, client, folderId, doFixes, path=None):
 
             # Final fix of links in budget file
             budget_sheet.check_task_links(client=client, sheet=budget, laborRows=laborRows, scheduleSheet=schedule, doFixes=doFixes)
+
+            # Fix tracking file
+            tracking_sheet.check(client=client, sheet=tracking, budgetSheet=budget, doFixes=doFixes)
+
         else:
             print("   Skipping remaining processing")
 

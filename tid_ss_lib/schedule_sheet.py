@@ -251,7 +251,7 @@ def check_task_row(*, client, sheet, rowIdx, doFixes):
                 new_row.cells.append(new_cell)
 
     if doFixes and len(new_row.cells) != 0:
-        print(f"   Applying fixes to row {rowIdx+1}.")
+        print(f"   Applying fixes to schedule row {rowIdx+1}.")
         client.Sheets.update_rows(sheet.id, [new_row])
 
 
@@ -317,7 +317,7 @@ def check_parent_links(*, client, sheet, rowIdx, laborRows, laborSheet, doFixes)
                 new_row.cells.append(new_cell)
 
     if doFixes and len(new_row.cells) != 0:
-        print(f"   Applying fixes to row {rowIdx+1}.")
+        print(f"   Applying fixes to schedule row {rowIdx+1}.")
         client.Sheets.update_rows(sheet.id, [new_row])
 
 
@@ -394,7 +394,7 @@ def check_task_links(*, client, sheet, rowIdx, laborRows, laborSheet, doFixes):
             new_row.cells.append(new_cell)
 
     if doFixes and len(new_row.cells) != 0:
-        print(f"   Applying fixes to row {rowIdx+1}.")
+        print(f"   Applying fixes to schedule row {rowIdx+1}.")
         client.Sheets.update_rows(sheet.id, [new_row])
 
 
