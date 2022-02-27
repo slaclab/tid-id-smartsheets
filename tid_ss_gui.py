@@ -8,6 +8,7 @@ from PyQt5.QtCore    import *
 from PyQt5.QtGui     import *
 
 import tid_ss_lib.navigate
+import tid_ss_lib.project_sheet
 import smartsheet
 
 class ProjectFix(QWidget):
@@ -36,6 +37,16 @@ class ProjectFix(QWidget):
         api_help.setReadOnly(True)
         fl.addRow('',api_help)
 
+        refreshRun = QPushButton("Refresh Project List")
+        refreshRun.pressed.connect(self.refreshPressed)
+        fl.addRow("",refreshRun)
+
+        self.proj_list = QComboBox()
+        self.projects = {0: ''}
+        self.proj_list.addItem('Manual Entry')
+        self.proj_list.currentIndexChanged.connect(self.proj_select)
+        fl.addRow('Project Select',self.proj_list)
+
         self.folder_id = QLineEdit()
         fl.addRow('Folder ID',self.folder_id)
 
@@ -62,6 +73,11 @@ class ProjectFix(QWidget):
 
         self.resize(500,500)
 
+    @pyqtSlot(int)
+    def proj_select(self, index):
+        if index >= 0:
+            self.folder_id.setText(str(self.projects[index]))
+
     @pyqtSlot()
     def fixPressed(self):
         try:
@@ -71,6 +87,23 @@ class ProjectFix(QWidget):
             doFixes = self.do_fixes.isChecked()
             tid_ss_lib.navigate.check_project(client=client,folderId=folder, doFixes=doFixes)
             print("Done!")
+        except Exception as msg:
+            print(f"\n\n\nGot Error:\n{msg}\n\n")
+
+    @pyqtSlot()
+    def refreshPressed(self):
+        try:
+            client = smartsheet.Smartsheet(self.api_key.text())
+            lst = tid_ss_lib.project_sheet.get_project_list(client=client)
+
+            self.proj_list.clear()
+            self.projects = {0: ''}
+            self.proj_list.addItem('Manual Entry')
+
+            for i,l in enumerate(lst):
+                self.projects[i+1] = l['id']
+                self.proj_list.addItem(l['name'] + ' - ' + l['pm'])
+
         except Exception as msg:
             print(f"\n\n\nGot Error:\n{msg}\n\n")
 
