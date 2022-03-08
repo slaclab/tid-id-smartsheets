@@ -28,25 +28,25 @@ form = [ ",,,,,,,,,18,,,,,,,",   ",,,,,,,,,,,,,,,,",     ",,,,,,,,,18,,13,,,,,",
          ",,,,,,,,,18,,,,,,,",   ",,,,,,,,,18,,,,,,,",   ",,,,,,,,,18,,,,,,,",   ",,,,,,,,,,,,,,,,",
          ",,,,,,,,,,,,,,,," ]
 
-def check_structure(*, sheet):
+columns = ['Status Month',
+           'Lookup PA',
+           'Monthly Actuals From Finance',
+           'Total Actuals From Finance',
+           'Funds Remaining From Finance',
+           'Actuals Adjustment',
+           'Reported Cost',
+           'Budget Variance',
+           'Budget Variance With Contingency',
+           'Duration Variance',
+           'Duration Variance With Contingency',
+           'Reporting Variance',
+           'Tracking Risk',
+           'Budget Risk',
+           'Schedule Risk',
+           'Scope Risk',
+           'Description Of Status']
 
-    columns = ['Status Month',
-               'Lookup PA',
-               'Monthly Actuals From Finance',
-               'Total Actuals From Finance',
-               'Funds Remaining From Finance',
-               'Actuals Adjustment',
-               'Reported Cost',
-               'Budget Variance',
-               'Budget Variance With Contingency',
-               'Duration Variance',
-               'Duration Variance With Contingency',
-               'Reporting Variance',
-               'Tracking Risk',
-               'Budget Risk',
-               'Schedule Risk',
-               'Scope Risk',
-               'Description Of Status']
+def check_structure(*, sheet):
 
     # Check column count
     if len(sheet.columns) != len(columns):
@@ -174,7 +174,7 @@ def check_other_row(*, client, rowIdx, sheet, doFixes):
     new_row = smartsheet.models.Row()
     new_row.id = row.id
 
-    for k in range(len(row.cells)):
+    for k in range(len(columns)):
         if (row.cells[k].format != form[k]) and not (form[k] == ",,,,,,,,,,,,,,,," and row.cells[k].format is None):
             print(f"   Incorrect format in row {rowIdx+1} cell {k+1} in tracking file. Got '{row.cells[k].format}' Expect '{form[k]}'")
             new_cell = smartsheet.models.Cell()

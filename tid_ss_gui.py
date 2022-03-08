@@ -3,6 +3,7 @@
 
 import sys
 import os
+import traceback
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore    import *
@@ -94,7 +95,9 @@ class ProjectFix(QWidget):
             tid_ss_lib.navigate.check_project(client=client,folderId=folder, doFixes=doFixes)
             print("Done!")
         except Exception as msg:
+            traceback.print_exc()
             print(f"\n\n\nGot Error:\n{msg}\n\n")
+
 
     @pyqtSlot()
     def refreshPressed(self):
