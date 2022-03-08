@@ -79,11 +79,12 @@ def check_structure(*, sheet):
 
 def check_parent_row(*, client, sheet, rowIdx, doFixes, title):
     formulas = { 7: '=NETWORKDAYS([Baseline Start]@row, [Baseline Finish]@row)',
+                8:  '=SUM(CHILDREN())',
                 12: '=SUM(CHILDREN())',
                 13: '=SUM(CHILDREN())' }
 
     # These Columns SHould Have No Value
-    noValue = set([8, 9, 15, 16])
+    noValue = set([9, 15, 16])
 
     # Preserve Values, but apply formatting
     noChange = set([14])

@@ -2,6 +2,7 @@
 
 
 import sys
+import os
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore    import *
@@ -29,7 +30,12 @@ class ProjectFix(QWidget):
         fl.setLabelAlignment(Qt.AlignRight)
         top.addLayout(fl)
 
-        self.api_key = QLineEdit()
+        if 'SMARTSHEETS_API' in os.environ:
+            api = os.environ['SMARTSHEETS_API']
+        else:
+            api = ''
+
+        self.api_key = QLineEdit(api)
         fl.addRow('API Key',self.api_key)
 
         api_help = QTextEdit()
