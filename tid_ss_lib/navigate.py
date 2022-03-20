@@ -87,7 +87,7 @@ def check_project(*, client, folderId, doFixes, path=None):
         schedule = client.Sheets.get_sheet(foundList['Schedule'].id, include='format')
         tracking = client.Sheets.get_sheet(foundList['Tracking'].id, include='format')
 
-        if budget_sheet.check_structure(sheet=budget) and schedule_sheet.check_structure(sheet=schedule):
+        if budget_sheet.check_structure(sheet=budget) and schedule_sheet.check_structure(sheet=schedule) and tracking_sheet.check_structure(sheet=tracking):
 
             # Fix internal budget file references
             laborRows = budget_sheet.check(client=client, sheet=budget, doFixes=doFixes )
@@ -105,7 +105,7 @@ def check_project(*, client, folderId, doFixes, path=None):
             print("   Skipping remaining processing")
 
 
-def check_folders(*, client, path = TID_ID_FOLDER_PREFIX, folderId=TID_ID_ACTIVE_FOLDER, doFixes):
+def get_active_list(*, client, path = TID_ID_FOLDER_PREFIX, folderId=TID_ID_ACTIVE_FOLDER):
     folder = client.Folders.get_folder(folderId)
     ret = {}
 
@@ -116,11 +116,10 @@ def check_folders(*, client, path = TID_ID_FOLDER_PREFIX, folderId=TID_ID_ACTIVE
 
         # Skip projects with no sheets
         if len(folder.sheets) != 0:
-            ret[path] = folderId
-            check_project(client=client, folderId=folderId, doFixes=doFixes, path=path)
+            ret[folderId] = {'path': path, 'name': folder.name, 'url': folder.permalink, 'tracked': False}
 
     else:
         for sub in folder.folders:
-            ret.update(check_folders(client=client, path=path, folderId=sub.id, doFixes=doFixes,))
+            ret.update(get_active_list(client=client, path=path, folderId=sub.id))
 
     return ret
