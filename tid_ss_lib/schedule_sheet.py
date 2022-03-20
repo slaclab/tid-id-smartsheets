@@ -122,7 +122,7 @@ def check_parent_row(*, client, sheet, rowIdx, doFixes, title):
             if not hasattr(row.cells[i],'formula') or row.cells[i].formula != formulas[i] or (form[i] is not None and row.cells[i].format != form[i]):
 
                 if not hasattr(row.cells[i],'formula') or row.cells[i].formula != formulas[i]:
-                    print(f"   Incorrect formula in row {rowIdx+1} cell {i+1} in schedule file.")
+                    print(f"   Incorrect formula in row {rowIdx+1} cell {i+1} in schedule file. Got '{row.cells[i].formula}' Exp '{formulas[i]}'")
 
                 if (form[i] is not None and row.cells[i].format != form[i]):
                     print(f"   Incorrect format in row {rowIdx+1} cell {i+1} in schedule file. Got '{row.cells[i].format}' Exp '{form[i]}'")
@@ -203,7 +203,7 @@ def check_task_row(*, client, sheet, rowIdx, doFixes):
             if not hasattr(row.cells[i],'formula') or row.cells[i].formula != formulas[i] or (form[i] is not None and row.cells[i].format != form[i]):
 
                 if not hasattr(row.cells[i],'formula') or row.cells[i].formula != formulas[i]:
-                    print(f"   Incorrect formula in row {rowIdx+1} cell {i+1} in schedule file. Got '{row.cells[i].value}' Exp '{formulas[i]}'.")
+                    print(f"   Incorrect formula in row {rowIdx+1} cell {i+1} in schedule file. Got '{row.cells[i].formula}' Exp '{formulas[i]}'.")
 
                 if (form[i] is not None and row.cells[i].format != form[i]):
                     print(f"   Incorrect format in row {rowIdx+1} cell {i+1} in schedule file. Got '{row.cells[i].format}' Exp '{form[i]}'")

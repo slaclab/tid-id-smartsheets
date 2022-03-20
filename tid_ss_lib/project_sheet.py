@@ -38,9 +38,9 @@ def get_project_list(*, client):
            row.cells[5].value is not None and row.cells[5].value != '':
 
             proj = {'program': row.cells[0].value,
-                    'name': row.cells[1].value,
-                    'pa_number': row.cells[2].value,
-                    'id': int(row.cells[3].value),
+                    'id': int(row.cells[1].value),
+                    'name': row.cells[2].value,
+                    'pa_number': row.cells[3].value,
                     'pm': row.cells[5].value}
 
             ret.append(proj)
