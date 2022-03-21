@@ -91,8 +91,11 @@ def check_first_row(*, client, sheet, budgetSheet, doFixes):
     for k,v in formulas.items():
         if ((not hasattr(row.cells[k],'formula')) or row.cells[k].formula != v) or row.cells[k].format != form[k]:
 
-            if ((not hasattr(row.cells[k],'formula')) or row.cells[k].formula != v):
-                print(f"   Incorrect formula in row {rowIdx+1} cell {k+1} in tracking file.")
+            if not hasattr(row.cells[k],'formula'):
+                print(f"   Missing formula in row {rowIdx+1} cell {k+1} in tracking file. Expect {v}")
+
+            elif row.cells[k].formula != v:
+                print(f"   Incorrect formula in row {rowIdx+1} cell {k+1} in tracking file. Got {row.cells[k].formula} Expect {v}")
 
             if row.cells[k].format != form[k]:
                 print(f"   Incorrect format in row {rowIdx+1} cell {k+1} in tracking file. Got '{row.cells[k].format}' Expect '{form[k]}'")
