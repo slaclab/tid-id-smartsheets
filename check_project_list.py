@@ -18,5 +18,5 @@ doFixes=True
 
 client = smartsheet.Smartsheet(secrets.API_KEY)
 
-tid_ss_lib.project_sheet.check(client=client, maxRow=31, doFixes=doFixes)
+tid_ss_lib.project_sheet.check(client=client, doFixes=doFixes)
 

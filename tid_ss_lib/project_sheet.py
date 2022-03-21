@@ -28,10 +28,15 @@ def get_project_list(*, client):
     sheet = client.Sheets.get_sheet(navigate.TID_ID_LIST_SHEET, include='format')
 
     ret = []
+    done = False
 
     for row in sheet.rows:
 
-        if row.cells[0].value is not None and row.cells[0].value != '' and \
+        if row.cells[0].value is None or row.cells[0].value == "":
+            done = True
+
+        if done is False and \
+           row.cells[0].value is not None and row.cells[0].value != '' and \
            row.cells[1].value is not None and row.cells[1].value != '' and \
            row.cells[2].value is not None and row.cells[2].value != '' and \
            row.cells[3].value is not None and row.cells[3].value != '' and \
@@ -143,14 +148,20 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
         client.Sheets.update_rows(sheet.id, [new_row])
 
 
-def check(*, client, maxRow, doFixes):
+def check(*, client, doFixes):
     sheet = client.Sheets.get_sheet(navigate.TID_ID_LIST_SHEET, include='format')
 
     # Get folder list:
     folderList = navigate.get_active_list(client=client)
+    done = False
 
-    for row in range(0, maxRow):
-        check_row(client=client, sheet=sheet, rowIdx=row, folderList=folderList, doFixes=doFixes)
+    for row in range(len(sheet.rows)):
+
+        if sheet.rows[row].cells[0].value is None or sheet.rows[row].cells[0].value  == "":
+            done = True
+
+        if done is False:
+            check_row(client=client, sheet=sheet, rowIdx=row, folderList=folderList, doFixes=doFixes)
 
     for k, v in folderList.items():
         if v['tracked'] is False:
