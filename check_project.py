@@ -12,16 +12,23 @@
 
 import tid_ss_lib.navigate
 import smartsheet
+import os
 
 import argparse
 
 # Set the argument parser
 parser = argparse.ArgumentParser('Smartsheets Project Check & Fix')
 
+if 'SMARTSHEETS_API' in os.environ:
+    defApi = os.environ['SMARTSHEETS_API']
+else:
+    defApi = ''
+
 parser.add_argument(
     "--key",
     type     = str,
-    required = True,
+    required = (defApi == ''),
+    default  = defApi,
     help     = "API Key from smartsheets. See https://help.smartsheet.com/articles/2482389-generate-API-key"
 )
 

@@ -10,13 +10,19 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
-import secrets
 import tid_ss_lib.project_sheet
 import smartsheet  # pip3 install smartsheet-python-sdk
+import os
+
+if 'SMARTSHEETS_API' in os.environ:
+    api = os.environ['SMARTSHEETS_API']
+else:
+    import secrets
+    api = secrets.API_KEY
 
 doFixes=True
 
-client = smartsheet.Smartsheet(secrets.API_KEY)
+client = smartsheet.Smartsheet(api)
 
 tid_ss_lib.project_sheet.check(client=client, doFixes=doFixes)
 
