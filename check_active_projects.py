@@ -26,5 +26,5 @@ for k in [4013014891423620, # Template
           3142587826628484  # Management
          ]:
 
-    tid_ss_lib.navigate.check_project(client=client,folderId=k, doFixes=doFixes)
+    tid_ss_lib.navigate.check_project(client=client,folderId=k, doFixes=True)
 

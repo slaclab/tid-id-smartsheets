@@ -84,7 +84,7 @@ def check_first_row(*, client, sheet, budgetSheet, doFixes):
                   3: '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 4, false)',
                   4: '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 5, false)',
                  11: '=([Total Actuals From Finance]@row + [Actuals Adjustment]@row) - [Reported Cost]@row',
-                 12: '=IF(abs([Reporting Variance]@row) > 50000, "High", IF(abs([Reporting Variance]@row) > 5000, "Medium", "Low"))',
+                 12: '=IF(ABS([Reporting Variance]@row) > 50000, "High", IF(ABS([Reporting Variance]@row) > 5000, "Medium", "Low"))',
                  13: '=IF([Budget Variance]@row > 50000, "High", IF([Budget Variance]@row > 5000, "Medium", "Low"))',
                  14: '=IF([Duration Variance]@row > 300, "High", IF([Duration Variance]@row > 100, "Medium", "Low"))' }
 
