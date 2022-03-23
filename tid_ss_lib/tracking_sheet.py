@@ -86,7 +86,7 @@ def check_first_row(*, client, sheet, budgetSheet, doFixes):
                  11: '=([Total Actuals From Finance]@row + [Actuals Adjustment]@row) - [Reported Cost]@row',
                  12: '=IF([Reporting Variance]@row > 50000, "High", IF([Reporting Variance]@row > 5000, "Medium", "Low"))',
                  13: '=IF([Budget Variance]@row > 50000, "High", IF([Budget Variance]@row > 5000, "Medium", "Low"))',
-                 14: '=IF([Duration Variance With Contingency]@row > 300, "High", IF([Duration Variance With Contingency]@row > 100, "Medium", "Low"))' }
+                 14: '=IF([Duration Variance]@row > 300, "High", IF([Duration Variance]@row > 100, "Medium", "Low"))' }
 
     for k,v in formulas.items():
         if ((not hasattr(row.cells[k],'formula')) or row.cells[k].formula != v) or row.cells[k].format != form[k]:
