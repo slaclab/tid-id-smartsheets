@@ -87,6 +87,12 @@ def check_project(*, client, folderId, doFixes, path=None):
         schedule = client.Sheets.get_sheet(foundList['Schedule'].id, include='format')
         tracking = client.Sheets.get_sheet(foundList['Tracking'].id, include='format')
 
+        # Double check schedule for new fix
+        if not schedule_sheet.check_structure(sheet=schedule):
+            print("   Attempting to update schedule sheet")
+            schedule_sheet.fix_structure(client=client, sheet=schedule)
+            schedule = client.Sheets.get_sheet(foundList['Schedule'].id, include='format')
+
         if budget_sheet.check_structure(sheet=budget) and schedule_sheet.check_structure(sheet=schedule) and tracking_sheet.check_structure(sheet=tracking):
 
             # Fix internal budget file references

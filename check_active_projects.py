@@ -10,12 +10,17 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
-import secrets
+import os
 import tid_ss_lib.navigate
 import tid_ss_lib.project_sheet
 import smartsheet
 
-client = smartsheet.Smartsheet(secrets.API_KEY)
+if 'SMARTSHEETS_API' in os.environ:
+    api = os.environ['SMARTSHEETS_API']
+else:
+    api = ''
+
+client = smartsheet.Smartsheet(api)
 
 doFixes = False
 
