@@ -22,41 +22,82 @@ from . import navigate
 #        18 - Gray
 #           = White
 
-form = [ ",,,,,,,,,18,,,,,,,",   ",,,,,,,,,,,,,,,,",     ",,,,,,,,,18,,13,,,,,", ",,,,,,,,,18,,13,,,,,",
-         ",,,,,,,,,18,,13,,,,,", ",,,,,,,,,18,,13,,,,,", ",,,,,,,,,18,,13,,,,,", ",,,,,,,,,18,,13,,,,,",
-         ",,,,,,,,,18,,13,,,,,", ",,,,,,,,,18,,,,,,,",   ",,,,,,,,,18,,,,,,,",   ",,,,,,,,,18,,13,,,,,",
-         ",,,,,,,,,18,,,,,,,",   ",,,,,,,,,18,,,,,,,",   ",,,,,,,,,18,,,,,,,",   ",,,,,,,,,,,,,,,,",
-         ",,,,,,,,,,,,,,,," ]
+form = [ ",,,,,,,,,18,,,,,,,",  # 1
+        ",,,,,,,,,,,,,,,,",  # 2
+        ",,,,,,,,,18,,13,,,,,",  # 3
+        ",,,,,,,,,18,,13,,,,,",  # 4
+        ",,,,,,,,,18,,13,,,,,",  # 5
+        ",,,,,,,,,18,,13,,,,,",  # 6
+        ",,,,,,,,,18,,13,,,,,",  # 7
+        ",,,,,,,,,,,13,,,,,",  # 8
+        ",,,,,,,,,18,,13,,,,,",  # 9
+        ",,,,,,,,,18,,13,,,,,",  # 10
+        ",,,,,,,,,18,,13,,,,,",  # 11
+        ",,,,,,,,,18,,,,,,,",  # 12
+        ",,,,,,,,,18,,,,,,,",  # 13
+        ",,,,,,,,,18,,13,,,,,",  # 14
+        ",,,,,,,,,18,,,,,,,",  # 15
+        ",,,,,,,,,18,,,,,,,",  # 16
+        ",,,,,,,,,18,,,,,,,",  # 17
+        ",,,,,,,,,,,,,,,,",  # 18
+        ",,,,,,,,,,,,,,,," ]  # 19
 
-columns = ['Status Month',
-           'Lookup PA',
-           'Monthly Actuals From Finance',
-           'Total Actuals From Finance',
-           'Remaining Funds From Finance',
-           'Actuals Adjustment',
-           'Reported Cost',
-           'Budget Variance',
-           'Budget Variance With Contingency',
-           'Duration Variance',
-           'Duration Variance With Contingency',
-           'Reporting Variance',
-           'Tracking Risk',
-           'Budget Risk',
-           'Schedule Risk',
-           'Scope Risk',
-           'Description Of Status']
+Columns = ['Status Month',  # 1
+           'Lookup PA',  # 2
+           'Monthly Actuals Date',  # 3
+           'Total Funds From Finance',  # 4
+           'Monthly Actuals From Finance',  # 5
+           'Total Actuals From Finance',  # 6
+           'Remaining Funds From Finance',  # 7
+           'Actuals Adjustment',  # 8
+           'Reported Cost',  # 9
+           'Budget Variance',  # 10
+           'Budget Variance With Contingency',  # 11
+           'Duration Variance',  # 12
+           'Duration Variance With Contingency',  # 13
+           'Reporting Variance',  # 14
+           'Tracking Risk',  # 15
+           'Budget Risk',  # 16
+           'Schedule Risk',  # 17
+           'Scope Risk',  # 18
+           'Description Of Status']  # 19
+
+def fix_structure(*, client, sheet):
+
+    if len(sheet.columns) != 17:
+        print(f"   Wrong number of columns in tracking file, could not fix: Got {len(sheet.columns)}.")
+        return False
+
+    # Add new columns
+    col2 = smartsheet.models.Column({'title': Columns[2],
+                                     'type': 'DATE',
+                                     'index': 2})
+
+    col3 = smartsheet.models.Column({'title': Columns[3],
+                                     'type': 'TEXT_NUMBER',
+                                     'index': 2})
+
+    client.Sheets.add_columns(sheet.id, [col2, col3])
+
+    xref = smartsheet.models.CrossSheetReference({
+        'name': 'Actuals Range 1',
+        'source_sheet_id': navigate.TID_ACTUALS_SHEET,
+        'start_row_id': navigate.TID_ACTUALS_START_ROW,
+        'end_row_id': navigate.TID_ACTUALS_END_ROW, })
+    client.Sheets.create_cross_sheet_reference(sheet.id, xref)
+    return True
 
 def check_structure(*, sheet):
 
     # Check column count
-    if len(sheet.columns) != len(columns):
-        print(f"   Wrong number of columns in tracking file: Got {len(sheet.columns)} Expect {len(columns)}.")
+    if len(sheet.columns) != len(Columns):
+        print(f"   Wrong number of columns in tracking file: Got {len(sheet.columns)} Expect {len(Columns)}.")
         return False
 
     else:
         ret = True
 
-        for i,v in enumerate(columns):
+        for i,v in enumerate(Columns):
             if sheet.columns[i].title != v:
                 print(f"   Mismatch tracking column name for col {i+1}. Got {sheet.columns[i].title}. Expect {v}.")
                 ret = False
@@ -72,21 +113,23 @@ def check_first_row(*, client, sheet, budgetSheet, doFixes):
     new_row = smartsheet.models.Row()
     new_row.id = row.id
 
-    links = { 6: 15,
-              7: 16,
-              8: 17,
-              9: 18,
-             10: 19}
+    links = { 8: 15,
+              9: 16,
+             10: 17,
+             11: 18,
+             12: 19}
 
-    noChange = set([0, 1, 5, 15, 16])
+    noChange = set([0, 1, 7, 17, 18])
 
-    formulas = {  2: '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 3, false)',
-                  3: '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 4, false)',
-                  4: '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 5, false)',
-                 11: '=([Total Actuals From Finance]@row + [Actuals Adjustment]@row) - [Reported Cost]@row',
-                 12: '=IF(ABS([Reporting Variance]@row) > 50000, "High", IF(ABS([Reporting Variance]@row) > 5000, "Medium", "Low"))',
-                 13: '=IF([Budget Variance]@row > 50000, "High", IF([Budget Variance]@row > 5000, "Medium", "Low"))',
-                 14: '=IF([Duration Variance]@row > 300, "High", IF([Duration Variance]@row > 100, "Medium", "Low"))' }
+    formulas = {  2: '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 7, false)',
+                  3: '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 6, false)',
+                  4: '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 3, false)',
+                  5: '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 4, false)',
+                  6: '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 5, false)',
+                 13: '=([Total Actuals From Finance]@row + [Actuals Adjustment]@row) - [Reported Cost]@row',
+                 14: '=IF(ABS([Reporting Variance]@row) > 50000, "High", IF(ABS([Reporting Variance]@row) > 5000, "Medium", "Low"))',
+                 15: '=IF([Budget Variance]@row > 50000, "High", IF([Budget Variance]@row > 5000, "Medium", "Low"))',
+                 16: '=IF([Duration Variance]@row > 300, "High", IF([Duration Variance]@row > 100, "Medium", "Low"))' }
 
     for k,v in formulas.items():
         if ((not hasattr(row.cells[k],'formula')) or row.cells[k].formula != v) or row.cells[k].format != form[k]:
@@ -177,7 +220,7 @@ def check_other_row(*, client, rowIdx, sheet, doFixes):
     new_row = smartsheet.models.Row()
     new_row.id = row.id
 
-    for k in range(len(columns)):
+    for k in range(len(Columns)):
         if (row.cells[k].format != form[k]) and not (form[k] == ",,,,,,,,,,,,,,,," and row.cells[k].format is None):
             print(f"   Incorrect format in row {rowIdx+1} cell {k+1} in tracking file. Got '{row.cells[k].format}' Expect '{form[k]}'")
             new_cell = smartsheet.models.Cell()
