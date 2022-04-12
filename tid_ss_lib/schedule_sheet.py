@@ -80,14 +80,36 @@ formatTask = [",,,,,,,,,2,,,,,,,",  # 0
               ",,,,,,,,,18,,,,,3,,",  # 10
               None,  # 11
               ",,,,,,,,,18,,,0,,,,",  # 12
-              ",,,,,,,,,2,,,0,,,,",  # 13
-              ",,,,,,,,,2,,,,,3,,",  # 14
+              ",,,,,,,,,16,,,0,,,,",  # 13
+              ",,,,,,,,,16,,,,,3,,",  # 14
               ",,,,,,,,,22,,,0,,,,",  # 15
-              ",,,,,,,,,22,,,,3,,,",  # 16
+              ",,,,,,,,,22,,,,,3,,",  # 16
               ",,,,,,,,,22,,,,,,,",   # 17
               ",,,,,,,,,22,,,,,,,",   # 18
               ",,,,,,,,,22,,,,,,1,",  # 19
               ",,,,,,,,,18,,,,,,,"]   # 20
+
+Columns = ['Task Name From Budget',           # 0
+           'Predecessors',                    # 1
+           'Start',                           # 2
+           'End',                             # 3
+           'Duration',                        # 4
+           'Baseline Start',                  # 5
+           'Baseline Finish',                 # 6
+           'Baseline Duration (days)',        # 7
+           'Planned Labor Hours From Budget', # 8
+           'Assigned To',                     # 9
+           '% Effort Planned From Resource',  # 10
+           'Baseline Variance',               # 11
+           'Duration Variance',               # 12
+           'Actual Labor Hours',              # 13
+           '% Complete',                      # 14
+           'Reported Labor Hours',            # 15
+           'Reported % Complete',             # 16
+           'Estimated Finish',                # 17
+           'Status Date',                     # 18
+           'Notes',                           # 19
+           'PA Number']                       # 20
 
 # Due to a limitation in the API the following columns can't be reformatted through the API:
 # Column 1, 3, 4, 5, 6, 7, 11, 12
@@ -99,21 +121,20 @@ def fix_structure(*, client, sheet):
         return False
 
     # Add new columns
-    col15 = smartsheet.models.Column({'title': 'Engineer Labor Hours',
+    col15 = smartsheet.models.Column({'title': Columns[15],
                                       'type': 'TEXT_NUMBER',
                                       'index': 15})
 
-    col16 = smartsheet.models.Column({'title': 'Engineer % Complete',
+    col16 = smartsheet.models.Column({'title': Columns[16],
                                       'type': 'TEXT_NUMBER',
                                       'index': 15})
 
-    col17 = smartsheet.models.Column({'title': 'Engineer Finish Date',
+    col17 = smartsheet.models.Column({'title': Columns[17],
                                       'type': 'DATE',
                                       'index': 15})
 
-    col18 = smartsheet.models.Column({'title': 'Engineer Status Ready',
-                                      'type': 'PICKLIST',
-                                      'options': ['No', 'Yes'],
+    col18 = smartsheet.models.Column({'title': Columns[18],
+                                      'type': 'DATE',
                                       'index': 15})
 
     client.Sheets.add_columns(sheet.id, [col15, col16, col17, col18])
@@ -121,37 +142,15 @@ def fix_structure(*, client, sheet):
 
 def check_structure(*, sheet):
 
-    columns = ['Task Name From Budget',           # 0
-               'Predecessors',                    # 1
-               'Start',                           # 2
-               'End',                             # 3
-               'Duration',                        # 4
-               'Baseline Start',                  # 5
-               'Baseline Finish',                 # 6
-               'Baseline Duration (days)',        # 7
-               'Planned Labor Hours From Budget', # 8
-               'Assigned To',                     # 9
-               '% Effort Planned From Resource',  # 10
-               'Baseline Variance',               # 11
-               'Duration Variance',               # 12
-               'Actual Labor Hours',              # 13
-               '% Complete',                      # 14
-               'Engineer Labor Hours',            # 15
-               'Engineer % Complete',             # 16
-               'Engineer Finish Date',            # 17
-               'Engineer Status Ready',           # 18
-               'Notes',                           # 19
-               'PA Number']                       # 20
-
     # Check column count
-    if len(sheet.columns) != len(columns):
+    if len(sheet.columns) != len(Columns):
         print(f"   Wrong number of columns in schedule file: Got {len(sheet.columns)}.")
         return False
 
     else:
         ret = True
 
-        for i, v in enumerate(columns):
+        for i, v in enumerate(Columns):
             if sheet.columns[i].title != v:
                 print(f"   Mismatch schedule column name for col {i+1}. Got {sheet.columns[i].title}. Expect {v}.")
                 ret = False
@@ -162,10 +161,11 @@ def check_parent_row(*, client, sheet, rowIdx, doFixes, title):
     formulas = {7: '=NETWORKDAYS([Baseline Start]@row, [Baseline Finish]@row)',
                 8:  '=SUM(CHILDREN())',
                 12: '=SUM(CHILDREN())',
-                13: '=SUM(CHILDREN())' }
+                13: '=SUM(CHILDREN())',
+                15: '=SUM(CHILDREN())' }
 
     # These Columns SHould Have No Value
-    noValue = set([9, 15, 16])
+    noValue = set([9, 16, 17, 18, 19])
 
     # Preserve Values, but apply formatting
     noChange = set([14])
@@ -264,13 +264,14 @@ def check_task_row(*, client, sheet, rowIdx, doFixes):
 
     init = { 13 : '0',
              14 : '0',
-             15 : '0',
-             16 : '0',
-             18 : 'No',
+             15 : 13,  # Copy
+             16 : 14,  # Copy
+             17 : 3,   # Copy
+             18 : '1/1/2022'
            }
 
     # Preserve Values, but apply formatting
-    noChange = set([9, 17, 19])
+    noChange = set([9, 19])
 
     if rowIdx >= len(sheet.rows):
         return
@@ -316,8 +317,17 @@ def check_task_row(*, client, sheet, rowIdx, doFixes):
 
                 if row.cells[i].value is not None and row.cells[i].value != '':
                     new_cell.value = row.cells[i].value
-                else:
+                elif isinstance(init[i],str):
                     new_cell.value = init[i]
+                else:  # Copy value
+                    val = str(row.cells[init[i]].value)
+
+                    # Fix crappy date formatting
+                    if '-' in val and 'T' in val and ':' in val:
+                        t = val.split('T')[0].split('-')
+                        val = f"{t[1]}/{t[2]}/{t[0]}"
+
+                    new_cell.value = val
 
                 new_row.cells.append(new_cell)
 
