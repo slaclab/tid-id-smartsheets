@@ -62,6 +62,8 @@ Columns = ['Status Month',  # 1
            'Scope Risk',  # 18
            'Description Of Status']  # 19
 
+RefName = 'Actuals Range 2'
+
 def fix_structure(*, client, sheet):
 
     if len(sheet.columns) != 17:
@@ -80,7 +82,7 @@ def fix_structure(*, client, sheet):
     client.Sheets.add_columns(sheet.id, [col2, col3])
 
     xref = smartsheet.models.CrossSheetReference({
-        'name': 'Actuals Range 1',
+        'name': RefName,
         'source_sheet_id': navigate.TID_ACTUALS_SHEET,
         'start_row_id': navigate.TID_ACTUALS_START_ROW,
         'end_row_id': navigate.TID_ACTUALS_END_ROW, })
@@ -121,11 +123,11 @@ def check_first_row(*, client, sheet, budgetSheet, doFixes):
 
     noChange = set([0, 1, 7, 17, 18])
 
-    formulas = {  2: '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 7, false)',
-                  3: '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 6, false)',
-                  4: '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 3, false)',
-                  5: '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 4, false)',
-                  6: '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 5, false)',
+    formulas = {  2: '=VLOOKUP([Lookup PA]@row, {' + RefName + '}, 7, false)',
+                  3: '=VLOOKUP([Lookup PA]@row, {' + RefName + '}, 6, false)',
+                  4: '=VLOOKUP([Lookup PA]@row, {' + RefName + '}, 3, false)',
+                  5: '=VLOOKUP([Lookup PA]@row, {' + RefName + '}, 4, false)',
+                  6: '=VLOOKUP([Lookup PA]@row, {' + RefName + '}, 5, false)',
                  13: '=([Total Actuals From Finance]@row + [Actuals Adjustment]@row) - [Reported Cost]@row',
                  14: '=IF(ABS([Reporting Variance]@row) > 50000, "High", IF(ABS([Reporting Variance]@row) > 5000, "Medium", "Low"))',
                  15: '=IF([Budget Variance]@row > 50000, "High", IF([Budget Variance]@row > 5000, "Medium", "Low"))',

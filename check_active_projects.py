@@ -10,7 +10,7 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
-doFixes = False
+doFixes = True
 
 SkipList = [8244071731881860]  # Lsst
 
