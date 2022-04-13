@@ -20,6 +20,9 @@ TID_ID_ACTIVE_FOLDER   = 1039693589571460
 TID_ID_TEMPLATE_FOLDER = 4013014891423620
 TID_ID_LIST_SHEET      = 2931334483076996
 TID_ID_FOLDER_PREFIX   = 'TID/ID'
+TID_ACTUALS_SHEET      = 7403570111768452
+TID_ACTUALS_START_ROW  = 5693264191481732
+TID_ACTUALS_END_ROW    = 1256792717715332
 
 OVERHEAD_NOTE = '12.25% Overhead'
 LABOR_RATE_NOTE = 'Labor Rate FY22 (Oct - Feb): $273.25; (Mar - Sep) $281.45; Slac Tech Rate FY22: $162.65'
@@ -86,6 +89,18 @@ def check_project(*, client, folderId, doFixes, path=None):
         budget   = client.Sheets.get_sheet(foundList['Budget'].id, include='format')
         schedule = client.Sheets.get_sheet(foundList['Schedule'].id, include='format')
         tracking = client.Sheets.get_sheet(foundList['Tracking'].id, include='format')
+
+        # Double check schedule for new fix
+        if doFixes and not schedule_sheet.check_structure(sheet=schedule):
+            print("   Attempting to update schedule sheet")
+            schedule_sheet.fix_structure(client=client, sheet=schedule)
+            schedule = client.Sheets.get_sheet(foundList['Schedule'].id, include='format')
+
+        # Double check tracking for new fix
+        if doFixes and not tracking_sheet.check_structure(sheet=tracking):
+            print("   Attempting to update tracking sheet")
+            tracking_sheet.fix_structure(client=client, sheet=tracking)
+            tracking = client.Sheets.get_sheet(foundList['Tracking'].id, include='format')
 
         if budget_sheet.check_structure(sheet=budget) and schedule_sheet.check_structure(sheet=schedule) and tracking_sheet.check_structure(sheet=tracking):
 

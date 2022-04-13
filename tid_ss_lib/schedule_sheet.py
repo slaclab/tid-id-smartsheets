@@ -23,68 +23,149 @@ import smartsheet
 #        18 - Gray
 #           = White
 
-formatMajor = [ ",,1,,,,,,2,39,,,,,,,",  ",,1,,,,,,2,39,,,,,,,",  None,                    None,                    None,
-                None,                    None,                    ",,1,,,,,,2,39,,,,,,,",  ",,1,,,,,,2,39,,,,,,,",  ",,1,,,,,,2,39,,,,,,,",
-                None,                    None,                    ",,1,,,,,,2,39,,,0,,,,", ",,1,,,,,,2,39,,,0,,,,", ",,1,,,,,,2,39,,,,,3,,",
-                ",,1,,,,,,2,39,,,,,,,",  ",,1,,,,,,2,39,,,,,,,"]
+formatMajor = [",,1,,,,,,2,39,,,,,,,",  # 0
+               ",,1,,,,,,2,39,,,,,,,",  # 1
+               None,  # 2
+               None,  # 3
+               None,  # 4
+               None,  # 5
+               None,  # 6
+               ",,1,,,,,,2,39,,,,,,,",  # 7
+               ",,1,,,,,,2,39,,,,,,,",  # 8
+               ",,1,,,,,,2,39,,,,,,,",  # 9
+               None,  # 10
+               None,  # 11
+               ",,1,,,,,,2,39,,,0,,,,",  # 12
+               ",,1,,,,,,2,39,,,0,,,,",  # 13
+               ",,1,,,,,,2,39,,,,,3,,",  # 14
+               ",,1,,,,,,2,39,,,,,,,",   # 15
+               ",,1,,,,,,2,39,,,,,,,",   # 16
+               ",,1,,,,,,2,39,,,,,,,",   # 17
+               ",,1,,,,,,2,39,,,,,,,",   # 18
+               ",,1,,,,,,2,39,,,,,,,",   # 19
+               ",,1,,,,,,2,39,,,,,,,"]   # 20
 
-formatMinor = [ ",,,,,,,,,23,,,,,,,",    ",,,,,,,,,23,,,,,,,",    None,                    None,                   None,
-                None,                    None,                    ",,,,,,,,,23,,,,,,,",    ",,,,,,,,,23,,,,,,,",    ",,,,,,,,,23,,,,,,,",
-                None,                    None,                    ",,,,,,,,,23,,,0,,,,",   ",,,,,,,,,23,,,0,,,,",   ",,,,,,,,,23,,,,,3,,",
-                ",,,,,,,,,23,,,,,,,",    ",,,,,,,,,23,,,,,,,"]
+formatMinor = [",,,,,,,,,23,,,,,,,",  # 0
+               ",,,,,,,,,23,,,,,,,",  # 1
+               None,  # 2
+               None,  # 3
+               None,  # 4
+               None,  # 5
+               None,  # 6
+               ",,,,,,,,,23,,,,,,,",  # 7
+               ",,,,,,,,,23,,,,,,,",  # 8
+               ",,,,,,,,,23,,,,,,,",  # 9
+               None,  # 10
+               None,  # 11
+               ",,,,,,,,,23,,,0,,,,",  # 12
+               ",,,,,,,,,23,,,0,,,,",  # 13
+               ",,,,,,,,,23,,,,,3,,",  # 14
+               ",,,,,,,,,23,,,,,,,",   # 15
+               ",,,,,,,,,23,,,,,,,",   # 16
+               ",,,,,,,,,23,,,,,,,",   # 17
+               ",,,,,,,,,23,,,,,,,",   # 18
+               ",,,,,,,,,23,,,,,,,",   # 19
+               ",,,,,,,,,23,,,,,,,"]   # 20
 
-formatTask  = [ ",,,,,,,,,2,,,,,,,",     ",,,,,,,,,2,,,,,,,",     None,                    None,                   None,
-                None,                    None,                    ",,,,,,,,,18,,,,,,,",    ",,,,,,,,,18,,,,,,,",   ",,,,,,,,,2,,,,,,,",
-                ",,,,,,,,,18,,,,,3,,",   None,                    ",,,,,,,,,18,,,0,,,,",   ",,,,,,,,,22,,,0,,,,",  ",,,,,,,,,22,,,,,3,,",
-                ",,,,,,,,,22,,,,,,1,",   ",,,,,,,,,18,,,,,,,"]
+formatTask = [",,,,,,,,,2,,,,,,,",  # 0
+              ",,,,,,,,,2,,,,,,,",  # 1
+              None,  # 2
+              None,  # 3
+              None,  # 4
+              None,  # 5
+              None,  # 6
+              ",,,,,,,,,18,,,,,,,",   # 7
+              ",,,,,,,,,18,,,,,,,",   # 8
+              ",,,,,,,,,2,,,,,,,",    # 9
+              ",,,,,,,,,18,,,,,3,,",  # 10
+              None,  # 11
+              ",,,,,,,,,18,,,0,,,,",  # 12
+              ",,,,,,,,,16,,,0,,,,",  # 13
+              ",,,,,,,,,16,,,,,3,,",  # 14
+              ",,,,,,,,,22,,,0,,,,",  # 15
+              ",,,,,,,,,22,,,,,3,,",  # 16
+              ",,,,,,,,,22,,,,,,,",   # 17
+              ",,,,,,,,,22,,,,,,,",   # 18
+              ",,,,,,,,,22,,,,,,1,",  # 19
+              ",,,,,,,,,18,,,,,,,"]   # 20
+
+Columns = ['Task Name From Budget',           # 0
+           'Predecessors',                    # 1
+           'Start',                           # 2
+           'End',                             # 3
+           'Duration',                        # 4
+           'Baseline Start',                  # 5
+           'Baseline Finish',                 # 6
+           'Baseline Duration (days)',        # 7
+           'Planned Labor Hours From Budget', # 8
+           'Assigned To',                     # 9
+           '% Effort Planned From Resource',  # 10
+           'Baseline Variance',               # 11
+           'Duration Variance',               # 12
+           'Actual Labor Hours',              # 13
+           '% Complete',                      # 14
+           'Reported Labor Hours',            # 15
+           'Reported % Complete',             # 16
+           'Estimated Finish',                # 17
+           'Status Date',                     # 18
+           'Notes',                           # 19
+           'PA Number']                       # 20
 
 # Due to a limitation in the API the following columns can't be reformatted through the API:
 # Column 1, 3, 4, 5, 6, 7, 11, 12
 
+def fix_structure(*, client, sheet):
+
+    if len(sheet.columns) != 17:
+        print(f"   Wrong number of columns in schedule file, could not fix: Got {len(sheet.columns)}.")
+        return False
+
+    # Add new columns
+    col15 = smartsheet.models.Column({'title': Columns[15],
+                                      'type': 'TEXT_NUMBER',
+                                      'index': 15})
+
+    col16 = smartsheet.models.Column({'title': Columns[16],
+                                      'type': 'TEXT_NUMBER',
+                                      'index': 15})
+
+    col17 = smartsheet.models.Column({'title': Columns[17],
+                                      'type': 'DATE',
+                                      'index': 15})
+
+    col18 = smartsheet.models.Column({'title': Columns[18],
+                                      'type': 'DATE',
+                                      'index': 15})
+
+    client.Sheets.add_columns(sheet.id, [col15, col16, col17, col18])
+    return True
+
 def check_structure(*, sheet):
 
-    columns = ['Task Name From Budget',
-               'Predecessors',
-               'Start',
-               'End',
-               'Duration',
-               'Baseline Start',
-               'Baseline Finish',
-               'Baseline Duration (days)',
-               'Planned Labor Hours From Budget',
-               'Assigned To',
-               '% Effort Planned From Resource',
-               'Baseline Variance',
-               'Duration Variance',
-               'Actual Labor Hours',
-               '% Complete',
-               'Notes',
-               'PA Number']
-
     # Check column count
-    if len(sheet.columns) != len(columns):
+    if len(sheet.columns) != len(Columns):
         print(f"   Wrong number of columns in schedule file: Got {len(sheet.columns)}.")
         return False
 
     else:
         ret = True
 
-        for i,v in enumerate(columns):
+        for i, v in enumerate(Columns):
             if sheet.columns[i].title != v:
                 print(f"   Mismatch schedule column name for col {i+1}. Got {sheet.columns[i].title}. Expect {v}.")
                 ret = False
 
         return ret
 
-
 def check_parent_row(*, client, sheet, rowIdx, doFixes, title):
-    formulas = { 7: '=NETWORKDAYS([Baseline Start]@row, [Baseline Finish]@row)',
+    formulas = {7: '=NETWORKDAYS([Baseline Start]@row, [Baseline Finish]@row)',
                 8:  '=SUM(CHILDREN())',
                 12: '=SUM(CHILDREN())',
-                13: '=SUM(CHILDREN())' }
+                13: '=SUM(CHILDREN())',
+                15: '=SUM(CHILDREN())' }
 
     # These Columns SHould Have No Value
-    noValue = set([9, 15, 16])
+    noValue = set([9, 16, 17, 18, 19])
 
     # Preserve Values, but apply formatting
     noChange = set([14])
@@ -182,10 +263,15 @@ def check_task_row(*, client, sheet, rowIdx, doFixes):
                  12: '=Duration@row - [Baseline Duration (days)]@row', }
 
     init = { 13 : '0',
-             14 : '0' }
+             14 : '0',
+             15 : 13,  # Copy
+             16 : 14,  # Copy
+             17 : 3,   # Copy
+             18 : '1/1/2022'
+           }
 
     # Preserve Values, but apply formatting
-    noChange = set([9, 15])
+    noChange = set([9, 19])
 
     if rowIdx >= len(sheet.rows):
         return
@@ -231,8 +317,17 @@ def check_task_row(*, client, sheet, rowIdx, doFixes):
 
                 if row.cells[i].value is not None and row.cells[i].value != '':
                     new_cell.value = row.cells[i].value
-                else:
+                elif isinstance(init[i],str):
                     new_cell.value = init[i]
+                else:  # Copy value
+                    val = str(row.cells[init[i]].value)
+
+                    # Fix crappy date formatting
+                    if '-' in val and 'T' in val and ':' in val:
+                        t = val.split('T')[0].split('-')
+                        val = f"{t[1]}/{t[2]}/{t[0]}"
+
+                    new_cell.value = val
 
                 new_row.cells.append(new_cell)
 
@@ -323,7 +418,7 @@ def check_parent_links(*, client, sheet, rowIdx, laborRows, laborSheet, doFixes)
 
 
 def check_task_links(*, client, sheet, rowIdx, laborRows, laborSheet, doFixes):
-    links = { 8: 2, 16: 20 }
+    links = { 8: 2, 20: 20 }
 
     if rowIdx >= len(sheet.rows):
         return

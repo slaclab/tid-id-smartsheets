@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------
-# Title      : Check Project Script
+# Title      : Test Scripts
 #-----------------------------------------------------------------------------
 # This file is part of the TID ID Smartsheets software platform. It is subject to
 # the license terms in the LICENSE.txt file found in the top-level directory
@@ -10,14 +10,9 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
-doFixes = False
-
-SkipList = [8244071731881860]  # Lsst
-
-import tid_ss_lib.navigate
-import tid_ss_lib.project_sheet
-import smartsheet
 import os
+import tid_ss_lib.project_sheet
+import smartsheet  # pip3 install smartsheet-python-sdk
 
 if 'SMARTSHEETS_API' in os.environ:
     api = os.environ['SMARTSHEETS_API']
@@ -26,15 +21,8 @@ else:
 
 client = smartsheet.Smartsheet(api)
 
-for p in tid_ss_lib.project_sheet.get_project_list(client=client):
-    if p['id'] in SkipList:
-        print(f"Skipping {p['name']}")
-    else:
-        tid_ss_lib.navigate.check_project(client=client,folderId=p['id'], doFixes=doFixes)
+doFixes = True
 
-for k in [4013014891423620, # Template
-          3142587826628484  # Management
-         ]:
-
-    tid_ss_lib.navigate.check_project(client=client,folderId=k, doFixes=False)
+for k in [2771110870706052]:
+    tid_ss_lib.navigate.check_project(client=client,folderId=k, doFixes=doFixes)
 
