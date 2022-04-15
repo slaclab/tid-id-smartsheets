@@ -10,13 +10,8 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
-doFixes = False
-
-#SkipList = [8244071731881860]  # Lsst
-SkipList = []
-
 import tid_ss_lib.navigate
-import tid_ss_lib.project_sheet
+import tid_ss_lib.resource_sheet
 import smartsheet
 import os
 
@@ -26,16 +21,5 @@ else:
     api = ''
 
 client = smartsheet.Smartsheet(api)
-
-for p in tid_ss_lib.project_sheet.get_project_list(client=client):
-    if p['id'] in SkipList:
-        print(f"Skipping {p['name']}")
-    else:
-        tid_ss_lib.navigate.check_project(client=client,folderId=p['id'], doFixes=doFixes)
-
-for k in [4013014891423620, # Template
-          3142587826628484  # Management
-         ]:
-
-    tid_ss_lib.navigate.check_project(client=client,folderId=k, doFixes=True)
+tid_ss_lib.resource_sheet.check_resource_files(client=client)
 

@@ -55,7 +55,7 @@ def check_linked_projects(*, sheet, alist):
     lsheets = [s.id for s in sheet.scope.sheets]
 
     for k, v in alist.items():
-        if v['Schedule'].id not in lsheets:
+        if v['sheets']['Schedule'].id not in lsheets:
             print(f"    Resource file is missing link to {v['name']}")
             ret = False
 

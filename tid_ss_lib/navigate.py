@@ -45,14 +45,12 @@ def get_folder_data(*, client, folderId, path=None):
     ret['tracked'] = False
     ret['name'] = folder.name
     ret['url'] = folder.permalink
-
-    for k in StandardProjectFiles:
-        ret[k] = None
+    ret['sheets'] = {k: None for k in StandardProjectFiles}
 
     for s in folder.sheets:
         for k in StandardProjectFiles:
             if k == s.name[-len(k):]:
-                ret[k] = s
+                ret['sheets'][k] = s
 
     return ret
 
@@ -68,7 +66,7 @@ def check_project(*, client, folderId, doFixes, path=None):
     ##########################################################
     # First Make sure folder has all of the neccessary files
     ##########################################################
-    for k, v in fdata.items():
+    for k, v in fdata['sheets'].items():
 
         # Copy file if it is missing
         if v is None:
@@ -92,40 +90,40 @@ def check_project(*, client, folderId, doFixes, path=None):
     # Refresh folder data, needed if new files were copied over
     fdata = get_folder_data(client=client, folderId=folderId)
 
-    if fdata['Budget'] is None or fdata['Schedule'] is None:
+    if fdata['sheets']['Budget'] is None or fdata['sheets']['Schedule'] is None:
         print("   Skipping remaining processing")
         return
 
     # Re-read sheet data
-    fdata['Budget'] = client.Sheets.get_sheet(fdata['Budget'].id, include='format')
-    fdata['Schedule'] = client.Sheets.get_sheet(fdata['Schedule'].id, include='format')
-    fdata['Tracking'] = client.Sheets.get_sheet(fdata['Tracking'].id, include='format')
+    fdata['sheets']['Budget'] = client.Sheets.get_sheet(fdata['sheets']['Budget'].id, include='format')
+    fdata['sheets']['Schedule'] = client.Sheets.get_sheet(fdata['sheets']['Schedule'].id, include='format')
+    fdata['sheets']['Tracking'] = client.Sheets.get_sheet(fdata['sheets']['Tracking'].id, include='format')
 
     # Double check schedule for new fix
-    if doFixes and not schedule_sheet.check_structure(sheet=fdata['Schedule']):
+    if doFixes and not schedule_sheet.check_structure(sheet=fdata['sheets']['Schedule']):
         print("   Attempting to update schedule sheet")
-        schedule_sheet.fix_structure(client=client, sheet=fdata['Schedule'])
-        fdata['Schedule'] = client.Sheets.get_sheet(fdata['Schedule'].id, include='format')
+        schedule_sheet.fix_structure(client=client, sheet=fdata['sheets']['Schedule'])
+        fdata['sheets']['Schedule'] = client.Sheets.get_sheet(fdata['sheets']['Schedule'].id, include='format')
 
     # Double check tracking for new fix
-    if doFixes and not tracking_sheet.check_structure(sheet=fdata['Tracking']):
+    if doFixes and not tracking_sheet.check_structure(sheet=fdata['sheets']['Tracking']):
         print("   Attempting to update tracking sheet")
-        tracking_sheet.fix_structure(client=client, sheet=fdata['Tracking'])
-        fdata['Tracking'] = client.Sheets.get_sheet(fdata['Tracking'].id, include='format')
+        tracking_sheet.fix_structure(client=client, sheet=fdata['sheets']['Tracking'])
+        fdata['sheets']['Tracking'] = client.Sheets.get_sheet(fdata['sheets']['Tracking'].id, include='format')
 
-    if budget_sheet.check_structure(sheet=fdata['Budget']) and schedule_sheet.check_structure(sheet=fdata['Schedule']) and tracking_sheet.check_structure(sheet=fdata['Tracking']):
+    if budget_sheet.check_structure(sheet=fdata['sheets']['Budget']) and schedule_sheet.check_structure(sheet=fdata['sheets']['Schedule']) and tracking_sheet.check_structure(sheet=fdata['sheets']['Tracking']):
 
         # Fix internal budget file references
-        laborRows = budget_sheet.check(client=client, sheet=fdata['Budget'], doFixes=doFixes )
+        laborRows = budget_sheet.check(client=client, sheet=fdata['sheets']['Budget'], doFixes=doFixes )
 
         # Check schedule file
-        schedule_sheet.check(client=client, sheet=fdata['Schedule'], laborRows=laborRows, laborSheet=fdata['Budget'], doFixes=doFixes )
+        schedule_sheet.check(client=client, sheet=fdata['sheets']['Schedule'], laborRows=laborRows, laborSheet=fdata['sheets']['Budget'], doFixes=doFixes )
 
         # Final fix of links in budget file
-        budget_sheet.check_task_links(client=client, sheet=fdata['Budget'], laborRows=laborRows, scheduleSheet=fdata['Schedule'], doFixes=doFixes)
+        budget_sheet.check_task_links(client=client, sheet=fdata['sheets']['Budget'], laborRows=laborRows, scheduleSheet=fdata['sheets']['Schedule'], doFixes=doFixes)
 
         # Fix tracking file
-        tracking_sheet.check(client=client, sheet=fdata['Tracking'], budgetSheet=fdata['Budget'], doFixes=doFixes)
+        tracking_sheet.check(client=client, sheet=fdata['sheets']['Tracking'], budgetSheet=fdata['sheets']['Budget'], doFixes=doFixes)
 
     else:
         print("   Skipping remaining processing")
