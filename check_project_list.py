@@ -20,7 +20,7 @@ else:
     import secrets
     api = secrets.API_KEY
 
-doFixes=True
+doFixes=False
 
 client = smartsheet.Smartsheet(api)
 

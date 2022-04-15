@@ -10,9 +10,10 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
-doFixes = True
+doFixes = False
 
-SkipList = [8244071731881860]  # Lsst
+#SkipList = [8244071731881860]  # Lsst
+SkipList = []
 
 import tid_ss_lib.navigate
 import tid_ss_lib.project_sheet

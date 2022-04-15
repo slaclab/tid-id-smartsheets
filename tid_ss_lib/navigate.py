@@ -23,44 +23,52 @@ TID_ID_FOLDER_PREFIX   = 'TID/ID'
 TID_ACTUALS_SHEET      = 7403570111768452
 TID_ACTUALS_START_ROW  = 5693264191481732
 TID_ACTUALS_END_ROW    = 1256792717715332
+TID_RESOURCE_FOLDER    = 6665944920549252
 
 OVERHEAD_NOTE = '12.25% Overhead'
 LABOR_RATE_NOTE = 'Labor Rate FY22 (Oct - Feb): $273.25; (Mar - Sep) $281.45; Slac Tech Rate FY22: $162.65'
 
-TEMPLATE_PREFIX = '[Project] '
+# Standard Project Files & Template IDs
+StandardProjectFiles = {'Budget': 6232441649162116,
+                        'PM Scoring': 888744673863556,
+                        'Risk Registry': 607544575059844,
+                        'Schedule': 1728842021791620,
+                        'Tracking': 4586297051375492}
 
-def build_template(*, client):
-    temp = {}
 
-    folder = client.Folders.get_folder(TID_ID_TEMPLATE_FOLDER)
+def get_folder_data(*, client, folderId, path=None):
+    folder = client.Folders.get_folder(folderId)
 
-    for f in folder.sheets:
-        name = f.name[len(TEMPLATE_PREFIX):]
-        temp[name] = f.id
+    ret = {'folder': folder}
 
-    return temp
+    ret['path'] = path
+    ret['tracked'] = False
+    ret['name'] = folder.name
+    ret['url'] = folder.permalink
+
+    for k in StandardProjectFiles:
+        ret[k] = None
+
+    for s in folder.sheets:
+        for k in StandardProjectFiles:
+            if k == s.name[-len(k):]:
+                ret[k] = s
+
+    return ret
 
 
 def check_project(*, client, folderId, doFixes, path=None):
-    folder = client.Folders.get_folder(folderId)
+    fdata = get_folder_data(client=client, folderId=folderId)
 
     if path is not None:
         print(f"Processing project {path} : {folderId}")
     else:
-        print(f"Processing project {folder.name} : {folderId}")
+        print(f"Processing project {fdata['folder'].name} : {folderId}")
 
     ##########################################################
     # First Make sure folder has all of the neccessary files
     ##########################################################
-    tempList = build_template(client=client)
-    foundList = {k: None for k in tempList}
-
-    for s in folder.sheets:
-        for k in foundList:
-            if k in s.name:
-                foundList[k] = s
-
-    for k,v in foundList.items():
+    for k, v in fdata.items():
 
         # Copy file if it is missing
         if v is None:
@@ -68,56 +76,59 @@ def check_project(*, client, folderId, doFixes, path=None):
 
             if doFixes:
                 print(f"   Coping '{k}' file to project.")
-                client.Sheets.copy_sheet(tempList[k], # Source sheet
+                client.Sheets.copy_sheet(StandardProjectFiles[k], # Source sheet
                                          smartsheet.models.ContainerDestination({'destination_type': 'folder',
-                                                                                'destination_id': folder.id,
-                                                                                'new_name': folder.name + ' ' + k}))
+                                                                                'destination_id': fdata['folder'].id,
+                                                                                'new_name': fdata['folder'].name + ' ' + k}))
 
         # Check for valid naming, rename if need be
-        elif 'Template Set ' not in folder.name and not v.name.startswith(folder.name):
+        elif 'Template Set ' not in fdata['folder'].name and not v.name.startswith(fdata['folder'].name):
             print(f"   Bad sheet name {v.name}.")
 
             if doFixes:
                 print(f"   Renaming {v.name}.")
-                client.Sheets.update_sheet(v.id, smartsheet.models.Sheet({'name': folder.name + ' ' + k}))
+                client.Sheets.update_sheet(v.id, smartsheet.models.Sheet({'name': fdata['folder'].name + ' ' + k}))
 
-    if foundList['Budget'] is None or foundList['Schedule'] is None:
+    # Refresh folder data, needed if new files were copied over
+    fdata = get_folder_data(client=client, folderId=folderId)
+
+    if fdata['Budget'] is None or fdata['Schedule'] is None:
         print("   Skipping remaining processing")
+        return
+
+    # Re-read sheet data
+    fdata['Budget'] = client.Sheets.get_sheet(fdata['Budget'].id, include='format')
+    fdata['Schedule'] = client.Sheets.get_sheet(fdata['Schedule'].id, include='format')
+    fdata['Tracking'] = client.Sheets.get_sheet(fdata['Tracking'].id, include='format')
+
+    # Double check schedule for new fix
+    if doFixes and not schedule_sheet.check_structure(sheet=fdata['Schedule']):
+        print("   Attempting to update schedule sheet")
+        schedule_sheet.fix_structure(client=client, sheet=fdata['Schedule'])
+        fdata['Schedule'] = client.Sheets.get_sheet(fdata['Schedule'].id, include='format')
+
+    # Double check tracking for new fix
+    if doFixes and not tracking_sheet.check_structure(sheet=fdata['Tracking']):
+        print("   Attempting to update tracking sheet")
+        tracking_sheet.fix_structure(client=client, sheet=fdata['Tracking'])
+        fdata['Tracking'] = client.Sheets.get_sheet(fdata['Tracking'].id, include='format')
+
+    if budget_sheet.check_structure(sheet=fdata['Budget']) and schedule_sheet.check_structure(sheet=fdata['Schedule']) and tracking_sheet.check_structure(sheet=fdata['Tracking']):
+
+        # Fix internal budget file references
+        laborRows = budget_sheet.check(client=client, sheet=fdata['Budget'], doFixes=doFixes )
+
+        # Check schedule file
+        schedule_sheet.check(client=client, sheet=fdata['Schedule'], laborRows=laborRows, laborSheet=fdata['Budget'], doFixes=doFixes )
+
+        # Final fix of links in budget file
+        budget_sheet.check_task_links(client=client, sheet=fdata['Budget'], laborRows=laborRows, scheduleSheet=fdata['Schedule'], doFixes=doFixes)
+
+        # Fix tracking file
+        tracking_sheet.check(client=client, sheet=fdata['Tracking'], budgetSheet=fdata['Budget'], doFixes=doFixes)
+
     else:
-
-        # First process budget sheet:
-        budget   = client.Sheets.get_sheet(foundList['Budget'].id, include='format')
-        schedule = client.Sheets.get_sheet(foundList['Schedule'].id, include='format')
-        tracking = client.Sheets.get_sheet(foundList['Tracking'].id, include='format')
-
-        # Double check schedule for new fix
-        if doFixes and not schedule_sheet.check_structure(sheet=schedule):
-            print("   Attempting to update schedule sheet")
-            schedule_sheet.fix_structure(client=client, sheet=schedule)
-            schedule = client.Sheets.get_sheet(foundList['Schedule'].id, include='format')
-
-        # Double check tracking for new fix
-        if doFixes and not tracking_sheet.check_structure(sheet=tracking):
-            print("   Attempting to update tracking sheet")
-            tracking_sheet.fix_structure(client=client, sheet=tracking)
-            tracking = client.Sheets.get_sheet(foundList['Tracking'].id, include='format')
-
-        if budget_sheet.check_structure(sheet=budget) and schedule_sheet.check_structure(sheet=schedule) and tracking_sheet.check_structure(sheet=tracking):
-
-            # Fix internal budget file references
-            laborRows = budget_sheet.check(client=client, sheet=budget, doFixes=doFixes )
-
-            # Check schedule file
-            schedule_sheet.check(client=client, sheet=schedule, laborRows=laborRows, laborSheet=budget, doFixes=doFixes )
-
-            # Final fix of links in budget file
-            budget_sheet.check_task_links(client=client, sheet=budget, laborRows=laborRows, scheduleSheet=schedule, doFixes=doFixes)
-
-            # Fix tracking file
-            tracking_sheet.check(client=client, sheet=tracking, budgetSheet=budget, doFixes=doFixes)
-
-        else:
-            print("   Skipping remaining processing")
+        print("   Skipping remaining processing")
 
 
 def get_active_list(*, client, path = TID_ID_FOLDER_PREFIX, folderId=TID_ID_ACTIVE_FOLDER):
@@ -131,7 +142,7 @@ def get_active_list(*, client, path = TID_ID_FOLDER_PREFIX, folderId=TID_ID_ACTI
 
         # Skip projects with no sheets
         if len(folder.sheets) != 0:
-            ret[folderId] = {'path': path, 'name': folder.name, 'url': folder.permalink, 'tracked': False}
+            ret[folderId] = get_folder_data(client=client, folderId=folder.id, path=path)
 
     else:
         for sub in folder.folders:

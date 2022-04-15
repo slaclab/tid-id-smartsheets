@@ -12,6 +12,7 @@
 
 import os
 import tid_ss_lib.project_sheet
+import tid_ss_lib.resource_sheet
 import smartsheet  # pip3 install smartsheet-python-sdk
 
 if 'SMARTSHEETS_API' in os.environ:
@@ -21,8 +22,9 @@ else:
 
 client = smartsheet.Smartsheet(api)
 
-doFixes = True
+doFixes = False
 
-for k in [2771110870706052]:
-    tid_ss_lib.navigate.check_project(client=client,folderId=k, doFixes=doFixes)
+#for k in [2771110870706052]:
+    #tid_ss_lib.navigate.check_project(client=client,folderId=k, doFixes=doFixes)
 
+tid_ss_lib.resource_sheet.check_resource_files(client=client)
