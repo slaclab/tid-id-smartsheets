@@ -110,11 +110,11 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
             new_row.cells.append(ret)
 
     # Lookup Fields
-    for col in range(9, 24):
+    for col in range(9, 25):
         exp = "=VLOOKUP([Status Month]@row, {"
         exp += p['name']
         exp += " Tracking Range 1}, "
-        exp += str(3 + (col-9))
+        exp += str(4 + (col-9))
         exp += ", false)"
 
         ret = check_cell_formula(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=col, expect=exp)
@@ -123,7 +123,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
             new_row.cells.append(ret)
 
     # Check hyperlink Column
-    col = 24
+    col = 25
     if row.cells[col].hyperlink is None or row.cells[col].hyperlink.url != p['url'] or row.cells[col].value != p['path']:
 
         if row.cells[col].hyperlink is None:
