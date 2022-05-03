@@ -13,16 +13,36 @@
 import tid_ss_lib.project_sheet
 import smartsheet  # pip3 install smartsheet-python-sdk
 import os
+import argparse
+
+# Set the argument parser
+parser = argparse.ArgumentParser('Smartsheets Project Check & Fix')
 
 if 'SMARTSHEETS_API' in os.environ:
-    api = os.environ['SMARTSHEETS_API']
+    defApi = os.environ['SMARTSHEETS_API']
 else:
-    import secrets
-    api = secrets.API_KEY
+    defApi = ''
 
-doFixes=False
+parser.add_argument(
+    "--key",
+    type     = str,
+    required = (defApi == ''),
+    default  = defApi,
+    help     = "API Key from smartsheets. See https://help.smartsheet.com/articles/2482389-generate-API-key"
+)
 
-client = smartsheet.Smartsheet(api)
+parser.add_argument(
+    "--fix",
+    action   = 'store_true',
+    required = False,
+    default  = False,
+    help     = "Use to enable fixing of project files.",
+)
 
-tid_ss_lib.project_sheet.check(client=client, doFixes=doFixes)
+# Get the arguments
+args = parser.parse_args()
+
+client = smartsheet.Smartsheet(args.key)
+
+tid_ss_lib.project_sheet.check(client=client, doFixes=args.fix)
 

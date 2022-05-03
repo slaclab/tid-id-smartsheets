@@ -13,7 +13,6 @@
 import tid_ss_lib.navigate
 import smartsheet
 import os
-
 import argparse
 
 # Set the argument parser
