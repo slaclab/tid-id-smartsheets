@@ -22,9 +22,10 @@ else:
 
 client = smartsheet.Smartsheet(api)
 
-doFixes = False
+doFixes = True
 
-#for k in [2771110870706052]:
-    #tid_ss_lib.navigate.check_project(client=client,folderId=k, doFixes=doFixes)
+for k in [7366639038556036]:
+    tid_ss_lib.navigate.check_project(client=client,folderId=k, doFixes=doFixes)
 
-tid_ss_lib.resource_sheet.check_resource_files(client=client)
+#tid_ss_lib.resource_sheet.check_resource_files(client=client)
+

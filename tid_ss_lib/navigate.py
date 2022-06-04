@@ -99,6 +99,12 @@ def check_project(*, client, folderId, doFixes, path=None):
     fdata['sheets']['Schedule'] = client.Sheets.get_sheet(fdata['sheets']['Schedule'].id, include='format')
     fdata['sheets']['Tracking'] = client.Sheets.get_sheet(fdata['sheets']['Tracking'].id, include='format')
 
+    # Double check budget for new fix
+    if doFixes and not budget_sheet.check_structure(sheet=fdata['sheets']['Budget']):
+        print("   Attempting to update budget sheet")
+        budget_sheet.fix_structure(client=client, sheet=fdata['sheets']['Budget'])
+        fdata['sheets']['Budget'] = client.Sheets.get_sheet(fdata['sheets']['Budget'].id, include='format')
+
     # Double check schedule for new fix
     if doFixes and not schedule_sheet.check_structure(sheet=fdata['sheets']['Schedule']):
         print("   Attempting to update schedule sheet")

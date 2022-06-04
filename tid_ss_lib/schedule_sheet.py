@@ -35,15 +35,14 @@ formatMajor = [",,1,,,,,,2,39,,,,,,,",  # 0
                ",,1,,,,,,2,39,,,,,,,",  # 9
                None,  # 10
                None,  # 11
-               ",,1,,,,,,2,39,,,0,,,,",  # 12
+               ",,1,,,,,,2,39,,,,,3,,",  # 12
                ",,1,,,,,,2,39,,,0,,,,",  # 13
                ",,1,,,,,,2,39,,,,,3,,",  # 14
                ",,1,,,,,,2,39,,,,,,,",   # 15
                ",,1,,,,,,2,39,,,,,,,",   # 16
                ",,1,,,,,,2,39,,,,,,,",   # 17
                ",,1,,,,,,2,39,,,,,,,",   # 18
-               ",,1,,,,,,2,39,,,,,,,",   # 19
-               ",,1,,,,,,2,39,,,,,,,"]   # 20
+               ",,1,,,,,,2,39,,,,,,,"]   # 19
 
 formatMinor = [",,,,,,,,,23,,,,,,,",  # 0
                ",,,,,,,,,23,,,,,,,",  # 1
@@ -57,15 +56,14 @@ formatMinor = [",,,,,,,,,23,,,,,,,",  # 0
                ",,,,,,,,,23,,,,,,,",  # 9
                None,  # 10
                None,  # 11
-               ",,,,,,,,,23,,,0,,,,",  # 12
+               ",,,,,,,,,23,,,,,3,,",  # 12
                ",,,,,,,,,23,,,0,,,,",  # 13
                ",,,,,,,,,23,,,,,3,,",  # 14
                ",,,,,,,,,23,,,,,,,",   # 15
                ",,,,,,,,,23,,,,,,,",   # 16
                ",,,,,,,,,23,,,,,,,",   # 17
                ",,,,,,,,,23,,,,,,,",   # 18
-               ",,,,,,,,,23,,,,,,,",   # 19
-               ",,,,,,,,,23,,,,,,,"]   # 20
+               ",,,,,,,,,23,,,,,,,"]   # 19
 
 formatTask = [",,,,,,,,,18,,,,,,,",  # 0
               ",,,,,,,,,2,,,,,,,",  # 1
@@ -79,15 +77,14 @@ formatTask = [",,,,,,,,,18,,,,,,,",  # 0
               ",,,,,,,,,2,,,,,,,",    # 9
               ",,,,,,,,,18,,,,,3,,",  # 10
               None,  # 11
-              ",,,,,,,,,18,,,0,,,,",  # 12
+              ",,,,,,,,,18,,,,,3,,",  # 12
               ",,,,,,,,,16,,,0,,,,",  # 13
-              ",,,,,,,,,16,,,,,3,,",  # 14
+              ",,,,,,,,,18,,,,,3,,",  # 14
               ",,,,,,,,,22,,,0,,,,",  # 15
               ",,,,,,,,,22,,,,,3,,",  # 16
               ",,,,,,,,,22,,,,,,,",   # 17
-              ",,,,,,,,,22,,,,,,,",   # 18
-              ",,,,,,,,,22,,,,,,1,",  # 19
-              ",,,,,,,,,18,,,,,,,"]   # 20
+              ",,,,,,,,,22,,,,,,1,",  # 18
+              ",,,,,,,,,18,,,,,,,"]   # 19
 
 Columns = ['Task Name From Budget',           # 0
            'Predecessors',                    # 1
@@ -101,43 +98,33 @@ Columns = ['Task Name From Budget',           # 0
            'Assigned To',                     # 9
            '% Effort Planned From Resource',  # 10
            'Baseline Variance',               # 11
-           'Duration Variance',               # 12
+           'Planned % Complete',              # 12
            'Actual Labor Hours',              # 13
            '% Complete',                      # 14
            'Reported Labor Hours',            # 15
            'Reported % Complete',             # 16
-           'Estimated Finish',                # 17
-           'Status Date',                     # 18
-           'Notes',                           # 19
-           'PA Number']                       # 20
+           'Status Date',                     # 17
+           'Notes',                           # 18
+           'PA Number']                       # 19
 
 # Due to a limitation in the API the following columns can't be reformatted through the API:
 # Column 1, 3, 4, 5, 6, 7, 11, 12
 
 def fix_structure(*, client, sheet):
 
-    if len(sheet.columns) != 17:
+    if len(sheet.columns) != 21:
         print(f"   Wrong number of columns in schedule file, could not fix: Got {len(sheet.columns)}.")
         return False
 
-    # Add new columns
-    col15 = smartsheet.models.Column({'title': Columns[15],
-                                      'type': 'TEXT_NUMBER',
-                                      'index': 15})
+    # Update Column Name
+    col = smartsheet.models.Column({'title': Columns[12],
+                                    'type': 'TEXT_NUMBER',
+                                    'index': 12})
 
-    col16 = smartsheet.models.Column({'title': Columns[16],
-                                      'type': 'TEXT_NUMBER',
-                                      'index': 15})
+    client.Sheets.update_column(sheet.id, sheet.columns[12].id, col)
 
-    col17 = smartsheet.models.Column({'title': Columns[17],
-                                      'type': 'DATE',
-                                      'index': 15})
-
-    col18 = smartsheet.models.Column({'title': Columns[18],
-                                      'type': 'DATE',
-                                      'index': 15})
-
-    client.Sheets.add_columns(sheet.id, [col15, col16, col17, col18])
+    #Delete column 17
+    client.Sheets.delete_column(sheet.id, sheet.columns[17].id)
     return True
 
 def check_structure(*, sheet):
@@ -160,15 +147,14 @@ def check_structure(*, sheet):
 def check_parent_row(*, client, sheet, rowIdx, doFixes, title):
     formulas = {7: '=NETWORKDAYS([Baseline Start]@row, [Baseline Finish]@row)',
                 8:  '=SUM(CHILDREN())',
-                12: '=SUM(CHILDREN())',
                 13: '=SUM(CHILDREN())',
                 15: '=SUM(CHILDREN())' }
 
     # These Columns SHould Have No Value
-    noValue = set([9, 16, 17, 18, 19])
+    noValue = set([9, 12, 16, 17, 18, 19])
 
     # Preserve Values, but apply formatting
-    noChange = set([14])
+    noChange = set([14,16])
 
     if rowIdx >= len(sheet.rows):
         return
@@ -260,14 +246,13 @@ def check_parent_row(*, client, sheet, rowIdx, doFixes, title):
 def check_task_row(*, client, sheet, rowIdx, doFixes):
     formulas = {  7: '=NETWORKDAYS([Baseline Start]@row, [Baseline Finish]@row)',
                  10: '=([Planned Labor Hours From Budget]@row / 8) / [Baseline Duration (days)]@row',
-                 12: '=Duration@row - [Baseline Duration (days)]@row', }
+                 12: '=IF(Start@row > TODAY(), 0, IF(End@row > TODAY(), NETWORKDAYS(Start@row, TODAY()) / Duration@row, 1))',}
 
     init = { 13 : '0',
              14 : '0',
              15 : 13,  # Copy
              16 : 14,  # Copy
-             17 : 3,   # Copy
-             18 : '1/1/2022'
+             17 : '1/1/2022'
            }
 
     # Preserve Values, but apply formatting
@@ -418,7 +403,7 @@ def check_parent_links(*, client, sheet, rowIdx, laborRows, laborSheet, doFixes)
 
 
 def check_task_links(*, client, sheet, rowIdx, laborRows, laborSheet, doFixes):
-    links = { 8: 2, 20: 20 }
+    links = { 8: 2, 19: 23 }
 
     if rowIdx >= len(sheet.rows):
         return
