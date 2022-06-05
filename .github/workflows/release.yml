@@ -35,7 +35,7 @@ jobs:
           IMAGE_VER: ${{ steps.get_image_info.outputs.tag }}
           GH_REPO_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          pyinstaller --onefile tid_ss_gui.py
+          pyinstaller --onefile check_project_gui.py
 
       - name: Upload
         uses: actions/upload-release-asset@v1.0.1
@@ -43,8 +43,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: dist\tid_ss_gui.exe
-          asset_name: tid_ss_gui.exe
+          asset_path: dist\check_project_gui.exe
+          asset_name: check_project_gui.exe
           asset_content_type: binary/octet-stream
 
   mac_packager:
@@ -75,7 +75,7 @@ jobs:
           IMAGE_VER: ${{ steps.get_image_info.outputs.tag }}
           GH_REPO_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          pyinstaller --onefile tid_ss_gui.py
+          pyinstaller --onefile check_project_gui.py
 
       - name: Upload
         uses: actions/upload-release-asset@v1.0.1
@@ -83,8 +83,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: dist/tid_ss_gui
-          asset_name: tid_ss_gui_osx
+          asset_path: dist/check_project_gui
+          asset_name: check_project_gui_osx
           asset_content_type: binary/octet-stream
 
   linux_packager:
@@ -115,7 +115,7 @@ jobs:
           IMAGE_VER: ${{ steps.get_image_info.outputs.tag }}
           GH_REPO_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          pyinstaller --onefile tid_ss_gui.py
+          pyinstaller --onefile check_project_gui.py
 
       - name: Upload
         uses: actions/upload-release-asset@v1.0.1
@@ -123,7 +123,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: dist/tid_ss_gui
-          asset_name: tid_ss_gui_linux
+          asset_path: dist/check_project_gui
+          asset_name: check_project_gui_linux
           asset_content_type: binary/octet-stream
 
