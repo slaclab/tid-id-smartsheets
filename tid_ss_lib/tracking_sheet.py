@@ -22,64 +22,67 @@ from . import navigate
 #        18 - Gray
 #           = White
 
-form = [ ",,,,,,,,,18,,,,,,,",  # 1
-        ",,,,,,,,,,,,,,,,",  # 2
+form = [ ",,,,,,,,,18,,,,,,,",  # 0
+        ",,,,,,,,,,,,,,,,",  # 1
+        ",,,,,,,,,18,,13,,,,,",  # 2
         ",,,,,,,,,18,,13,,,,,",  # 3
         ",,,,,,,,,18,,13,,,,,",  # 4
         ",,,,,,,,,18,,13,,,,,",  # 5
         ",,,,,,,,,18,,13,,,,,",  # 6
-        ",,,,,,,,,18,,13,,,,,",  # 7
-        ",,,,,,,,,,,13,,,,,",  # 8
+        ",,,,,,,,,,,13,,,,,",  # 7
+        ",,,,,,,,,18,,13,,,,,",  # 8
         ",,,,,,,,,18,,13,,,,,",  # 9
         ",,,,,,,,,18,,13,,,,,",  # 10
         ",,,,,,,,,18,,13,,,,,",  # 11
-        ",,,,,,,,,18,,,,,,,",  # 12
-        ",,,,,,,,,18,,,,,,,",  # 13
-        ",,,,,,,,,18,,13,,,,,",  # 14
+        ",,,,,,,,,18,,13,,,,,",  # 12
+        ",,,,,,,,,18,,13,,,,,",  # 13
+        ",,,,,,,,,18,,,,,,,",  # 14
         ",,,,,,,,,18,,,,,,,",  # 15
         ",,,,,,,,,18,,,,,,,",  # 16
-        ",,,,,,,,,18,,,,,,,",  # 17
-        ",,,,,,,,,,,,,,,,",  # 18
-        ",,,,,,,,,,,,,,,," ]  # 19
+        ",,,,,,,,,,,,,,,,",  # 17
+        ",,,,,,,,,,,,,,,," ]  # 18
 
-Columns = ['Status Month',  # 1
-           'Lookup PA',  # 2
-           'Monthly Actuals Date',  # 3
-           'Total Funds From Finance',  # 4
-           'Monthly Actuals From Finance',  # 5
-           'Total Actuals From Finance',  # 6
-           'Remaining Funds From Finance',  # 7
-           'Actuals Adjustment',  # 8
-           'Reported Cost',  # 9
-           'Budget Variance',  # 10
-           'Budget Variance With Contingency',  # 11
-           'Duration Variance',  # 12
-           'Duration Variance With Contingency',  # 13
-           'Reporting Variance',  # 14
-           'Tracking Risk',  # 15
-           'Budget Risk',  # 16
-           'Schedule Risk',  # 17
-           'Scope Risk',  # 18
-           'Description Of Status']  # 19
+Columns = ['Status Month',  # 0
+           'Lookup PA',  # 1
+           'Monthly Actuals Date',  # 2
+           'Total Funds From Finance',  # 3
+           'Monthly Actuals From Finance',  # 4
+           'Total Actuals From Finance',  # 5
+           'Remaining Funds From Finance',  # 6
+           'Actuals Adjustment',  # 7
+           'Reported Cost',  # 8
+           'Budget Variance',  # 9
+           'Budget Variance With Contingency',  # 10
+           'Schedule Variance',  # 11
+           'Schedule Variance With Contingency',  # 12
+           'Reporting Variance',  # 13
+           'Tracking Risk',  # 14
+           'Budget Risk',  # 15
+           'Schedule Risk',  # 16
+           'Scope Risk',  # 17
+           'Description Of Status']  # 18
 
-RefName = 'Actuals Range 2'
+RefName = 'Actuals Range 3'
 
 def fix_structure(*, client, sheet):
 
-    if len(sheet.columns) != 17:
+    return False
+
+    if len(sheet.columns) != 19:
         print(f"   Wrong number of columns in tracking file, could not fix: Got {len(sheet.columns)}.")
         return False
 
-    # Add new columns
-    col2 = smartsheet.models.Column({'title': Columns[2],
-                                     'type': 'DATE',
-                                     'index': 2})
+    # Modify Column Names
+    col11 = smartsheet.models.Column({'title': Columns[11],
+                                      'type': 'TEXT_NUMBER',
+                                      'index': 11})
 
-    col3 = smartsheet.models.Column({'title': Columns[3],
-                                     'type': 'TEXT_NUMBER',
-                                     'index': 2})
+    col12 = smartsheet.models.Column({'title': Columns[12],
+                                      'type': 'TEXT_NUMBER',
+                                      'index': 12})
 
-    client.Sheets.add_columns(sheet.id, [col2, col3])
+    client.Sheets.update_column(sheet.id, sheet.columns[11].id, col11)
+    client.Sheets.update_column(sheet.id, sheet.columns[12].id, col12)
 
     xref = smartsheet.models.CrossSheetReference({
         'name': RefName,
@@ -118,8 +121,8 @@ def check_first_row(*, client, sheet, budgetSheet, doFixes):
     links = { 8: 15,
               9: 16,
              10: 17,
-             11: 18,
-             12: 19}
+             11: 21,
+             12: 22}
 
     noChange = set([0, 1, 7, 17, 18])
 
@@ -131,7 +134,7 @@ def check_first_row(*, client, sheet, budgetSheet, doFixes):
                  13: '=([Total Actuals From Finance]@row + [Actuals Adjustment]@row) - [Reported Cost]@row',
                  14: '=IF(ABS([Reporting Variance]@row) > 50000, "High", IF(ABS([Reporting Variance]@row) > 5000, "Medium", "Low"))',
                  15: '=IF([Budget Variance]@row > 50000, "High", IF([Budget Variance]@row > 5000, "Medium", "Low"))',
-                 16: '=IF([Duration Variance]@row > 300, "High", IF([Duration Variance]@row > 100, "Medium", "Low"))' }
+                 16: '=IF([Schedule Variance]@row > 50000, "High", IF([Schedule Variance]@row > 5000, "Medium", "Low"))' }
 
     for k,v in formulas.items():
         if ((not hasattr(row.cells[k],'formula')) or row.cells[k].formula != v) or row.cells[k].format != form[k]:
