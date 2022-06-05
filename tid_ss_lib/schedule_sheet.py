@@ -154,7 +154,7 @@ def check_parent_row(*, client, sheet, rowIdx, doFixes, title):
     noValue = set([9, 12, 16, 17, 18, 19])
 
     # Preserve Values, but apply formatting
-    noChange = set([14,16])
+    noChange = set([14])
 
     if rowIdx >= len(sheet.rows):
         return
