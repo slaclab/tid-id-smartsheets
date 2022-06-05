@@ -66,6 +66,8 @@ RefName = 'Actuals Range 3'
 
 def fix_structure(*, client, sheet):
 
+    return False
+
     if len(sheet.columns) != 19:
         print(f"   Wrong number of columns in tracking file, could not fix: Got {len(sheet.columns)}.")
         return False

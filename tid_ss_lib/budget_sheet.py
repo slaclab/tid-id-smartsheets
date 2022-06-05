@@ -74,6 +74,8 @@ Columns = ['Category and Item',  # 0
 
 def fix_structure(*, client, sheet):
 
+    return False
+
     if len(sheet.columns) != 21:
         print(f"   Wrong number of columns in budget file, could not fix: Got {len(sheet.columns)}.")
         return False

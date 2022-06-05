@@ -112,6 +112,8 @@ Columns = ['Task Name From Budget',           # 0
 
 def fix_structure(*, client, sheet):
 
+    return False
+
     if len(sheet.columns) != 21:
         print(f"   Wrong number of columns in schedule file, could not fix: Got {len(sheet.columns)}.")
         return False
