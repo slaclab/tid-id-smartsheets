@@ -32,6 +32,15 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--div",
+    type     = str,
+    required = True,
+    default  = False,
+    choices  = ['id', 'cds'],
+    help     = "Division for project tracking. Either --div=id or --div=cds"
+)
+
+parser.add_argument(
     "--fix",
     action   = 'store_true',
     required = False,
@@ -53,5 +62,5 @@ client = smartsheet.Smartsheet(args.key)
 print("")
 
 for p in args.folder:
-    tid_ss_lib.navigate.check_project(client=client,folderId=int(p), doFixes=args.fix)
+    tid_ss_lib.navigate.check_project(client=client,div=args.div, folderId=int(p), doFixes=args.fix)
 

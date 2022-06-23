@@ -64,9 +64,13 @@ Columns = ['Status Month',  # 0
 
 RefName = 'Actuals Range 3'
 
-def fix_structure(*, client, sheet):
-
+def fix_structure(*, client, div, sheet):
     return False
+
+    if div == 'id':
+        labor_rate = navigate.TID_ID_RATE_NOTE
+    elif div == 'cds':
+        labor_rate = navigate.TID_CDS_RATE_NOTE
 
     if len(sheet.columns) != 19:
         print(f"   Wrong number of columns in tracking file, could not fix: Got {len(sheet.columns)}.")
@@ -84,11 +88,20 @@ def fix_structure(*, client, sheet):
     client.Sheets.update_column(sheet.id, sheet.columns[11].id, col11)
     client.Sheets.update_column(sheet.id, sheet.columns[12].id, col12)
 
-    xref = smartsheet.models.CrossSheetReference({
-        'name': RefName,
-        'source_sheet_id': navigate.TID_ACTUALS_SHEET,
-        'start_row_id': navigate.TID_ACTUALS_START_ROW,
-        'end_row_id': navigate.TID_ACTUALS_END_ROW, })
+    if div == 'id':
+        xref = smartsheet.models.CrossSheetReference({
+            'name': RefName,
+            'source_sheet_id': navigate.TID_ID_ACTUALS_SHEET,
+            'start_row_id': navigate.TID_ID_ACTUALS_START_ROW,
+            'end_row_id': navigate.TID_ID_ACTUALS_END_ROW, })
+
+    elif div == 'cds':
+        xref = smartsheet.models.CrossSheetReference({
+            'name': RefName,
+            'source_sheet_id': navigate.TID_CDS_ACTUALS_SHEET,
+            'start_row_id': navigate.TID_CDS_ACTUALS_START_ROW,
+            'end_row_id': navigate.TID_CDS_ACTUALS_END_ROW, })
+
     client.Sheets.create_cross_sheet_reference(sheet.id, xref)
     return True
 
@@ -226,8 +239,20 @@ def check_other_row(*, client, rowIdx, sheet, doFixes):
     new_row.id = row.id
 
     for k in range(len(Columns)):
-        if (row.cells[k].format != form[k]) and not (form[k] == ",,,,,,,,,,,,,,,," and row.cells[k].format is None):
-            print(f"   Incorrect format in row {rowIdx+1} cell {k+1} in tracking file. Got '{row.cells[k].format}' Expect '{form[k]}'")
+
+        if (hasattr(row.cells[k],'formula') and row.cells[k].formula is not None) or \
+           (row.cells[k].link_in_from_cell is not None) or \
+           ((row.cells[k].format != form[k]) and not (form[k] == ",,,,,,,,,,,,,,,," and row.cells[k].format is None)):
+
+            if hasattr(row.cells[k],'formula') and row.cells[k].formula is not None:
+                print(f"   Invalid formula in row {rowIdx+1} cell {k+1} in tracking file. Formula = {row.cells[k].formula}, Value = {row.cells[k].value}")
+
+            if row.cells[k].link_in_from_cell is not None:
+                print(f"   Invalid link in row {rowIdx+1} cell {k+1} in tracking file. Value = {row.cells[k].value}")
+
+            if (row.cells[k].format != form[k]) and not (form[k] == ",,,,,,,,,,,,,,,," and row.cells[k].format is None):
+                print(f"   Incorrect format in row {rowIdx+1} cell {k+1} in tracking file. Got '{row.cells[k].format}' Expect '{form[k]}'")
+
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[k].id
 
@@ -235,6 +260,7 @@ def check_other_row(*, client, rowIdx, sheet, doFixes):
                 new_cell.value = ''
             else:
                 new_cell.value = row.cells[k].value
+
             new_cell.format = form[k]
             new_cell.strict = False
             new_row.cells.append(new_cell)

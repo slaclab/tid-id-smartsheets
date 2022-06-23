@@ -406,8 +406,13 @@ def check_task_links(*, client, sheet, laborRows, scheduleSheet, doFixes):
                     client.Sheets.update_rows(sheet.id, [new_row])
 
 
-def check(*, client, sheet, doFixes):
+def check(*, client, sheet, doFixes, div):
     labor = []
+
+    if div == 'id':
+        labor_rate = navigate.TID_ID_RATE_NOTE
+    elif div == 'cds':
+        labor_rate = navigate.TID_CDS_RATE_NOTE
 
     check_parent_row(client=client,
                   sheet=sheet,
@@ -439,7 +444,7 @@ def check(*, client, sheet, doFixes):
                           sheet=sheet,
                           rowIdx=rowIdx,
                           sumCols=set([2, 6, 7, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22]),
-                          titles=['Labor', navigate.LABOR_RATE_NOTE],
+                          titles=['Labor', labor_rate],
                           doFixes=doFixes)
 
             inMS = False

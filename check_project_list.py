@@ -32,6 +32,15 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--div",
+    type     = str,
+    required = True,
+    default  = False,
+    choices  = ['id', 'cds'],
+    help     = "Division for project tracking. Either --div=id or --div=cds"
+)
+
+parser.add_argument(
     "--fix",
     action   = 'store_true',
     required = False,
@@ -44,5 +53,5 @@ args = parser.parse_args()
 
 client = smartsheet.Smartsheet(args.key)
 
-tid_ss_lib.project_sheet.check(client=client, doFixes=args.fix)
+tid_ss_lib.project_sheet.check(client=client, div=args.div, doFixes=args.fix)
 

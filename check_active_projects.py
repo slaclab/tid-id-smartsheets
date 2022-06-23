@@ -10,9 +10,6 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
-#SkipList = [8244071731881860]  # Lsst
-SkipList = []
-
 import tid_ss_lib.navigate
 import tid_ss_lib.project_sheet
 import smartsheet
@@ -26,6 +23,15 @@ if 'SMARTSHEETS_API' in os.environ:
     defApi = os.environ['SMARTSHEETS_API']
 else:
     defApi = ''
+
+parser.add_argument(
+    "--div",
+    type     = str,
+    required = True,
+    default  = False,
+    choices  = ['id', 'cds'],
+    help     = "Division for project tracking. Either --div=id or --div=cds"
+)
 
 parser.add_argument(
     "--key",
@@ -48,15 +54,14 @@ args = parser.parse_args()
 
 client = smartsheet.Smartsheet(args.key)
 
-for p in tid_ss_lib.project_sheet.get_project_list(client=client):
-    if p['id'] in SkipList:
-        print(f"Skipping {p['name']}")
-    else:
-        tid_ss_lib.navigate.check_project(client=client,folderId=p['id'], doFixes=args.fix)
+if args.div == 'id':
+    lst = [tid_ss_lib.navigate.TID_ID_TEMPLATE_FOLDER, tid_ss_lib.navigate.TID_ID_MANAGEMENT_FOLDER]
+elif args.div == 'cds':
+    lst = [tid_ss_lib.navigate.TID_CDS_TEMPLATE_FOLDER, tid_ss_lib.navigate.TID_CDS_MANAGEMENT_FOLDER]
 
-for k in [4013014891423620, # Template
-          3142587826628484  # Management
-         ]:
+for p in tid_ss_lib.project_sheet.get_project_list(client=client, div=args.div):
+    lst.append(p['id'])
 
-    tid_ss_lib.navigate.check_project(client=client,folderId=k, doFixes=True)
+for p in lst:
+    tid_ss_lib.navigate.check_project(client=client, div=args.div, folderId=p, doFixes=args.fix)
 

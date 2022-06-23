@@ -12,13 +12,15 @@ from PyQt5.QtGui     import *
 import tid_ss_lib.navigate
 import tid_ss_lib.project_sheet
 import smartsheet
+import argparse
 
 class ProjectFix(QWidget):
 
-    def __init__(self, parent=None):
+    def __init__(self, key, div, parent=None):
         super(ProjectFix, self).__init__(parent)
 
         self.setWindowTitle("TID ID Smartsheets Project Fix")
+        self.div = div
 
         # Setup status widgets
         top = QVBoxLayout()
@@ -31,12 +33,7 @@ class ProjectFix(QWidget):
         fl.setLabelAlignment(Qt.AlignRight)
         top.addLayout(fl)
 
-        if 'SMARTSHEETS_API' in os.environ:
-            api = os.environ['SMARTSHEETS_API']
-        else:
-            api = ''
-
-        self.api_key = QLineEdit(api)
+        self.api_key = QLineEdit(key)
         fl.addRow('API Key',self.api_key)
 
         api_help = QTextEdit()
@@ -92,7 +89,7 @@ class ProjectFix(QWidget):
             client = smartsheet.Smartsheet(self.api_key.text())
             folder = int(self.folder_id.text())
             doFixes = self.do_fixes.isChecked()
-            tid_ss_lib.navigate.check_project(client=client,folderId=folder, doFixes=doFixes)
+            tid_ss_lib.navigate.check_project(client=client, div=self.div, folderId=folder, doFixes=doFixes)
             print("Done!")
         except Exception as msg:
             traceback.print_exc()
@@ -103,7 +100,7 @@ class ProjectFix(QWidget):
     def refreshPressed(self):
         try:
             client = smartsheet.Smartsheet(self.api_key.text())
-            lst = tid_ss_lib.project_sheet.get_project_list(client=client)
+            lst = tid_ss_lib.project_sheet.get_project_list(client=client, div=self.div)
 
             self.proj_list.clear()
             self.projects = {0: ''}
@@ -116,9 +113,37 @@ class ProjectFix(QWidget):
         except Exception as msg:
             print(f"\n\n\nGot Error:\n{msg}\n\n")
 
+# Set the argument parser
+parser = argparse.ArgumentParser('Smartsheets Project Check & Fix')
+
+if 'SMARTSHEETS_API' in os.environ:
+    defApi = os.environ['SMARTSHEETS_API']
+else:
+    defApi = ''
+
+parser.add_argument(
+    "--key",
+    type     = str,
+    required = (defApi == ''),
+    default  = defApi,
+    help     = "API Key from smartsheets. See https://help.smartsheet.com/articles/2482389-generate-API-key"
+)
+
+parser.add_argument(
+    "--div",
+    type     = str,
+    required = True,
+    default  = False,
+    choices  = ['id', 'cds'],
+    help     = "Division for project tracking. Either --div=id or --div=cds"
+)
+
+# Get the arguments
+args = parser.parse_args()
+
 appTop = QApplication(sys.argv)
 
-gui = ProjectFix()
+gui = ProjectFix(key=args.key, div=args.div)
 gui.show()
 appTop.exec_()
 
