@@ -239,8 +239,20 @@ def check_other_row(*, client, rowIdx, sheet, doFixes):
     new_row.id = row.id
 
     for k in range(len(Columns)):
-        if (row.cells[k].format != form[k]) and not (form[k] == ",,,,,,,,,,,,,,,," and row.cells[k].format is None):
-            print(f"   Incorrect format in row {rowIdx+1} cell {k+1} in tracking file. Got '{row.cells[k].format}' Expect '{form[k]}'")
+
+        if (hasattr(row.cells[k],'formula') and row.cells[k].formula is not None) or \
+           (row.cells[k].link_in_from_cell is not None) or \
+           ((row.cells[k].format != form[k]) and not (form[k] == ",,,,,,,,,,,,,,,," and row.cells[k].format is None)):
+
+            if hasattr(row.cells[k],'formula') and row.cells[k].formula is not None:
+                print(f"   Invalid formula in row {rowIdx+1} cell {k+1} in tracking file. Formula = {row.cells[k].formula}, Value = {row.cells[k].value}")
+
+            if row.cells[k].link_in_from_cell is not None:
+                print(f"   Invalid link in row {rowIdx+1} cell {k+1} in tracking file. Value = {row.cells[k].value}")
+
+            if (row.cells[k].format != form[k]) and not (form[k] == ",,,,,,,,,,,,,,,," and row.cells[k].format is None):
+                print(f"   Incorrect format in row {rowIdx+1} cell {k+1} in tracking file. Got '{row.cells[k].format}' Expect '{form[k]}'")
+
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[k].id
 
@@ -248,6 +260,7 @@ def check_other_row(*, client, rowIdx, sheet, doFixes):
                 new_cell.value = ''
             else:
                 new_cell.value = row.cells[k].value
+
             new_cell.format = form[k]
             new_cell.strict = False
             new_row.cells.append(new_cell)
