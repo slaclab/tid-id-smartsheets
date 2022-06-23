@@ -23,9 +23,14 @@ from . import navigate
 #           = White
 
 
-def get_project_list(*, client):
+def get_project_list(*, client, div):
 
-    sheet = client.Sheets.get_sheet(navigate.TID_ID_LIST_SHEET, include='format')
+    if div == 'id':
+        list_sheet = navigate.TID_ID_LIST_SHEET
+    elif div == 'cds':
+        list_sheet = navigate.TID_CDS_LIST_SHEET
+
+    sheet = client.Sheets.get_sheet(list_sheet, include='format')
 
     ret = []
     done = False
@@ -148,11 +153,17 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
         client.Sheets.update_rows(sheet.id, [new_row])
 
 
-def check(*, client, doFixes):
-    sheet = client.Sheets.get_sheet(navigate.TID_ID_LIST_SHEET, include='format')
+def check(*, client, doFixes, div):
+
+    if div == 'id':
+        list_sheet = navigate.TID_ID_LIST_SHEET
+    elif div == 'cds':
+        list_sheet = navigate.TID_CDS_LIST_SHEET
+
+    sheet = client.Sheets.get_sheet(list_sheet, include='format')
 
     # Get folder list:
-    folderList = navigate.get_active_list(client=client)
+    folderList = navigate.get_active_list(client=client,div=div)
     done = False
 
     for row in range(len(sheet.rows)):

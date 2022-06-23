@@ -72,11 +72,18 @@ def check_resource_file(*, client, sheet, alist):
         ret = False
 
 
-def check_resource_files(*, client, alist=None, folderId=navigate.TID_RESOURCE_FOLDER):
+def check_resource_files(*, client, div=None, alist=None, folderId=None):
+
+    if folderId is None and div is not None:
+        if div == 'id':
+            folderId = navigate.TID_ID_RESOURCE_FOLDER
+        elif div == 'cds':
+            folderId = navigate.TID_CDS_RESOURCE_FOLDER
+
     folder = client.Folders.get_folder(folderId)
 
     if alist is None:
-        alist = navigate.get_active_list(client=client)
+        alist = navigate.get_active_list(client=client,div=div)
 
     for s in folder.reports:
         check_resource_file(client=client, sheet=s, alist=alist)
