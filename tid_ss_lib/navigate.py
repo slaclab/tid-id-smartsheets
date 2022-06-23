@@ -35,20 +35,20 @@ TID_ID_TEMPLATE_TRACKING = 4586297051375492
 
 TID_ID_RATE_NOTE = 'TID-ID Eng Rate FY22 (Mar - Sep) $281.45; Tech Rate FY22: $162.65'
 
-TID_CDS_ACTIVE_FOLDER     = 0
-TID_CDS_LIST_SHEET        = 0
+TID_CDS_ACTIVE_FOLDER     = 8506630263334788
+TID_CDS_LIST_SHEET        = 4947269792360324
 TID_CDS_FOLDER_PREFIX     = 'TID/CDS'
-TID_CDS_ACTUALS_SHEET     = 0
-TID_CDS_ACTUALS_START_ROW = 0
-TID_CDS_ACTUALS_END_ROW   = 0
-TID_CDS_RESOURCE_FOLDER   = 0
-TID_CDS_MANAGEMENT_FOLDER = 0
-TID_CDS_TEMPLATE_FOLDER   = 0
-TID_CDS_TEMPLATE_BUDGET   = 0
-TID_CDS_TEMPLATE_SCORING  = 0
-TID_CDS_TEMPLATE_RISK     = 0
-TID_CDS_TEMPLATE_SCHEDULE = 0
-TID_CDS_TEMPLATE_TRACKING = 0
+TID_CDS_ACTUALS_SHEET     = 2695469978675076
+TID_CDS_ACTUALS_START_ROW = 3233931241645956
+TID_CDS_ACTUALS_END_ROW   = 8729290357270404
+TID_CDS_RESOURCE_FOLDER   = 7728176030869380
+TID_CDS_MANAGEMENT_FOLDER = 6923333519337348
+TID_CDS_TEMPLATE_FOLDER   = 3048654543054724
+TID_CDS_TEMPLATE_BUDGET   = 1489735219734404
+TID_CDS_TEMPLATE_SCORING  = 3741535033419652
+TID_CDS_TEMPLATE_RISK     = 8245134660790148
+TID_CDS_TEMPLATE_SCHEDULE = 7119234753947524
+TID_CDS_TEMPLATE_TRACKING = 5993334847104900
 
 TID_CDS_RATE_NOTE = 'TID-CDS Eng Rate FY22 (Mar - Sep) $281.45; Tech Rate FY22: $162.65'
 
@@ -149,7 +149,7 @@ def check_project(*, client, div, folderId, doFixes, path=None):
     # Double check tracking for new fix
     if doFixes and not tracking_sheet.check_structure(sheet=fdata['sheets']['Tracking']):
         print("   Attempting to update tracking sheet")
-        tracking_sheet.fix_structure(client=client, sheet=fdata['sheets']['Tracking'])
+        tracking_sheet.fix_structure(client=client, div=div, sheet=fdata['sheets']['Tracking'])
         fdata['sheets']['Tracking'] = client.Sheets.get_sheet(fdata['sheets']['Tracking'].id, include='format')
 
     if budget_sheet.check_structure(sheet=fdata['sheets']['Budget']) and schedule_sheet.check_structure(sheet=fdata['sheets']['Schedule']) and tracking_sheet.check_structure(sheet=fdata['sheets']['Tracking']):
@@ -170,9 +170,9 @@ def check_project(*, client, div, folderId, doFixes, path=None):
         print("   Skipping remaining processing")
 
 
-def get_active_list(*, client, div=None, path=None, folderId=None):
+def get_active_list(*, client, div, path=None, folderId=None):
 
-    if path is None and folderId is None and div is not None:
+    if path is None and folderId is None:
         if div == 'id':
             path     = TID_ID_FOLDER_PREFIX
             folderId = TID_ID_ACTIVE_FOLDER
@@ -194,6 +194,6 @@ def get_active_list(*, client, div=None, path=None, folderId=None):
 
     else:
         for sub in folder.folders:
-            ret.update(get_active_list(client=client, path=path, folderId=sub.id))
+            ret.update(get_active_list(client=client, div=div, path=path, folderId=sub.id))
 
     return ret

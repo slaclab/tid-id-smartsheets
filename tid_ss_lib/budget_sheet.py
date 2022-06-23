@@ -413,8 +413,6 @@ def check(*, client, sheet, doFixes, div):
         labor_rate = navigate.TID_ID_RATE_NOTE
     elif div == 'cds':
         labor_rate = navigate.TID_CDS_RATE_NOTE
-    else:
-        labor_rate = ''
 
     check_parent_row(client=client,
                   sheet=sheet,

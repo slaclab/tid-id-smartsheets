@@ -64,9 +64,13 @@ Columns = ['Status Month',  # 0
 
 RefName = 'Actuals Range 3'
 
-def fix_structure(*, client, sheet):
-
+def fix_structure(*, client, div, sheet):
     return False
+
+    if div == 'id':
+        labor_rate = navigate.TID_ID_RATE_NOTE
+    elif div == 'cds':
+        labor_rate = navigate.TID_CDS_RATE_NOTE
 
     if len(sheet.columns) != 19:
         print(f"   Wrong number of columns in tracking file, could not fix: Got {len(sheet.columns)}.")
@@ -84,11 +88,20 @@ def fix_structure(*, client, sheet):
     client.Sheets.update_column(sheet.id, sheet.columns[11].id, col11)
     client.Sheets.update_column(sheet.id, sheet.columns[12].id, col12)
 
-    xref = smartsheet.models.CrossSheetReference({
-        'name': RefName,
-        'source_sheet_id': navigate.TID_ACTUALS_SHEET,
-        'start_row_id': navigate.TID_ACTUALS_START_ROW,
-        'end_row_id': navigate.TID_ACTUALS_END_ROW, })
+    if div == 'id':
+        xref = smartsheet.models.CrossSheetReference({
+            'name': RefName,
+            'source_sheet_id': navigate.TID_ID_ACTUALS_SHEET,
+            'start_row_id': navigate.TID_ID_ACTUALS_START_ROW,
+            'end_row_id': navigate.TID_ID_ACTUALS_END_ROW, })
+
+    elif div == 'cds':
+        xref = smartsheet.models.CrossSheetReference({
+            'name': RefName,
+            'source_sheet_id': navigate.TID_CDS_ACTUALS_SHEET,
+            'start_row_id': navigate.TID_CDS_ACTUALS_START_ROW,
+            'end_row_id': navigate.TID_CDS_ACTUALS_END_ROW, })
+
     client.Sheets.create_cross_sheet_reference(sheet.id, xref)
     return True
 
