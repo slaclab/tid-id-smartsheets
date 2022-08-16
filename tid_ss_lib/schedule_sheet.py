@@ -500,7 +500,8 @@ def check_broken(*, client, sheet, doFixes):
 
 # Check matching rows to budget file
 def check_rows(*, client, sheet, laborRows, laborSheet, doFixes):
-    lastId = sheet.rows[0].id
+    lastParent = sheet.rows[0].id
+    lastId = None
     rowIdx = 1
 
     for i in range(len(laborRows)):
@@ -508,7 +509,13 @@ def check_rows(*, client, sheet, laborRows, laborSheet, doFixes):
              sheet.rows[rowIdx].cells[0].link_in_from_cell is not None and \
              sheet.rows[rowIdx].cells[0].link_in_from_cell.row_id == laborRows[i]['data'].id:
 
-            lastId = sheet.rows[rowIdx].id
+            if laborRows[i]['parent']:
+                lastParent = sheet.rows[rowIdx].id
+                lastId = None
+            else:
+                lastParent = None
+                lastId = sheet.rows[rowIdx].id
+
             laborRows[i]['link'] = sheet.rows[rowIdx]
             rowIdx += 1
         else:
@@ -522,9 +529,9 @@ def check_rows(*, client, sheet, laborRows, laborSheet, doFixes):
 
             newRow = smartsheet.models.Row()
 
-            if rowIdx == 1:
-                newRow.parent_id = lastId
-            else:
+            if lastParent is not None:
+                newRow.parent_id = lastParent
+            if lastId is not None:
                 newRow.sibling_id = lastId
 
             newRow.cells.append({'column_id': sheet.rows[0].cells[0].column_id, 'value': ''})
