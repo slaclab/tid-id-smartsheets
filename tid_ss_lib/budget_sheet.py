@@ -24,25 +24,25 @@ from . import navigate
 #           = White
 
 formatMajor = [ ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,,,,,1,",
-                ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,,,,,1,",
+                ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,13,2,1,2,,",
                 ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,,,,,1,",     ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,,,,,1,",
                 ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,,0,,,1,",    ",,1,,,,,,2,31,,13,2,1,2,,",
                 ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,13,2,1,2,,", ",,1,,,,,,2,31,,,,,,1," ]
 
 formatMinor = [ ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,,",
-                ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,,",
+                ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,13,2,1,2,,",
                 ",,,,,,,,,23,,,,,,,",      ",,,,,,,,,23,,,,,,1,",     ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,,,,,,",
                 ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,,0,,,,",     ",,,,,,,,,23,,13,2,1,2,,",
                 ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,13,2,1,2,,", ",,,,,,,,,23,,,,,,,"]
 
 formatMAndS = [ ",,,,,,,,,2,,,,,,1,",      ",,,,,,,,,2,,,,,,1,",      ",,,,,,,,,2,,,,,,1,",      ",,,,,,,,,2,,13,2,1,2,,",  ",,,,,,,,,2,,,,,,,",
-                ",,,,,,,,,18,,,,,3,,",     ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,26,,,,,,,",      ",,,,,,,,,26,,,,,,,",
+                ",,,,,,,,,18,,,,,3,,",     ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,",
                 ",,,,,,,,,26,,,,,,,",      ",,,,,,,,,22,,,,,3,,",     ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,26,,,,,,,",
                 ",,,,,,,,,22,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,,0,,3,,",    ",,,,,,,,,18,,13,2,1,2,,",
                 ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,2,,,,,,," ]
 
 formatTask  = [ ",,,,,,,,,2,,,,,,,",       ",,,,,,,,,2,,,,,,,",       ",,,,,,,,,2,,,,,,,",       ",,,,,,,,,2,,13,2,1,2,,",  ",,,,,,,,,2,,,,,,,",
-                ",,,,,,,,,18,,,,,3,,",     ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,,,,,,",      ",,,,,,,,,18,,,0,,,,",
+                ",,,,,,,,,18,,,,,3,,",     ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,",
                 ",,,,,,,,,18,,,,,,,",      ",,,,,,,,,18,,,,,3,,",     ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,,,,,,",
                 ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,,0,,3,,",    ",,,,,,,,,18,,13,2,1,2,,",
                 ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,18,,13,2,1,2,,", ",,,,,,,,,2,,,,,,," ]
@@ -55,57 +55,34 @@ Columns = ['Category and Item',  # 0
            'Contingency Factor',  # 5
            'Total Budget',  # 6
            'Budget With Contingency',  # 7
-           'Planned Duration From Schedule (days)',      # 8
-           'Planned Duration With Contingency  (days)',  # 9
-           'Assigned To From Schedule',  # 10
-           'Percent Complete From Schedule Or Local M&S', # 11
-           'Earned Value',  # 12
-           'Earned Value With Contingency',    # 13
-           'Actual Hours From Schedule',       # 14
-           'Actual Cost Computed Or Real M&S', # 15
-           'Budget Variance',  # 16
-           'Budget Variance With Contingency',  # 17
-           'Planned % Complete From Schedule',  # 18  # Rename
-           'Planned Earned Value',  # 19  # Rename
-           'Planned Earned Value With Contingency', # 20 # Add
-           'Schedule Variance',  # 21 # Add
-           'Schedule Variance With Contingency', # 22 # Add
-           'PA Number']  # 23
+           #'Planned Duration From Schedule (days)',      # 8
+           #'Planned Duration With Contingency  (days)',  # 9
+           'Assigned To From Schedule',  # 8
+           'Percent Complete From Schedule Or Local M&S', # 9
+           'Earned Value',  # 10
+           'Earned Value With Contingency',    # 11
+           'Actual Hours From Schedule',       # 12
+           'Actual Cost Computed Or Real M&S', # 13
+           'Budget Variance',  # 14
+           'Budget Variance With Contingency',  # 15
+           'Planned % Complete From Schedule',  # 16
+           'Planned Earned Value',  # 17
+           'Planned Earned Value With Contingency', # 18
+           'Schedule Variance',  # 19
+           'Schedule Variance With Contingency', # 20
+           'PA Number']  # 21
 
 def fix_structure(*, client, sheet):
 
     return False
 
-    if len(sheet.columns) != 21:
+    if len(sheet.columns) != 24:
         print(f"   Wrong number of columns in budget file, could not fix: Got {len(sheet.columns)}.")
         return False
 
-    # Modify Column Names
-    col18 = smartsheet.models.Column({'title': Columns[21],
-                                      'type': 'TEXT_NUMBER',
-                                      'index': 18})
-
-    col19 = smartsheet.models.Column({'title': Columns[22],
-                                      'type': 'TEXT_NUMBER',
-                                      'index': 19})
-
-    client.Sheets.update_column(sheet.id, sheet.columns[18].id, col18)
-    client.Sheets.update_column(sheet.id, sheet.columns[19].id, col19)
-
-    # Add new columns
-    col20 = smartsheet.models.Column({'title': Columns[18],
-                                      'type': 'TEXT_NUMBER',
-                                      'index': 18})
-
-    col21 = smartsheet.models.Column({'title': Columns[19],
-                                      'type': 'TEXT_NUMBER',
-                                      'index': 18})
-
-    col22 = smartsheet.models.Column({'title': Columns[20],
-                                      'type': 'TEXT_NUMBER',
-                                      'index': 18})
-
-    client.Sheets.add_columns(sheet.id, [col20, col21, col22])
+    # Delete column 8 & 9
+    client.Sheets.delete_column(sheet.id, sheet.columns[8].id)
+    client.Sheets.delete_column(sheet.id, sheet.columns[9].id)
 
     return True
 
@@ -222,14 +199,14 @@ def check_task_row(*, client, sheet, rowIdx, inMS, doFixes):
                    'IF([Risk Factor]@row = "High (50% Contingency)", 1.5))))',
                6:  '=[Budgeted Labor Hours Or Qty]@row * [Cost per Item Fully Burdened]@row',
                7:  '=[Contingency Factor]@row * [Total Budget]@row',
-               12: '=[Total Budget]@row * [Percent Complete From Schedule Or Local M&S]@row',
-               13: '=[Earned Value]@row * [Contingency Factor]@row',
-               16: '=[Actual Cost Computed Or Real M&S]@row - [Earned Value]@row',
-               17: '=[Actual Cost Computed Or Real M&S]@row - [Earned Value With Contingency]@row',
-               19: '=[Total Budget]@row * [Planned % Complete From Schedule]@row',
-               20: '=[Planned Earned Value]@row * [Contingency Factor]@row',
-               21: '=[Planned Earned Value]@row - [Earned Value]@row',
-               22: '=[Planned Earned Value With Contingency]@row - [Earned Value With Contingency]@row',
+               10: '=[Total Budget]@row * [Percent Complete From Schedule Or Local M&S]@row',
+               11: '=[Earned Value]@row * [Contingency Factor]@row',
+               14: '=[Actual Cost Computed Or Real M&S]@row - [Earned Value]@row',
+               15: '=[Actual Cost Computed Or Real M&S]@row - [Earned Value With Contingency]@row',
+               17: '=[Total Budget]@row * [Planned % Complete From Schedule]@row',
+               18: '=[Planned Earned Value]@row * [Contingency Factor]@row',
+               19: '=[Planned Earned Value]@row - [Earned Value]@row',
+               20: '=[Planned Earned Value With Contingency]@row - [Earned Value With Contingency]@row',
               }
 
     # Empty cells
@@ -239,20 +216,17 @@ def check_task_row(*, client, sheet, rowIdx, inMS, doFixes):
     defV  = []
 
     # Preserve Values, but apply formatting
-    noChange = [0, 1, 2, 3, 4, 23]
+    noChange = [0, 1, 2, 3, 4, 21]
 
     if inMS:
         empty.append(8)
-        empty.append(9)
-        empty.append(10)
-        empty.append(14)
-        defV.append(11)
-        defV.append(15)
-        rowVals[18] = '=[Percent Complete From Schedule Or Local M&S]@row'
+        empty.append(12)
+        defV.append(9)
+        defV.append(13)
+        rowVals[16] = '=[Percent Complete From Schedule Or Local M&S]@row'
         form = formatMAndS
     else:
-        rowVals[9]  = '=[Contingency Factor]@row * [Planned Duration From Schedule (days)]@row'
-        rowVals[15] = '=[Cost per Item Fully Burdened]@row * [Actual Hours From Schedule]@row'
+        rowVals[13] = '=[Cost per Item Fully Burdened]@row * [Actual Hours From Schedule]@row'
         form = formatTask
 
     for k,v in rowVals.items():
@@ -329,11 +303,10 @@ def check_task_row(*, client, sheet, rowIdx, inMS, doFixes):
 
 
 def check_task_links(*, client, sheet, laborRows, scheduleSheet, doFixes):
-    links = { 8: 7,
-             10: 9,
-             11: 14,
-             14: 13,
-             18: 12}
+    links = { 8: 9,
+              9: 14,
+             12: 13,
+             16: 12}
 
     # Need re-link
     relink = set()
@@ -417,14 +390,14 @@ def check(*, client, sheet, doFixes, div):
     check_parent_row(client=client,
                   sheet=sheet,
                   rowIdx=0,
-                  sumCols=set([6, 7, 12, 13, 15, 16, 17, 19, 20, 21, 22]),
+                  sumCols=set([6, 7, 10, 11, 13, 14, 15, 17, 18, 19, 20]),
                   titles=['Total Project Budget'],
                   doFixes=doFixes)
 
     check_parent_row(client=client,
                   sheet=sheet,
                   rowIdx=1,
-                  sumCols=set([6, 7, 12, 13, 15, 16, 17, 19, 20, 21, 22]),
+                  sumCols=set([6, 7, 10, 11, 13, 14, 15, 17, 18, 19, 20]),
                   titles=['M&S Total',navigate.OVERHEAD_NOTE],
                   doFixes=doFixes)
 
@@ -443,7 +416,7 @@ def check(*, client, sheet, doFixes, div):
             check_parent_row(client=client,
                           sheet=sheet,
                           rowIdx=rowIdx,
-                          sumCols=set([2, 6, 7, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22]),
+                          sumCols=set([2, 6, 7, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20]),
                           titles=['Labor', labor_rate],
                           doFixes=doFixes)
 
@@ -457,7 +430,7 @@ def check(*, client, sheet, doFixes, div):
                 check_parent_row(client=client,
                                  sheet=sheet,
                                  rowIdx=rowIdx,
-                                 sumCols=set([6, 7, 12, 13, 15, 16, 17, 19, 20, 21, 22]),
+                                 sumCols=set([6, 7, 10, 11, 13, 14, 15, 17, 18, 19, 20]),
                                  titles=[],
                                  doFixes=doFixes)
 
@@ -469,7 +442,7 @@ def check(*, client, sheet, doFixes, div):
                 check_parent_row(client=client,
                                  sheet=sheet,
                                  rowIdx=rowIdx,
-                                 sumCols=set([2, 6, 7, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22]),
+                                 sumCols=set([2, 6, 7, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20]),
                                  titles=[],
                                  doFixes=doFixes)
 

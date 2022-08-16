@@ -131,11 +131,11 @@ def check_first_row(*, client, sheet, budgetSheet, doFixes):
     new_row = smartsheet.models.Row()
     new_row.id = row.id
 
-    links = { 8: 15,
-              9: 16,
-             10: 17,
-             11: 21,
-             12: 22}
+    links = { 8: 13,
+              9: 14,
+             10: 15,
+             11: 19,
+             12: 20}
 
     noChange = set([0, 1, 7, 17, 18])
 

@@ -405,7 +405,7 @@ def check_parent_links(*, client, sheet, rowIdx, laborRows, laborSheet, doFixes)
 
 
 def check_task_links(*, client, sheet, rowIdx, laborRows, laborSheet, doFixes):
-    links = { 8: 2, 19: 23 }
+    links = { 8: 2, 19: 21 }
 
     if rowIdx >= len(sheet.rows):
         return
