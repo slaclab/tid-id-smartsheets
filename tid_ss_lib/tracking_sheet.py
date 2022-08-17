@@ -10,6 +10,7 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 import smartsheet
+import re
 from . import navigate
 
 # Set formats
@@ -62,10 +63,14 @@ Columns = ['Status Month',  # 0
            'Scope Risk',  # 17
            'Description Of Status']  # 18
 
-RefName = 'Actuals Range 3'
+RefName = None
 
 def fix_structure(*, client, div, sheet):
+    global RefName
+
     return False
+
+    RefName = 'Actuals Range 3'
 
     if div == 'id':
         labor_rate = navigate.TID_ID_RATE_NOTE
@@ -124,6 +129,8 @@ def check_structure(*, sheet):
 
 
 def check_first_row(*, client, sheet, budgetSheet, doFixes):
+    global RefName
+
     rowIdx = 0
     row = sheet.rows[rowIdx]
 
@@ -139,11 +146,21 @@ def check_first_row(*, client, sheet, budgetSheet, doFixes):
 
     noChange = set([0, 1, 7, 17, 18])
 
-    formulas = {  2: '=VLOOKUP([Lookup PA]@row, {' + RefName + '}, 7, false)',
-                  3: '=VLOOKUP([Lookup PA]@row, {' + RefName + '}, 6, false)',
-                  4: '=VLOOKUP([Lookup PA]@row, {' + RefName + '}, 3, false)',
-                  5: '=VLOOKUP([Lookup PA]@row, {' + RefName + '}, 4, false)',
-                  6: '=VLOOKUP([Lookup PA]@row, {' + RefName + '}, 5, false)',
+    if RefName is None:
+        if hasattr(row.cells[2],'formula'):
+            RefStr = re.findall(r"\{.*?\}",row.cells[2].formula)[0];
+        else:
+            RefStr = '{Actuals Range 1}'
+    else:
+        RefStr = f"{Refname}"
+
+    #print(f"Using RefStr = {RefStr}")
+
+    formulas = {  2: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 7, false)',
+                  3: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 6, false)',
+                  4: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 3, false)',
+                  5: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 4, false)',
+                  6: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 5, false)',
                  13: '=([Total Actuals From Finance]@row + [Actuals Adjustment]@row) - [Reported Cost]@row',
                  14: '=IF(ABS([Reporting Variance]@row) > 50000, "High", IF(ABS([Reporting Variance]@row) > 5000, "Medium", "Low"))',
                  15: '=IF([Budget Variance]@row > 50000, "High", IF([Budget Variance]@row > 5000, "Medium", "Low"))',
