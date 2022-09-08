@@ -22,7 +22,6 @@ from . import navigate
 #        18 - Gray
 #           = White
 
-
 def get_project_list(*, client, div):
 
     if div == 'id':
@@ -43,15 +42,15 @@ def get_project_list(*, client, div):
         if done is False and \
            row.cells[0].value is not None and row.cells[0].value != '' and \
            row.cells[1].value is not None and row.cells[1].value != '' and \
-           row.cells[2].value is not None and row.cells[2].value != '' and \
-           row.cells[3].value is not None and row.cells[3].value != '' and \
-           row.cells[5].value is not None and row.cells[5].value != '':
+           row.cells[3].value is not None and row.cells[2].value != '' and \
+           row.cells[6].value is not None and row.cells[3].value != '' and \
+           row.cells[7].value is not None and row.cells[5].value != '':
 
             proj = {'program': row.cells[0].value,
-                    'id': int(row.cells[1].value),
-                    'name': row.cells[2].value,
-                    'pa_number': row.cells[3].value,
-                    'pm': row.cells[5].value}
+                    'name': row.cells[1].value,
+                    'pm': row.cells[3].value,
+                    'pa_number': row.cells[6].value,
+                    'id': int(row.cells[7].value)}
 
             ret.append(proj)
 
@@ -92,7 +91,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
     new_row.id = row.id
 
     # First we get the project ID
-    fid = int(row.cells[1].value)
+    fid = int(row.cells[7].value)
 
     if fid not in folderList:
         print(f"    Row {rowIdx+1} contains unknown project ID {fid}")
@@ -102,7 +101,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
     p['tracked'] =True
 
     # Project Name
-    ret = check_cell_value(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=2, expect=p['name'])
+    ret = check_cell_value(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=1, expect=p['name'])
 
     if ret is not None:
         new_row.cells.append(ret)
@@ -128,7 +127,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
             new_row.cells.append(ret)
 
     # Check hyperlink Column
-    col = 25
+    col = 26
     if row.cells[col].hyperlink is None or row.cells[col].hyperlink.url != p['url'] or row.cells[col].value != p['path']:
 
         if row.cells[col].hyperlink is None:
@@ -164,14 +163,11 @@ def check(*, client, doFixes, div):
 
     # Get folder list:
     folderList = navigate.get_active_list(client=client,div=div)
-    done = False
 
     for row in range(len(sheet.rows)):
 
-        if sheet.rows[row].cells[0].value is None or sheet.rows[row].cells[0].value  == "":
-            done = True
-
-        if done is False:
+        # Skip rows that don't have a project ID
+        if sheet.rows[row].cells[7].value is not None and sheet.rows[row].cells[7].value != "":
             check_row(client=client, sheet=sheet, rowIdx=row, folderList=folderList, doFixes=doFixes)
 
     for k, v in folderList.items():
