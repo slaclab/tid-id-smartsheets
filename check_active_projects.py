@@ -55,9 +55,9 @@ args = parser.parse_args()
 client = smartsheet.Smartsheet(args.key)
 
 if args.div == 'id':
-    lst = [tid_ss_lib.navigate.TID_ID_TEMPLATE_FOLDER, tid_ss_lib.navigate.TID_ID_MANAGEMENT_FOLDER]
+    lst = [tid_ss_lib.navigate.TID_ID_TEMPLATE_FOLDER]
 elif args.div == 'cds':
-    lst = [tid_ss_lib.navigate.TID_CDS_TEMPLATE_FOLDER, tid_ss_lib.navigate.TID_CDS_MANAGEMENT_FOLDER]
+    lst = [tid_ss_lib.navigate.TID_CDS_TEMPLATE_FOLDER]
 
 for p in tid_ss_lib.project_sheet.get_project_list(client=client, div=args.div):
     lst.append(p['id'])
