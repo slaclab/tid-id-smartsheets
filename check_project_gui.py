@@ -62,6 +62,9 @@ class ProjectFix(QWidget):
         self.do_fixes = QCheckBox()
         fl.addRow('Do Fixes',self.do_fixes)
 
+        self.do_cost = QCheckBox()
+        fl.addRow('Do Cost',self.do_cost)
+
         fix_help = QTextEdit()
         fix_help.setPlainText("Check Do Fixes to apply fixes,\notherwise the script will just report problems.")
         fix_help.setReadOnly(True)
@@ -89,7 +92,8 @@ class ProjectFix(QWidget):
             client = smartsheet.Smartsheet(self.api_key.text())
             folder = int(self.folder_id.text())
             doFixes = self.do_fixes.isChecked()
-            tid_ss_lib.navigate.check_project(client=client, div=self.div, folderId=folder, doFixes=doFixes)
+            doCost  = self.do_cost.isChecked()
+            tid_ss_lib.navigate.check_project(client=client, div=self.div, folderId=folder, doFixes=doFixes, doCost=doCost)
             print("Done!")
         except Exception as msg:
             traceback.print_exc()

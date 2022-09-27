@@ -15,6 +15,9 @@ from . import budget_sheet
 from . import schedule_sheet
 from . import tracking_sheet
 
+import numpy as np
+import datetime
+
 TID_WORKSPACE = 4728845933799300
 OVERHEAD_NOTE = '12.25% Overhead'
 
@@ -90,8 +93,9 @@ def get_folder_data(*, client, div, folderId, path=None):
     return ret
 
 
-def check_project(*, client, div, folderId, doFixes, path=None):
+def check_project(*, client, div, folderId, doFixes, doCost=False, path=None):
     fdata = get_folder_data(client=client, div=div, folderId=folderId)
+    laborRows = None
 
     if path is not None:
         print(f"Processing project {path} : {folderId}")
@@ -169,6 +173,52 @@ def check_project(*, client, div, folderId, doFixes, path=None):
     else:
         print("   Skipping remaining processing")
 
+    if laborRows is not None and doCost is True:
+        compute_monthly_cost(name = fdata['folder'].name, data=laborRows)
+
+
+def compute_monthly_cost(*, name, data, fy=2023):
+
+    tot = 0.0
+    months = {f'{fy-1}_10': 0.0, f'{fy-1}_11': 0.0, f'{fy-1}_12': 0.0,
+              f'{fy}_1': 0.0, f'{fy}_2': 0.0, f'{fy}_3': 0.0,
+              f'{fy}_4': 0.0, f'{fy}_5': 0.0, f'{fy}_6': 0.0,
+              f'{fy}_7': 0.0, f'{fy}_8': 0.0, f'{fy}_9': 0.0}
+
+    for r in data:
+        sd = r['link'].cells[5].value.split('T')[0].split('-')  # Start date fields
+        ed = r['link'].cells[6].value.split('T')[0].split('-')  # End date fields
+
+        sdd = datetime.date(int(sd[0]),int(sd[1]),int(sd[2]))
+        edd = datetime.date(int(ed[0]),int(ed[1]),int(ed[2]))
+
+        if r['parent'] is False:
+            days = 0
+
+            # Count the number of weekdays in the time period
+            for n in range(int((edd - sdd).days)):
+                dt = sdd + datetime.timedelta(n)
+
+                if dt.weekday() != 5 and dt.weekday() != 6:
+                    days += 1
+
+            # (Hours * rate) / days to get cost per day
+            cpd = (float(r['data'].cells[3].value) * float(r['data'].cells[2].value)) / days
+
+            # Iterate through the days
+            for n in range(int((edd - sdd).days)):
+                dt = sdd + datetime.timedelta(n)
+
+                if dt.weekday() != 5 and dt.weekday() != 6:
+                    k = f"{dt.year}_{dt.month}"
+
+                    if k in months:
+                        months[k] += cpd
+                        tot += cpd
+
+    with open(f'{name}_cost.txt', 'w') as f:
+        for k,v in months.items():
+            f.write(f"{k},{v}\n")
 
 def get_active_list(*, client, div, path=None, folderId=None):
 
