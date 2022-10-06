@@ -28,7 +28,7 @@ TID_ID_ACTUALS_START_ROW = 5693264191481732
 TID_ID_ACTUALS_END_ROW   = 1256792717715332
 TID_ID_RESOURCE_FOLDER   = 6665944920549252
 TID_ID_TEMPLATE_FOLDER   = 5079595864090500
-TID_ID_TEMPLATE_PROJECT  = 0
+TID_ID_TEMPLATE_PROJECT  = 3065701360527236
 TID_ID_TEMPLATE_SCORING  = 3343660403189636
 TID_ID_TEMPLATE_RISK     = 7847260030560132
 TID_ID_TEMPLATE_TRACKING = 5595460216874884
@@ -43,7 +43,7 @@ TID_CDS_ACTUALS_START_ROW = 3233931241645956
 TID_CDS_ACTUALS_END_ROW   = 8729290357270404
 TID_CDS_RESOURCE_FOLDER   = 7728176030869380
 TID_CDS_TEMPLATE_FOLDER   = 3048654543054724
-TID_CDS_TEMPLATE_PROJECT  = 0
+TID_CDS_TEMPLATE_PROJECT  = 6293755830527876
 TID_CDS_TEMPLATE_SCORING  = 3741535033419652
 TID_CDS_TEMPLATE_RISK     = 8245134660790148
 TID_CDS_TEMPLATE_TRACKING = 5993334847104900
@@ -102,14 +102,6 @@ def check_project(*, client, div, folderId, doFixes, doCost=False, path=None):
         # Copy file if it is missing
         if v is None:
             print(f"   Project is missing '{k}' file.")
-
-            # This may have issues
-            #if doFixes:
-            #    print(f"   Coping '{k}' file to project.")
-            #    client.Sheets.copy_sheet(StandardProjectFiles[k], # Source sheet
-            #                             smartsheet.models.ContainerDestination({'destination_type': 'folder',
-            #                                                                    'destination_id': fdata['folder'].id,
-            #                                                                    'new_name': fdata['folder'].name + ' ' + k}))
 
         # Check for valid naming, rename if need be
         elif 'Template Set ' not in fdata['folder'].name and not v.name.startswith(fdata['folder'].name):
