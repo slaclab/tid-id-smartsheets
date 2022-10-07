@@ -46,16 +46,26 @@ form = [ ",,,,,,,,,18,,,,,,,",  # 0
 Columns = ['Status Month',  # 0
            'Lookup PA',  # 1
            'Monthly Actuals Date',  # 2
-           'Total Funds From Finance',  # 3
+
+           # Remove "Total Funds From Finance"
+
            'Monthly Actuals From Finance',  # 4
            'Total Actuals From Finance',  # 5
-           'Remaining Funds From Finance',  # 6
-           'Actuals Adjustment',  # 7
-           'Reported Cost',  # 8
-           'Budget Variance',  # 9
-           'Budget Variance With Contingency',  # 10
-           'Schedule Variance',  # 11
-           'Schedule Variance With Contingency',  # 12
+
+           # Remove "Remaining Funds From Finance"
+           # Remove "Actuals Adjustment"
+
+           'Actual Cost',  # Change from Report Cost
+           'Remaining Funds',  # New link field
+           'Cost Variance',  # Change from "Budget Variance # 9
+           'Cost Variance With Contingency',  # Change from Budget Variance With Contingency #10
+           'Schedule Variance',  # Keep
+
+           'Budget Variance',  # 9 (change above)
+           'Budget Variance With Contingency',  # 10 (change above)
+           'Schedule Variance',  # 11 (keep)
+           'Schedule Variance With Contingency',  # 12 # Remove
+
            'Reporting Variance',  # 13
            'Tracking Risk',  # 14
            'Budget Risk',  # 15
@@ -70,7 +80,7 @@ def fix_structure(*, client, div, sheet):
 
     return False
 
-    RefName = 'Actuals Range 3'
+    RefName = 'Actuals Range 10'
 
     if div == 'id':
         labor_rate = navigate.TID_ID_RATE_NOTE
@@ -128,7 +138,7 @@ def check_structure(*, sheet):
         return ret
 
 
-def check_first_row(*, client, sheet, budgetSheet, doFixes):
+def check_first_row(*, client, sheet, projectSheet, doFixes, cData):
     global RefName
 
     rowIdx = 0
@@ -287,8 +297,9 @@ def check_other_row(*, client, rowIdx, sheet, doFixes):
         client.Sheets.update_rows(sheet.id, [new_row])
 
 
-def check(*, client, sheet, budgetSheet, doFixes):
-    check_first_row(client=client, sheet=sheet, budgetSheet=budgetSheet, doFixes=doFixes)
+def check(*, client, sheet, projectSheet, doFixes, cData=cData):
+    check_first_row(client=client, sheet=sheet, projectSheet=projectSheet, doFixes=doFixes, cData=cData)
 
     for i in range(1,13):
         check_other_row(client=client, rowIdx=i, sheet=sheet, doFixes=doFixes)
+

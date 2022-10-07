@@ -12,6 +12,7 @@
 
 import smartsheet  # pip3 install smartsheet-python-sdk
 from . import project_sheet
+from . import project_sheet_columns
 from . import project_list
 from . import tracking_sheet
 
@@ -118,77 +119,19 @@ def check_project(*, client, div, folderId, doFixes, doCost=False, path=None):
     fdata['sheets']['Project'] = client.Sheets.get_sheet(fdata['sheets']['Project'].id, include='format')
     fdata['sheets']['Tracking'] = client.Sheets.get_sheet(fdata['sheets']['Tracking'].id, include='format')
 
+    # Used to store column addresses
+    cData = project_sheet_columns.ColData
+
     # Check project file
-    ret = project_sheet.check(client=client, div=div, sheet=fdata['sheets']['Project'], doFixes=doFixes )
+    ret = project_sheet.check(client=client, div=div, sheet=fdata['sheets']['Project'], doFixes=doFixes, cData=cData, doCost=doCost, name=fdata['folder'].name )
 
     # Fix tracking file
     #if ret:
-        #tracking_sheet.check(client=client, sheet=fdata['sheets']['Tracking'], projectSheet=fdata['sheets']['Project'], doFixes=doFixes)
+    #    tracking_sheet.check(client=client, sheet=fdata['sheets']['Tracking'], projectSheet=fdata['sheets']['Project'], doFixes=doFixes, cData=cData)
 
     #else:
-        #print("   Skipping remaining processing")
+    #    print("   Skipping remaining processing")
 
-    ##if laborRows is not None and doCost is True:
-        #compute_monthly_cost(name = fdata['folder'].name, data=laborRows)
-
-
-def compute_monthly_cost(*, name, data):
-
-    tot = 0.0
-    months = {}
-
-    for r in data:
-        if r['parent'] is False:
-
-            hours = r['data'].cells[2].value
-            rate = r['data'].cells[3].value
-
-            sd = r['link'].cells[5].value.split('T')[0].split('-')  # Start date fields
-            ed = r['link'].cells[6].value.split('T')[0].split('-')  # End date fields
-
-            sdd = datetime.date(int(sd[0]),int(sd[1]),int(sd[2]))
-            edd = datetime.date(int(ed[0]),int(ed[1]),int(ed[2]))
-
-            # Count the number of weekdays in the time period
-            days = 0
-
-            for n in range(int((edd - sdd).days)+1):
-                dt = sdd + datetime.timedelta(n)
-
-                if dt.weekday() != 5 and dt.weekday() != 6:
-                    days += 1
-
-            # Compute hours per day
-            hpd = float(hours) / days
-
-            # Iterate through the days
-            for n in range(int((edd - sdd).days)+1):
-                dt = sdd + datetime.timedelta(n)
-
-                if dt.weekday() != 5 and dt.weekday() != 6:
-                    k = f"{dt.year}_{dt.month}"
-
-                    if k not in months:
-                        months[k] = {rate: 0.0}
-
-                    elif rate not in months[k]:
-                        months[k][rate] = 0.0
-
-                    months[k][rate] += hpd
-                    tot += hpd
-
-    with open(f'{name}_cost.txt', 'w') as f:
-        for k,v in months.items():
-            f.write(f"{k}: ")
-
-            if v is None:
-                f.write("0.0")
-            else:
-                f.write(', '.join([f"{i} = {j:.1f}" for i,j in v.items()]))
-
-            f.write('\n')
-
-        f.write(f"Total Hours: {tot:.1f}\n")
 
 def get_active_list(*, client, div, path=None, folderId=None):
 
@@ -217,3 +160,4 @@ def get_active_list(*, client, div, path=None, folderId=None):
             ret.update(get_active_list(client=client, div=div, path=path, folderId=sub.id))
 
     return ret
+

@@ -14,6 +14,8 @@ import smartsheet
 from . import navigate
 from . import project_sheet_columns
 
+import datetime
+
 
 def find_columns(*, client, sheet, doFixes, cData):
 
@@ -42,6 +44,7 @@ def find_columns(*, client, sheet, doFixes, cData):
             return False
 
     return True
+
 
 def check_row(*, client, sheet, rowIdx, key, div, cData, doFixes):
 
@@ -142,10 +145,90 @@ def check_row(*, client, sheet, rowIdx, key, div, cData, doFixes):
         client.Sheets.update_rows(sheet.id, [new_row])
 
 
-def check(*, client, sheet, doFixes, div):
+def cost_ms(*, sheet, rowIdx, cData, msTable):
+
+    # Extract key columns
+    qty = float(sheet.rows[rowIdx].cells[cData['Budgeted Quantity']['position']].value)
+    perItem = float(sheet.rows[rowIdx].cells[cData['Cost Per Item']['position']].value)
+    endStr = sheet.rows[rowIdx].cells[cData['End']['position']].value
+
+    if endStr is None:
+        return
+
+    # Split date fields
+    endFields = endStr.split('T')[0].split('-')    # End date fields
+
+    # Convert to python date object
+    endDate = datetime.date(int(endFields[0]),int(endFields[1]),int(endFields[2]))
+
+    # Generate a key for the end year/month
+    k = f"{endDate.year}_{endDate.month}"
+
+    # Add year/month to dictionary if it does not exist
+    if k not in msTable:
+        msTable[k] = 0.0
+
+    # Increment the ms cost for that year/month
+    msTable[k] += (qty * perItem)
+
+
+def cost_labor(*, sheet, rowIdx, cData, laborTable):
+
+    # Extract key columns
+    hours = float(sheet.rows[rowIdx].cells[cData['Budgeted Quantity']['position']].value)
+    rate = sheet.rows[rowIdx].cells[cData['Cost Per Item']['position']].value
+    startStr = sheet.rows[rowIdx].cells[cData['Start']['position']].value
+    endStr = sheet.rows[rowIdx].cells[cData['End']['position']].value
+
+    if endStr is None or startStr is None:
+        return
+
+    # Split date fields
+    startFields = startStr.split('T')[0].split('-')  # Start date fields
+    endFields = endStr.split('T')[0].split('-')    # End date fields
+
+    # Convert to python date object
+    startDate = datetime.date(int(startFields[0]),int(startFields[1]),int(startFields[2]))
+    endDate = datetime.date(int(endFields[0]),int(endFields[1]),int(endFields[2]))
+
+    # Count the number of weekdays in the time period
+    days = 0
+
+    for n in range(int((endDate - startDate).days)+1):
+        dt = startDate + datetime.timedelta(n)
+
+        if dt.weekday() != 5 and dt.weekday() != 6:
+            days += 1
+
+    # Compute hours per day
+    hoursPerDay = hours / days
+
+    # Iterate through the weekdays
+    for n in range(int((endDate - startDate).days)+1):
+        dt = startDate + datetime.timedelta(n)
+
+        if dt.weekday() != 5 and dt.weekday() != 6:
+
+            # Generate a key for the year/month
+            k = f"{dt.year}_{dt.month}"
+
+            # Add year/month to dictionary if it does not exist
+            if k not in laborTable:
+                laborTable[k] = {rate: 0.0}
+
+            # Add rate to sub-dictionrary for month
+            elif rate not in [k]:
+                laborTable[k][rate] = 0.0
+
+            # Increment the number of hours in that year/month, for the given rate
+            laborTable[k][rate] += hoursPerDay
+
+
+def check(*, client, sheet, doFixes, div, cData, doCost, name):
     inLabor = False
     inMS = False
-    cData = project_sheet_columns.ColData
+    msTable = {}
+    laborTable = {}
 
     # First check structure
     while True:
@@ -176,22 +259,43 @@ def check(*, client, sheet, doFixes, div):
             check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='ms_top', div=div, cData=cData, doFixes=doFixes)
             inMS = True
             inLabor = False
+
         elif sheet.rows[rowIdx].cells[0].value == 'Labor':
             check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='labor_top', div=div, cData=cData, doFixes=doFixes)
             inMS = False
             inLabor = True
-        elif inMS or inLabor:
 
-            if inMS:
-                key = 'ms'
-            else:
-                key = 'labor'
+        elif inMS:
 
+            # In parent
             if sheet.rows[rowIdx].id in parents:
-                key += '_parent'
+                check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='ms_parent', div=div, cData=cData, doFixes=doFixes)
             else:
-                key += '_task'
+                check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='ms_task', div=div, cData=cData, doFixes=doFixes)
+                cost_ms(sheet=sheet, rowIdx=rowIdx, cData=cData, msTable=msTable)
 
-            check_row(client=client, sheet=sheet, rowIdx=rowIdx, key=key, div=div, cData=cData, doFixes=doFixes)
+        elif inLabor:
+
+            # In parent
+            if sheet.rows[rowIdx].id in parents:
+                check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='labor_parent', div=div, cData=cData, doFixes=doFixes)
+            else:
+                check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='labor_task', div=div, cData=cData, doFixes=doFixes)
+                cost_labor(sheet=sheet, rowIdx=rowIdx, cData=cData, laborTable=laborTable)
+
+    if doCost:
+        with open(f'{name} Cost.txt', 'w') as f:
+            f.write("-------- Labor Cost -------------\n")
+
+            for k,v in laborTable.items():
+                f.write(f"{k}: ")
+                f.write(', '.join([f"{i} = {j:.1f}" for i,j in v.items()]))
+                f.write('\n')
+
+            f.write("-------- M&S Cost ---------------\n")
+
+            for k,v in msTable.items():
+                f.write(f"{k}: {v}\n")
 
     return True
+
