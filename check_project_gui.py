@@ -9,8 +9,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore    import *
 from PyQt5.QtGui     import *
 
-import tid_ss_lib.navigate
-import tid_ss_lib.project_sheet
+import tid_ss_lib_v2.navigate
+import tid_ss_lib_v2.project_list
 import smartsheet
 import argparse
 
@@ -93,7 +93,7 @@ class ProjectFix(QWidget):
             folder = int(self.folder_id.text())
             doFixes = self.do_fixes.isChecked()
             doCost  = self.do_cost.isChecked()
-            tid_ss_lib.navigate.check_project(client=client, div=self.div, folderId=folder, doFixes=doFixes, doCost=doCost)
+            tid_ss_lib_v2.navigate.check_project(client=client, div=self.div, folderId=folder, doFixes=doFixes, doCost=doCost)
             print("Done!")
         except Exception as msg:
             traceback.print_exc()
@@ -104,7 +104,7 @@ class ProjectFix(QWidget):
     def refreshPressed(self):
         try:
             client = smartsheet.Smartsheet(self.api_key.text())
-            lst = tid_ss_lib.project_sheet.get_project_list(client=client, div=self.div)
+            lst = tid_ss_lib_v2.project_list.get_project_list(client=client, div=self.div)
 
             self.proj_list.clear()
             self.projects = {0: ''}

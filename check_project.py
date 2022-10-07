@@ -10,7 +10,7 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
-import tid_ss_lib.navigate
+import tid_ss_lib_v2.navigate
 import smartsheet
 import os
 import argparse
@@ -62,5 +62,5 @@ client = smartsheet.Smartsheet(args.key)
 print("")
 
 for p in args.folder:
-    tid_ss_lib.navigate.check_project(client=client,div=args.div, folderId=int(p), doFixes=args.fix)
+    tid_ss_lib_v2.navigate.check_project(client=client,div=args.div, folderId=int(p), doFixes=args.fix)
 

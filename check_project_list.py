@@ -10,7 +10,7 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
-import tid_ss_lib.project_sheet
+import tid_ss_lib_v2.project_list
 import smartsheet  # pip3 install smartsheet-python-sdk
 import os
 import argparse
@@ -53,5 +53,5 @@ args = parser.parse_args()
 
 client = smartsheet.Smartsheet(args.key)
 
-tid_ss_lib.project_sheet.check(client=client, div=args.div, doFixes=args.fix)
+tid_ss_lib_v2.project_list.check(client=client, div=args.div, doFixes=args.fix)
 
