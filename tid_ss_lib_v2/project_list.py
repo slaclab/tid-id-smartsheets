@@ -44,7 +44,6 @@ def get_project_list(*, client, div):
            row.cells[1].value is not None and row.cells[1].value != '' and \
            row.cells[3].value is not None and row.cells[3].value != '' and \
            row.cells[7].value is not None and row.cells[7].value != '':
-           #row.cells[6].value is not None and row.cells[6].value != '' and \
 
             proj = {'program': row.cells[0].value,
                     'name': row.cells[1].value,
@@ -114,11 +113,11 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
             new_row.cells.append(ret)
 
     # Lookup Fields
-    for col in range(9, 25):
+    for col in range(9, 21):
         exp = "=VLOOKUP([Status Month]@row, {"
         exp += p['name']
         exp += " Tracking Range 1}, "
-        exp += str(4 + (col-9))
+        exp += str(col-3)
         exp += ", false)"
 
         ret = check_cell_formula(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=col, expect=exp)
@@ -127,7 +126,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
             new_row.cells.append(ret)
 
     # Check hyperlink Column
-    col = 26
+    col = 22
     if row.cells[col].hyperlink is None or row.cells[col].hyperlink.url != p['url'] or row.cells[col].value != p['path']:
 
         if row.cells[col].hyperlink is None:
