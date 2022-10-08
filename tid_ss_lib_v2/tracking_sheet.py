@@ -78,7 +78,7 @@ def fix_structure(*, client, div, sheet):
 
     return False
 
-    RefName = 'Actuals Range 3'
+    RefName = 'Actuals Range 1'
 
     if div == 'id':
         xref = smartsheet.models.CrossSheetReference({
@@ -137,6 +137,8 @@ def check_first_row(*, client, sheet, projectSheet, doFixes, cData):
     if RefName is None:
         if hasattr(row.cells[2],'formula'):
             RefStr = re.findall(r"\{.*?\}",row.cells[2].formula)[0];
+            #if RefStr != '{Actuals Range 1}':
+                #print(f"   Reference mistmatch, got {RefStr}")
         else:
             RefStr = '{Actuals Range 1}'
     else:
