@@ -103,6 +103,7 @@ def check_project(*, client, div, folderId, doFixes, doCost=False, path=None):
         # Copy file if it is missing
         if v is None:
             print(f"   Project is missing '{k}' file.")
+            return
 
         # Check for valid naming, rename if need be
         elif 'Template Set ' not in fdata['folder'].name and not v.name.startswith(fdata['folder'].name):
@@ -111,6 +112,8 @@ def check_project(*, client, div, folderId, doFixes, doCost=False, path=None):
             if doFixes:
                 print(f"   Renaming {v.name}.")
                 client.Sheets.update_sheet(v.id, smartsheet.models.Sheet({'name': fdata['folder'].name + ' ' + k}))
+            else:
+                return
 
     # Refresh folder data, needed if new files were copied over
     fdata = get_folder_data(client=client, div=div, folderId=folderId)
@@ -126,11 +129,11 @@ def check_project(*, client, div, folderId, doFixes, doCost=False, path=None):
     ret = project_sheet.check(client=client, div=div, sheet=fdata['sheets']['Project'], doFixes=doFixes, cData=cData, doCost=doCost, name=fdata['folder'].name )
 
     # Fix tracking file
-    #if ret:
-    #    tracking_sheet.check(client=client, sheet=fdata['sheets']['Tracking'], projectSheet=fdata['sheets']['Project'], doFixes=doFixes, cData=cData)
+    if ret:
+        tracking_sheet.check(client=client, sheet=fdata['sheets']['Tracking'], projectSheet=fdata['sheets']['Project'], div=div, doFixes=doFixes, cData=cData)
 
-    #else:
-    #    print("   Skipping remaining processing")
+    else:
+        print("   Skipping remaining processing")
 
 
 def get_active_list(*, client, div, path=None, folderId=None):

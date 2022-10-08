@@ -23,85 +23,62 @@ from . import navigate
 #        18 - Gray
 #           = White
 
-form = [ ",,,,,,,,,18,,,,,,,",  # 0
-        ",,,,,,,,,,,,,,,,",  # 1
-        ",,,,,,,,,18,,13,,,,,",  # 2
-        ",,,,,,,,,18,,13,,,,,",  # 3
-        ",,,,,,,,,18,,13,,,,,",  # 4
-        ",,,,,,,,,18,,13,,,,,",  # 5
-        ",,,,,,,,,18,,13,,,,,",  # 6
-        ",,,,,,,,,,,13,,,,,",  # 7
-        ",,,,,,,,,18,,13,,,,,",  # 8
-        ",,,,,,,,,18,,13,,,,,",  # 9
-        ",,,,,,,,,18,,13,,,,,",  # 10
-        ",,,,,,,,,18,,13,,,,,",  # 11
-        ",,,,,,,,,18,,13,,,,,",  # 12
-        ",,,,,,,,,18,,13,,,,,",  # 13
-        ",,,,,,,,,18,,,,,,,",  # 14
-        ",,,,,,,,,18,,,,,,,",  # 15
-        ",,,,,,,,,18,,,,,,,",  # 16
-        ",,,,,,,,,,,,,,,,",  # 17
-        ",,,,,,,,,,,,,,,," ]  # 18
+form = [ ",,,,,,,,,18,,,,,,,",      # 0
+        ",,,,,,,,,,,,,,,,",         # 1
+        ",,,,,,,,,18,,13,,,,,",     # 2
+        ",,,,,,,,,18,,13,2,1,2,,",  # 3
+        ",,,,,,,,,18,,13,2,1,2,,",  # 4
+        ",,,,,,,,,18,,13,2,1,2,,",  # 5
+        ",,,,,,,,,18,,13,2,1,2,,",  # 6
+        ",,,,,,,,,18,,13,2,1,2,,",  # 7
+        ",,,,,,,,,18,,13,2,1,2,,",  # 8
+        ",,,,,,,,,18,,13,2,1,2,,",  # 9
+        ",,,,,,,,,18,,13,2,1,2,,",  # 10
+        ",,,,,,,,,18,,13,2,1,2,,",  # 11
+        ",,,,,,,,,18,,,,,,,",       # 12
+        ",,,,,,,,,18,,,,,,,",       # 13
+        ",,,,,,,,,18,,,,,,,",       # 14
+        ",,,,,,,,,,,,,,,,",         # 15
+        ",,,,,,,,,,,,,,,," ]        # 16
 
 Columns = ['Status Month',  # 0
            'Lookup PA',  # 1
            'Monthly Actuals Date',  # 2
-
-           # Remove "Total Funds From Finance"
-
-           'Monthly Actuals From Finance',  # 4
-           'Total Actuals From Finance',  # 5
-
-           # Remove "Remaining Funds From Finance"
-           # Remove "Actuals Adjustment"
-
-           'Actual Cost',  # Change from Report Cost
-           'Remaining Funds',  # New link field
-           'Cost Variance',  # Change from "Budget Variance # 9
-           'Cost Variance With Contingency',  # Change from Budget Variance With Contingency #10
-           'Schedule Variance',  # Keep
-
-           'Budget Variance',  # 9 (change above)
-           'Budget Variance With Contingency',  # 10 (change above)
-           'Schedule Variance',  # 11 (keep)
-           'Schedule Variance With Contingency',  # 12 # Remove
-
-           'Reporting Variance',  # 13
-           'Tracking Risk',  # 14
-           'Budget Risk',  # 15
-           'Schedule Risk',  # 16
-           'Scope Risk',  # 17
-           'Description Of Status']  # 18
+           'Monthly Actuals From Finance',  # 3
+           'Total Actuals From Finance',  # 4
+           'Total Budget', # 5
+           'Actual Cost',  #  6
+           'Remaining Funds', # 7
+           'Cost Variance',  #  8
+           'Cost Variance With Contingency', # 9
+           'Schedule Variance', # 10
+           'Reporting Variance', # 11
+           'Tracking Risk',  # 12
+           'Budget Risk',  # 13
+           'Schedule Risk',  # 14
+           'Scope Risk',  # 15
+           'Description Of Status']  # 16
 
 RefName = None
 
 def fix_structure(*, client, div, sheet):
-    global RefName
+    global refName
+
+    if len(sheet.columns) != 16:
+        print(f"   Can't fix tracking sheet. Got {len(sheet.columns)} Expect {16}.")
+        return False
+
+    print("   Fixing tracking sheet.")
+
+    col5 = smartsheet.models.Column({'title': Columns[5],
+                                     'type': 'TEXT_NUMBER',
+                                     'index': 5})
+
+    client.Sheets.add_columns(sheet.id, [col5])
 
     return False
 
-    RefName = 'Actuals Range 10'
-
-    if div == 'id':
-        labor_rate = navigate.TID_ID_RATE_NOTE
-    elif div == 'cds':
-        labor_rate = navigate.TID_CDS_RATE_NOTE
-
-    if len(sheet.columns) != 19:
-        print(f"   Wrong number of columns in tracking file, could not fix: Got {len(sheet.columns)}.")
-        return False
-
-    # Modify Column Names
-    col11 = smartsheet.models.Column({'title': Columns[11],
-                                      'type': 'TEXT_NUMBER',
-                                      'index': 11})
-
-    col12 = smartsheet.models.Column({'title': Columns[12],
-                                      'type': 'TEXT_NUMBER',
-                                      'index': 12})
-
-    client.Sheets.update_column(sheet.id, sheet.columns[11].id, col11)
-    client.Sheets.update_column(sheet.id, sheet.columns[12].id, col12)
+    RefName = 'Actuals Range 3'
 
     if div == 'id':
         xref = smartsheet.models.CrossSheetReference({
@@ -118,7 +95,7 @@ def fix_structure(*, client, div, sheet):
             'end_row_id': navigate.TID_CDS_ACTUALS_END_ROW, })
 
     client.Sheets.create_cross_sheet_reference(sheet.id, xref)
-    return True
+
 
 def check_structure(*, sheet):
 
@@ -148,13 +125,14 @@ def check_first_row(*, client, sheet, projectSheet, doFixes, cData):
     new_row = smartsheet.models.Row()
     new_row.id = row.id
 
-    links = { 8: 13,
-              9: 14,
-             10: 15,
-             11: 19,
-             12: 20}
+    links = { 5: cData['Total Budgeted Cost']['position'],
+              6: cData['Actual Cost']['position'],
+              7: cData['Remaining Funds']['position'],
+              8: cData['Cost Variance']['position'],
+              9: cData['Cost Variance With Contingency']['position'],
+              10: cData['Schedule Variance']['position'] }
 
-    noChange = set([0, 1, 7, 17, 18])
+    noChange = set([0, 1, 15, 16])
 
     if RefName is None:
         if hasattr(row.cells[2],'formula'):
@@ -166,15 +144,13 @@ def check_first_row(*, client, sheet, projectSheet, doFixes, cData):
 
     #print(f"Using RefStr = {RefStr}")
 
-    formulas = {  2: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 7, false)',
-                  3: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 6, false)',
-                  4: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 3, false)',
-                  5: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 4, false)',
-                  6: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 5, false)',
-                 13: '=([Total Actuals From Finance]@row + [Actuals Adjustment]@row) - [Reported Cost]@row',
-                 14: '=IF(ABS([Reporting Variance]@row) > 50000, "High", IF(ABS([Reporting Variance]@row) > 5000, "Medium", "Low"))',
-                 15: '=IF([Budget Variance]@row > 50000, "High", IF([Budget Variance]@row > 5000, "Medium", "Low"))',
-                 16: '=IF([Schedule Variance]@row > 50000, "High", IF([Schedule Variance]@row > 5000, "Medium", "Low"))' }
+    formulas = {  2: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 5, false)',
+                  3: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 3, false)',
+                  4: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 4, false)',
+                 11: '=([Actual Cost]@row - [Total Actuals From Finance]@row)',
+                 12: '=IF(ABS([Reporting Variance]@row) < -50000, "High", IF(ABS([Reporting Variance]@row) < -5000, "Medium", "Low"))',
+                 13: '=IF([Cost Variance]@row < -50000, "High", IF([Cost Variance]@row < -5000, "Medium", "Low"))',
+                 14: '=IF([Schedule Variance]@row < -50000, "High", IF([Schedule Variance]@row < -5000, "Medium", "Low"))' }
 
     for k,v in formulas.items():
         if ((not hasattr(row.cells[k],'formula')) or row.cells[k].formula != v) or row.cells[k].format != form[k]:
@@ -231,9 +207,9 @@ def check_first_row(*, client, sheet, projectSheet, doFixes, cData):
     new_row.id = row.id
 
     for k, v in links.items():
-        rowIdTar = budgetSheet.rows[0].id
-        colIdTar = budgetSheet.rows[0].cells[v].column_id
-        shtIdTar = budgetSheet.id
+        rowIdTar = projectSheet.rows[0].id
+        colIdTar = projectSheet.rows[0].cells[v].column_id
+        shtIdTar = projectSheet.id
 
         if k in relink or row.cells[k].link_in_from_cell is None or \
             row.cells[k].link_in_from_cell.row_id != rowIdTar or \
@@ -297,7 +273,11 @@ def check_other_row(*, client, rowIdx, sheet, doFixes):
         client.Sheets.update_rows(sheet.id, [new_row])
 
 
-def check(*, client, sheet, projectSheet, doFixes, cData=cData):
+def check(*, client, sheet, projectSheet, doFixes, div, cData):
+    if not check_structure(sheet=sheet):
+        #fix_structure(client=client, div=div, sheet=sheet)
+        return False
+
     check_first_row(client=client, sheet=sheet, projectSheet=projectSheet, doFixes=doFixes, cData=cData)
 
     for i in range(1,13):
