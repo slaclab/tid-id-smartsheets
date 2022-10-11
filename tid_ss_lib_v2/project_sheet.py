@@ -162,7 +162,7 @@ def cost_ms(*, sheet, rowIdx, cData, msTable):
     endDate = datetime.date(int(endFields[0]),int(endFields[1]),int(endFields[2]))
 
     # Generate a key for the end year/month
-    k = f"{endDate.year}_{endDate.month}"
+    k = f"{endDate.year}_{endDate.month:02d}"
 
     # Add year/month to dictionary if it does not exist
     if k not in msTable:
@@ -210,7 +210,7 @@ def cost_labor(*, sheet, rowIdx, cData, laborTable):
         if dt.weekday() != 5 and dt.weekday() != 6:
 
             # Generate a key for the year/month
-            k = f"{dt.year}_{dt.month}"
+            k = f"{dt.year}_{dt.month:02d}"
 
             # Add year/month to dictionary if it does not exist
             if k not in laborTable:
@@ -285,19 +285,63 @@ def check(*, client, sheet, doFixes, div, cData, doCost, name):
                 if doCost:
                     cost_labor(sheet=sheet, rowIdx=rowIdx, cData=cData, laborTable=laborTable)
 
+    # Generate excel friend view of monthly spending
     if doCost:
-        with open(f'{name} Cost.txt', 'w') as f:
-            f.write("-------- Labor Cost -------------\n")
+        months = set([])
+        rates  = set([])
 
-            for k,v in laborTable.items():
-                f.write(f"{k}: ")
-                f.write(', '.join([f"{i} = {j:.1f}" for i,j in v.items()]))
-                f.write('\n')
+        # First generate month and rate lists to create excel grid
+        for mnth in laborTable:
+            months.add(mnth)
+            for rte in laborTable[mnth]:
+                rates.add(rte)
 
-            f.write("-------- M&S Cost ---------------\n")
+        for mnth in msTable:
+            months.add(mnth)
 
-            for k,v in msTable.items():
-                f.write(f"{k}: {v}\n")
+        months = sorted(months)
+        rates = sorted(rates)
 
+        with open(f'{name} Cost.csv', 'w') as f:
+
+            # Create Header
+            f.write('Month,M&S,')
+
+            for rte in rates:
+                f.write(f'{float(rte):0.2f} Hours, {float(rte):0.2f} Dollars,')
+
+            f.write("Total Labor Hours, Total Labor Dollars, Total Dollars\n")
+
+            # Each month
+            for m in months:
+                totLabHours = 0.0
+                totLabDollars = 0.0
+                totDollars = 0.0
+
+                # Put in M&S
+                if m in msTable:
+                    val = float(msTable[m])
+                else:
+                    val = 0.0
+
+                f.write(f'{m}, {val:0.2f},')
+                totDollars += val
+
+                # Put in Labor
+                for rte in rates:
+                    if m in laborTable and rte in laborTable[m]:
+                        hrs = float(laborTable[m][rte])
+                        val = float(hrs) * float(rte)
+                    else:
+                        hrs = 0.0
+                        val = 0.0
+
+                    totLabHours += hrs
+                    totLabDollars += val
+                    totDollars += val
+
+                    f.write(f'{hrs:0.2f}, {val:0.2f},')
+
+                f.write(f"{totLabHours:0.2f}, {totLabDollars:0.2f},{totDollars:0.2f}\n")
     return True
 
