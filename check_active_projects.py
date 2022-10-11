@@ -49,6 +49,14 @@ parser.add_argument(
     help     = "Use to enable fixing of project files.",
 )
 
+parser.add_argument(
+    "--doCost",
+    action   = 'store_true',
+    required = False,
+    default  = False,
+    help     = "Flag to generate cost tables.",
+)
+
 # Get the arguments
 args = parser.parse_args()
 
@@ -63,5 +71,5 @@ for p in tid_ss_lib_v2.project_list.get_project_list(client=client, div=args.div
     lst.append(p['id'])
 
 for p in lst:
-    tid_ss_lib_v2.navigate.check_project(client=client, div=args.div, folderId=p, doFixes=args.fix)
+    tid_ss_lib_v2.navigate.check_project(client=client, div=args.div, folderId=p, doFixes=args.fix, doCost=args.doCost)
 
