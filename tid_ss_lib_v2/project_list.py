@@ -113,11 +113,15 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
             new_row.cells.append(ret)
 
     # Lookup Fields
-    for col in range(9, 21):
+    for col in range(9, 22):
         exp = "=VLOOKUP([Status Month]@row, {"
         exp += p['name']
         exp += " Tracking Range 1}, "
-        exp += str(col-3)
+
+        if col == 9:
+            exp += "2"
+        else:
+            exp += str(col-4)
         exp += ", false)"
 
         ret = check_cell_formula(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=col, expect=exp)
@@ -126,7 +130,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
             new_row.cells.append(ret)
 
     # Check hyperlink Column
-    col = 22
+    col = 23
     if row.cells[col].hyperlink is None or row.cells[col].hyperlink.url != p['url'] or row.cells[col].value != p['path']:
 
         if row.cells[col].hyperlink is None:
@@ -145,6 +149,15 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
         new_cell.hyperlink.url = p['url']
         new_cell.strict = False
         new_row.cells.append(new_cell)
+
+    # Check PA Compare Column
+    col = 24
+    exp = '=IF([PA Number]@row = [Lookup PA]@row, "True", "False")'
+
+    ret = check_cell_formula(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=col, expect=exp)
+
+    if ret is not None:
+        new_row.cells.append(ret)
 
     if doFixes and len(new_row.cells) != 0:
         print(f"   Applying fixes to row {rowIdx+1}.")

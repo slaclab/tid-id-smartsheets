@@ -150,7 +150,7 @@ def check_first_row(*, client, sheet, projectSheet, doFixes, cData):
                   3: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 3, false)',
                   4: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 4, false)',
                  11: '=([Actual Cost]@row - [Total Actuals From Finance]@row)',
-                 12: '=IF(ABS([Reporting Variance]@row) < -50000, "High", IF(ABS([Reporting Variance]@row) < -5000, "Medium", "Low"))',
+                 12: '=IF(ABS([Reporting Variance]@row) > 50000, "High", IF(ABS([Reporting Variance]@row) > 5000, "Medium", "Low"))',
                  13: '=IF([Cost Variance]@row < -50000, "High", IF([Cost Variance]@row < -5000, "Medium", "Low"))',
                  14: '=IF([Schedule Variance]@row < -50000, "High", IF([Schedule Variance]@row < -5000, "Medium", "Low"))' }
 

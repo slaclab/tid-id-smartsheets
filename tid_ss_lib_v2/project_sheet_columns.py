@@ -10,7 +10,10 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
-PlannedPct = '=IF(Start@row > TODAY(), 0, IF(End@row > TODAY(), NETWORKDAYS(Start@row, TODAY()) / Duration@row, 1))'
+PlannedPct = '=IF(Start@row > (DATE(YEAR(TODAY()), MONTH(TODAY()), 1) - 1), 0, ' \
+             'IF(End@row > (DATE(YEAR(TODAY()), MONTH(TODAY()), 1) - 1), '\
+             'NETWORKDAYS(Start@row, (DATE(YEAR(TODAY()), MONTH(TODAY()), 1) - 1)) / Duration@row, 1))'
+
 Contingency = '=IF([Risk Factor]@row = "Low (5% Contingency)", 1.05, IF([Risk Factor]@row = "Medium (10% Contingency)", 1.1, ' \
               'IF([Risk Factor]@row = "Med-High (25% Contingency)", 1.25, IF([Risk Factor]@row = "High (50% Contingency)", 1.5))))'
 
