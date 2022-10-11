@@ -217,7 +217,7 @@ def cost_labor(*, sheet, rowIdx, cData, laborTable):
                 laborTable[k] = {rate: 0.0}
 
             # Add rate to sub-dictionrary for month
-            elif rate not in [k]:
+            elif rate not in laborTable[k]:
                 laborTable[k][rate] = 0.0
 
             # Increment the number of hours in that year/month, for the given rate
