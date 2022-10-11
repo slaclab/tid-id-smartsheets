@@ -272,7 +272,8 @@ def check(*, client, sheet, doFixes, div, cData, doCost, name):
                 check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='ms_parent', div=div, cData=cData, doFixes=doFixes)
             else:
                 check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='ms_task', div=div, cData=cData, doFixes=doFixes)
-                cost_ms(sheet=sheet, rowIdx=rowIdx, cData=cData, msTable=msTable)
+                if doCost:
+                    cost_ms(sheet=sheet, rowIdx=rowIdx, cData=cData, msTable=msTable)
 
         elif inLabor:
 
@@ -281,7 +282,8 @@ def check(*, client, sheet, doFixes, div, cData, doCost, name):
                 check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='labor_parent', div=div, cData=cData, doFixes=doFixes)
             else:
                 check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='labor_task', div=div, cData=cData, doFixes=doFixes)
-                cost_labor(sheet=sheet, rowIdx=rowIdx, cData=cData, laborTable=laborTable)
+                if doCost:
+                    cost_labor(sheet=sheet, rowIdx=rowIdx, cData=cData, laborTable=laborTable)
 
     if doCost:
         with open(f'{name} Cost.txt', 'w') as f:
