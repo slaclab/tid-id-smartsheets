@@ -72,19 +72,22 @@ args = parser.parse_args()
 
 client = smartsheet.Smartsheet(args.key)
 
+# Generate download directory name
+if args.backup is not None:
+    backupDir = f"{args.backup}/" + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+    try:
+        os.mkdir(backupDir)
+    except FileExistsError:
+        pass
+else:
+    backupDir = None
+
 for div in args.div:
 
     print(f"\n-------------- {div} ------------------------\n")
 
-    # Generate download directory name
-    if args.backup is not None:
-        doDownload = f"{args.backup}/" + datetime.datetime.now().strftime("%Y_%m_%d")
-        try:
-            os.mkdir(doDownload)
-        except FileExistsError:
-            pass
-
-        doDownload += f"/{div}"
+    if backupDir is not None:
+        doDownload = f"{backupDir}/{div}"
         try:
             os.mkdir(doDownload)
         except FileExistsError:
