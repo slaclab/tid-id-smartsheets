@@ -275,7 +275,7 @@ def check_other_row(*, client, rowIdx, sheet, doFixes):
         client.Sheets.update_rows(sheet.id, [new_row])
 
 
-def check(*, client, sheet, projectSheet, doFixes, div, cData):
+def check(*, client, sheet, projectSheet, doFixes, div, cData, doDownload):
     if not check_structure(sheet=sheet):
         #fix_structure(client=client, div=div, sheet=sheet)
         return False
@@ -284,4 +284,7 @@ def check(*, client, sheet, projectSheet, doFixes, div, cData):
 
     for i in range(1,13):
         check_other_row(client=client, rowIdx=i, sheet=sheet, doFixes=doFixes)
+
+    if doDownload is not False:
+        client.Sheets.get_sheet_as_excel(sheet.id, doDownload)
 

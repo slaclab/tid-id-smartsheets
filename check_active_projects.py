@@ -15,6 +15,7 @@ import tid_ss_lib_v2.project_list
 import smartsheet
 import os
 import argparse
+import datetime
 
 # Set the argument parser
 parser = argparse.ArgumentParser('Smartsheets Project Check & Fix')
@@ -27,8 +28,8 @@ else:
 parser.add_argument(
     "--div",
     type     = str,
+    action   = 'append',
     required = True,
-    default  = False,
     choices  = ['id', 'cds'],
     help     = "Division for project tracking. Either --div=id or --div=cds"
 )
@@ -57,19 +58,49 @@ parser.add_argument(
     help     = "Flag to generate cost tables.",
 )
 
+parser.add_argument(
+    "--backup",
+    type     = str,
+    required = False,
+    default  = None,
+    help     = "Flag to generate a backup"
+)
+
+
 # Get the arguments
 args = parser.parse_args()
 
 client = smartsheet.Smartsheet(args.key)
 
-if args.div == 'id':
-    lst = [tid_ss_lib_v2.navigate.TID_ID_TEMPLATE_FOLDER]
-elif args.div == 'cds':
-    lst = [tid_ss_lib_v2.navigate.TID_CDS_TEMPLATE_FOLDER]
+for div in args.div:
 
-for p in tid_ss_lib_v2.project_list.get_project_list(client=client, div=args.div):
-    lst.append(p['id'])
+    print(f"\n-------------- {div} ------------------------\n")
 
-for p in lst:
-    tid_ss_lib_v2.navigate.check_project(client=client, div=args.div, folderId=p, doFixes=args.fix, doCost=args.doCost)
+    # Generate download directory name
+    if args.backup is not None:
+        doDownload = f"{args.backup}/" + datetime.datetime.now().strftime("%Y_%m_%d")
+        try:
+            os.mkdir(doDownload)
+        except FileExistsError:
+            pass
+
+        doDownload += f"/{div}"
+        try:
+            os.mkdir(doDownload)
+        except FileExistsError:
+            pass
+
+    else:
+        doDownload = False
+
+    if div == 'id':
+        lst = [tid_ss_lib_v2.navigate.TID_ID_TEMPLATE_FOLDER]
+    elif div == 'cds':
+        lst = [tid_ss_lib_v2.navigate.TID_CDS_TEMPLATE_FOLDER]
+
+    for p in tid_ss_lib_v2.project_list.get_project_list(client=client, div=div):
+        lst.append(p['id'])
+
+    for p in lst:
+        tid_ss_lib_v2.navigate.check_project(client=client, div=div, folderId=p, doFixes=args.fix, doCost=args.doCost, doDownload=doDownload)
 

@@ -224,7 +224,7 @@ def cost_labor(*, sheet, rowIdx, cData, laborTable):
             laborTable[k][rate] += hoursPerDay
 
 
-def check(*, client, sheet, doFixes, div, cData, doCost, name):
+def check(*, client, sheet, doFixes, div, cData, doCost, name, doDownload):
     inLabor = False
     inMS = False
     msTable = {}
@@ -289,6 +289,9 @@ def check(*, client, sheet, doFixes, div, cData, doCost, name):
     # Generate excel friend view of monthly spending
     if doCost:
         write_cost_table(name=name, laborTable=laborTable, msTable=msTable)
+
+    if doDownload is not False:
+        client.Sheets.get_sheet_as_excel(sheet.id, doDownload)
 
     return True
 

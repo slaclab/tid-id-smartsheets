@@ -67,7 +67,7 @@ def get_folder_data(*, client, div, folderId, path=None):
     return ret
 
 
-def check_project(*, client, div, folderId, doFixes, doCost=False, path=None):
+def check_project(*, client, div, folderId, doFixes, doCost=False, doDownload=False, path=None):
     fdata = get_folder_data(client=client, div=div, folderId=folderId)
 
     if path is not None:
@@ -106,11 +106,11 @@ def check_project(*, client, div, folderId, doFixes, doCost=False, path=None):
     cData = project_sheet_columns.ColData
 
     # Check project file
-    ret = project_sheet.check(client=client, div=div, sheet=fdata['sheets']['Project'], doFixes=doFixes, cData=cData, doCost=doCost, name=fdata['folder'].name )
+    ret = project_sheet.check(client=client, div=div, sheet=fdata['sheets']['Project'], doFixes=doFixes, cData=cData, doCost=doCost, name=fdata['folder'].name, doDownload=doDownload)
 
     # Fix tracking file
     if ret:
-        tracking_sheet.check(client=client, sheet=fdata['sheets']['Tracking'], projectSheet=fdata['sheets']['Project'], div=div, doFixes=doFixes, cData=cData)
+        tracking_sheet.check(client=client, sheet=fdata['sheets']['Tracking'], projectSheet=fdata['sheets']['Project'], div=div, doFixes=doFixes, cData=cData, doDownload=doDownload)
 
     else:
         print("   Skipping remaining processing")
