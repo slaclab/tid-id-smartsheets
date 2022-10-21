@@ -20,7 +20,7 @@
 #        18 - Gray
 #           = White
 
-ToDelete = []
+ToDelete = ['Reporting Variance']
 
 ColData = { 'Status Month':
                { 'position' : 0,
@@ -115,7 +115,7 @@ ColData = { 'Status Month':
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,2,1,1,,",
-                 'formula'  : "=[Earned Value]@row / [Actual Cost]@row",
+                 'formula'  : "=[Earned Value]@row / ([Actual Cost]@row + 0.01)",
                  'link'     : None},
 
             'Schedule Variance' :
@@ -131,15 +131,15 @@ ColData = { 'Status Month':
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,2,1,1,,",
-                 'formula'  : "=[Earned Value]@row / [Planned Earned Value]@row",
+                 'formula'  : "=[Earned Value]@row / ([Planned Earned Value]@row + 0.01)",
                  'link'     : None},
 
-            'Reporting Variance' :
+            'Reporting Index' :
                { 'position' : 14,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
-                 'format'   : ",,,,,,,,,18,,13,2,1,2,,",
-                 'formula'  : '=([Actual Cost]@row - [Total Actuals From Finance]@row)',
+                 'format'   : ",,,,,,,,,18,,,2,1,1,,",
+                 'formula'  : '=[Total Actuals From Finance]@row / ([Actual Cost]@row + 0.01)',
                  'link'     : None},
 
             'Tracking Risk' :
@@ -147,7 +147,7 @@ ColData = { 'Status Month':
                  'type'     : 'PICKLIST',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,,,,,",
-                 'formula'  : '=IF(ABS([Reporting Variance]@row) > 50000, "High", IF(ABS([Reporting Variance]@row) > 5000, "Medium", "Low"))',
+                 'formula'  : '=IF(ABS(1 - [Reporting Index]@row) > 0.1, "High", IF(ABS(1 - [Reporting Index]@row) > 0.05, "Medium", "Low"))',
                  'link'     : None},
 
             'Budget Risk' :
@@ -155,7 +155,7 @@ ColData = { 'Status Month':
                  'type'     : 'PICKLIST',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,,,,,",
-                 'formula'  : '=IF([Cost Variance]@row < -50000, "High", IF([Cost Variance]@row < -5000, "Medium", "Low"))',
+                 'formula'  : '=IF(CPI@row < 0.9, "High", IF(CPI@row < 0.95, "Medium", "Low"))',
                  'link'     : None},
 
             'Schedule Risk' :
@@ -163,7 +163,7 @@ ColData = { 'Status Month':
                  'type'     : 'PICKLIST',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,,,,,",
-                 'formula'  : '=IF([Schedule Variance]@row < -50000, "High", IF([Schedule Variance]@row < -5000, "Medium", "Low"))',
+                 'formula'  : '=IF(SPI@row < 0.9, "High", IF(SPI@row < 0.95, "Medium", "Low"))',
                  'link'     : None},
 
             'Scope Risk' :
