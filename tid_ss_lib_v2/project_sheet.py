@@ -19,16 +19,24 @@ import datetime
 
 def find_columns(*, client, sheet, doFixes, cData):
 
+    # Look for columns we want to delete
+    for tod in project_sheet_columns.ToDelete:
+        for i in range(len(sheet.columns)):
+            if sheet.columns[i].title == tod:
+                if doFixes:
+                    print(f"Found column to delete {tod} at position {i+1}. Deleting")
+                    client.Sheets.delete_column(sheet.id, sheet.columns[i].id)
+                    return False
+
+    # Look for each expected column
     for k,v in cData.items():
         found = False
         for i in range(len(sheet.columns)):
             if sheet.columns[i].title == k:
                 found = True
                 if v['position'] != i:
-                    print(f"Column location mismatch for {k}. Expected at {v['position']}, found at {i}.")
+                    print(f"Column location mismatch for {k}. Expected at {v['position']+1}, found at {i+1}.")
                     v['position'] = i
-
-                #print(f"Found column {k} at position {v['position']}, with id {sheet.columns[i].id}")
 
         if not found:
             print(f"Column not found: {k}.")

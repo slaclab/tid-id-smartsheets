@@ -12,278 +12,223 @@
 import smartsheet
 import re
 from . import navigate
-
-# Set formats
-#
-# https://smartsheet-platform.github.io/api-docs/#formatting
-#
-# Colors 31 = Dark Blue
-#        26 = Dark Gray
-#        23 = Blue
-#        18 - Gray
-#           = White
-
-form = [ ",,,,,,,,,18,,,,,,,",      # 0
-        ",,,,,,,,,,,,,,,,",         # 1
-        ",,,,,,,,,18,,13,,,,,",     # 2
-        ",,,,,,,,,18,,13,2,1,2,,",  # 3
-        ",,,,,,,,,18,,13,2,1,2,,",  # 4
-        ",,,,,,,,,18,,13,2,1,2,,",  # 5
-        ",,,,,,,,,18,,13,2,1,2,,",  # 6
-        ",,,,,,,,,18,,13,2,1,2,,",  # 7
-        ",,,,,,,,,18,,13,2,1,2,,",  # 8
-        ",,,,,,,,,18,,13,2,1,2,,",  # 9
-        ",,,,,,,,,18,,13,2,1,2,,",  # 10
-        ",,,,,,,,,18,,13,2,1,2,,",  # 11
-        ",,,,,,,,,18,,,,,,,",       # 12
-        ",,,,,,,,,18,,,,,,,",       # 13
-        ",,,,,,,,,18,,,,,,,",       # 14
-        ",,,,,,,,,,,,,,,,",         # 15
-        ",,,,,,,,,,,,,,,," ]        # 16
-
-Columns = ['Status Month',  # 0
-           'Lookup PA',  # 1
-           'Monthly Actuals Date',  # 2
-           'Monthly Actuals From Finance',  # 3
-           'Total Actuals From Finance',  # 4
-           'Total Budget', # 5
-           'Actual Cost',  #  6
-           'Remaining Funds', # 7
-           'Cost Variance',  #  8
-           'Cost Variance With Contingency', # 9
-           'Schedule Variance', # 10
-           'Reporting Variance', # 11
-           'Tracking Risk',  # 12
-           'Budget Risk',  # 13
-           'Schedule Risk',  # 14
-           'Scope Risk',  # 15
-           'Description Of Status']  # 16
-
-RefName = None
-
-def fix_structure(*, client, div, sheet):
-    global refName
-
-    if len(sheet.columns) != 16:
-        print(f"   Can't fix tracking sheet. Got {len(sheet.columns)} Expect {16}.")
-        return False
-
-    print("   Fixing tracking sheet.")
-
-    col5 = smartsheet.models.Column({'title': Columns[5],
-                                     'type': 'TEXT_NUMBER',
-                                     'index': 5})
-
-    client.Sheets.add_columns(sheet.id, [col5])
-
-    return False
-
-    RefName = 'Actuals Range 1'
-
-    if div == 'id':
-        xref = smartsheet.models.CrossSheetReference({
-            'name': RefName,
-            'source_sheet_id': navigate.TID_ID_ACTUALS_SHEET,
-            'start_row_id': navigate.TID_ID_ACTUALS_START_ROW,
-            'end_row_id': navigate.TID_ID_ACTUALS_END_ROW, })
-
-    elif div == 'cds':
-        xref = smartsheet.models.CrossSheetReference({
-            'name': RefName,
-            'source_sheet_id': navigate.TID_CDS_ACTUALS_SHEET,
-            'start_row_id': navigate.TID_CDS_ACTUALS_START_ROW,
-            'end_row_id': navigate.TID_CDS_ACTUALS_END_ROW, })
-
-    client.Sheets.create_cross_sheet_reference(sheet.id, xref)
+from . import tracking_sheet_columns
 
 
-def check_structure(*, sheet):
+def find_columns(*, client, sheet, doFixes, tData):
 
-    # Check column count
-    if len(sheet.columns) != len(Columns):
-        print(f"   Wrong number of columns in tracking file: Got {len(sheet.columns)} Expect {len(Columns)}.")
-        return False
+    # Look for columns we want to delete
+    for tod in tracking_sheet_columns.ToDelete:
+        for i in range(len(sheet.columns)):
+            if sheet.columns[i].title == tod:
+                if doFixes:
+                    print(f"Found column to delete {tod} at position {i+1}. Deleting")
+                    client.Sheets.delete_column(sheet.id, sheet.columns[i].id)
+                    return False
 
-    else:
-        ret = True
+    # Look for each expected column
+    for k,v in tData.items():
+        found = False
+        for i in range(len(sheet.columns)):
+            if sheet.columns[i].title == k:
+                found = True
+                if v['position'] != i:
+                    print(f"Column location mismatch for {k}. Expected at {v['position']+1}, found at {i+1}.")
+                    v['position'] = i
 
-        for i,v in enumerate(Columns):
-            if sheet.columns[i].title != v:
-                print(f"   Mismatch tracking column name for col {i+1}. Got {sheet.columns[i].title}. Expect {v}.")
-                ret = False
+        if not found:
+            print(f"Column not found: {k}.")
 
-        return ret
+            if doFixes is True:
+                print(f"Adding column: {k}.")
+                col = smartsheet.models.Column({'title': k,
+                                                'type': v['type'],
+                                                'index': v['position']})
+
+                client.Sheets.add_columns(sheet.id, [col])
+
+            return False
+
+    return True
 
 
-def check_first_row(*, client, sheet, projectSheet, doFixes, cData):
-    global RefName
+def check_first_row(*, client, sheet, doFixes, tData, projectSheet, cData):
+    row = sheet.rows[0]
 
-    rowIdx = 0
+    relink = []
+
+    # Setup row update structure just in case
+    new_row = smartsheet.models.Row()
+    new_row.id = row.id
+
+    for k,v in tData.items():
+        doFormat = False
+        idx = v['position']
+
+        # First check format
+        if v['format'] is not None and row.cells[idx].format != v['format']:
+            print(f"   Incorrect format in row 0 cell {idx+1} in tracking file. Got {row.cells[idx].format} Exp {v['format']}")
+            doFormat = True
+
+        # Row has a formula
+        if v['formula'] is not None:
+            doRow = False
+
+            if not hasattr(row.cells[idx],'formula') or row.cells[idx].formula != v['formula']:
+                print(f"   Incorrect formula in row 0 cell {idx+1} in tracking file. Got {row.cells[idx].formula} Exp {v['formula']}")
+                doRow = True
+
+            if doRow or doFormat:
+                new_cell = smartsheet.models.Cell()
+                new_cell.column_id = sheet.columns[idx].id
+                new_cell.formula = v['formula']
+
+                if v['format'] is not None:
+                    new_cell.format = v['format']
+
+                new_cell.strict = False
+                new_row.cells.append(new_cell)
+
+        # Row has a forced value
+        elif v['forced'] is not None:
+            doRow = False
+
+            if (not (row.cells[idx].value is None and v['forced'] == '')) and (row.cells[idx].value is None or row.cells[idx].value != v['forced']):
+                print(f"   Incorrect value in row 0 cell {idx+1} in tracking file. Got {row.cells[idx].value} Exp {v['forced']}")
+                doRow = True
+
+            if doRow or doFormat:
+                new_cell = smartsheet.models.Cell()
+                new_cell.column_id = sheet.columns[idx].id
+                new_cell.value = v['forced']
+
+                if v['format'] is not None:
+                    new_cell.format = v['format']
+
+                new_cell.strict = False
+                new_row.cells.append(new_cell)
+
+        # Catch format only case
+        elif doFormat:
+
+            new_cell = smartsheet.models.Cell()
+            new_cell.column_id = sheet.columns[idx].id
+
+            if v['link'] is not None:
+                new_cell.value = smartsheet.models.ExplicitNull()
+                relink.add(k)
+            elif row.cells[idx].value is None:
+                new_cell.value = ''
+            else:
+                new_cell.value = row.cells[idx].value
+
+            new_cell.format = v['format']
+            new_cell.strict = False
+            new_row.cells.append(new_cell)
+
+    if doFixes and len(new_row.cells) != 0:
+        print("   Applying fixes to tracking row 0")
+        client.Sheets.update_rows(sheet.id, [new_row])
+
+    # Last check links
+
+    # Setup row update structure just in case
+    new_row = smartsheet.models.Row()
+    new_row.id = row.id
+
+    for k,v in tData.items():
+        idx = v['position']
+
+        if v['link'] is not None:
+
+            remCol = cData[v['link']]['position']
+
+            rowIdTar = projectSheet.rows[0].id
+            colIdTar = projectSheet.rows[0].cells[remCol].column_id
+            shtIdTar = projectSheet.id
+
+            if k in relink or row.cells[idx].link_in_from_cell is None or \
+                row.cells[idx].link_in_from_cell.row_id != rowIdTar or \
+                row.cells[idx].link_in_from_cell.column_id != colIdTar or \
+                row.cells[idx].link_in_from_cell.sheet_id != shtIdTar:
+
+                print(f"   Incorrect tracking link for row {row.row_number} column {k+1}.")
+
+                cell_link = smartsheet.models.CellLink()
+                cell_link.sheet_id  = shtIdTar
+                cell_link.row_id = rowIdTar
+                cell_link.column_id = colIdTar
+
+                new_cell = smartsheet.models.Cell()
+                new_cell.column_id = row.cells[idx].column_id
+                new_cell.value = smartsheet.models.ExplicitNull()
+                new_cell.link_in_from_cell = cell_link
+                new_row.cells.append(new_cell)
+
+    if doFixes and len(new_row.cells) != 0:
+        print(f"   Applying fixes to tracking row {row.row_number}.")
+        client.Sheets.update_rows(sheet.id, [new_row])
+
+
+def check_other_row(*, client, rowIdx, sheet, tData, doFixes):
     row = sheet.rows[rowIdx]
 
     # Setup row update structure just in case
     new_row = smartsheet.models.Row()
     new_row.id = row.id
 
-    links = { 5: cData['Total Budgeted Cost']['position'],
-              6: cData['Actual Cost']['position'],
-              7: cData['Remaining Funds']['position'],
-              8: cData['Cost Variance']['position'],
-              9: cData['Cost Variance With Contingency']['position'],
-              10: cData['Schedule Variance']['position'] }
+    for k,v in tData.items():
+        idx = v['position']
 
-    noChange = set([0, 1, 15, 16])
+        if (hasattr(row.cells[idx],'formula') and row.cells[idx].formula is not None) or \
+           (row.cells[idx].link_in_from_cell is not None) or \
+           ((row.cells[idx].format != v['format']) and not (v['format'] == ",,,,,,,,,,,,,,,," and row.cells[idx].format is None)):
 
-    if RefName is None:
-        if hasattr(row.cells[2],'formula'):
-            RefStr = re.findall(r"\{.*?\}",row.cells[2].formula)[0];
-            #if RefStr != '{Actuals Range 1}':
-                #print(f"   Reference mistmatch, got {RefStr}")
+            if hasattr(row.cells[idx],'formula') and row.cells[idx].formula is not None:
+                print(f"   Invalid formula in row {rowIdx+1} cell {idx+1} in tracking file. Formula = {row.cells[idx].formula}, Value = {row.cells[idx].value}")
+
+            if row.cells[idx].link_in_from_cell is not None:
+                print(f"   Invalid link in row {rowIdx+1} cell {idx+1} in tracking file. Value = {row.cells[idx].value}")
+
+            if (row.cells[idx].format != v['format']) and not (v['format'] == ",,,,,,,,,,,,,,,," and row.cells[idx].format is None):
+                print(f"   Incorrect format in row {rowIdx+1} cell {idx+1} in tracking file. Got '{row.cells[idx].format}' Expect v['format']")
+
+            new_cell = smartsheet.models.Cell()
+            new_cell.column_id = sheet.columns[idx].id
+
+            if row.cells[idx].value is None:
+                new_cell.value = ''
+            else:
+                new_cell.value = row.cells[idx].value
+
+            new_cell.format = v['format']
+            new_cell.strict = False
+            new_row.cells.append(new_cell)
+
+    if doFixes and len(new_row.cells) != 0:
+        print(f"   Applying fixes to tracking row {row.row_number}.")
+        client.Sheets.update_rows(sheet.id, [new_row])
+
+
+def check(*, client, sheet, projectSheet, tData, doFixes, cData, doDownload, div):
+
+    # First check structure
+    while True:
+        ret = find_columns(client=client, sheet=sheet, doFixes=doFixes, tData=tData )
+
+        if ret is False and doFixes is False:
+            return False
+
+        elif ret is True:
+            break
+
         else:
-            RefStr = '{Actuals Range 1}'
-    else:
-        RefStr = f"{Refname}"
+            sheet = client.Sheets.get_sheet(sheet.id, include='format')
 
-    #print(f"Using RefStr = {RefStr}")
-
-    formulas = {  2: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 5, false)',
-                  3: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 3, false)',
-                  4: '=VLOOKUP([Lookup PA]@row, ' + RefStr + ', 4, false)',
-                 11: '=([Actual Cost]@row - [Total Actuals From Finance]@row)',
-                 12: '=IF(ABS([Reporting Variance]@row) > 50000, "High", IF(ABS([Reporting Variance]@row) > 5000, "Medium", "Low"))',
-                 13: '=IF([Cost Variance]@row < -50000, "High", IF([Cost Variance]@row < -5000, "Medium", "Low"))',
-                 14: '=IF([Schedule Variance]@row < -50000, "High", IF([Schedule Variance]@row < -5000, "Medium", "Low"))' }
-
-    for k,v in formulas.items():
-        if ((not hasattr(row.cells[k],'formula')) or row.cells[k].formula != v) or row.cells[k].format != form[k]:
-
-            if not hasattr(row.cells[k],'formula'):
-                print(f"   Missing formula in row {rowIdx+1} cell {k+1} in tracking file. Expect {v}")
-
-            elif row.cells[k].formula != v:
-                print(f"   Incorrect formula in row {rowIdx+1} cell {k+1} in tracking file. Got {row.cells[k].formula} Expect {v}")
-
-            if row.cells[k].format != form[k]:
-                print(f"   Incorrect format in row {rowIdx+1} cell {k+1} in tracking file. Got '{row.cells[k].format}' Expect '{form[k]}'")
-
-            new_cell = smartsheet.models.Cell()
-            new_cell.column_id = sheet.columns[k].id
-            new_cell.formula = v
-            new_cell.format = form[k]
-            new_cell.strict = False
-            new_row.cells.append(new_cell)
-
-    for k in noChange:
-        if (row.cells[k].format != form[k]) and not (form[k] == ",,,,,,,,,,,,,,,," and row.cells[k].format is None):
-            print(f"   Incorrect format in row {rowIdx+1} cell {k+1} in tracking file. Got '{row.cells[k].format}' Expect '{form[k]}'")
-            new_cell = smartsheet.models.Cell()
-            new_cell.column_id = sheet.columns[k].id
-
-            if row.cells[k].value is None:
-                new_cell.value = ''
-            else:
-                new_cell.value = row.cells[k].value
-            new_cell.format = form[k]
-            new_cell.strict = False
-            new_row.cells.append(new_cell)
-
-    # Need re-link
-    relink = set()
-
-    for k,v in links.items():
-        if row.cells[k].format != form[k]:
-            print(f"   Incorrect format in row {rowIdx+1} cell {k+1} in tracking file. Got '{row.cells[k].format}' Expect '{form[k]}'")
-            relink.add(k)
-            new_cell = smartsheet.models.Cell()
-            new_cell.column_id = row.cells[k].column_id
-            new_cell.value = smartsheet.models.ExplicitNull()
-            new_cell.format = form[k]
-            new_row.cells.append(new_cell)
-
-    if doFixes and len(new_row.cells) != 0:
-        print(f"   Applying fixes to tracking row {row.row_number}.")
-        client.Sheets.update_rows(sheet.id, [new_row])
-
-    # Setup row update structure just in case
-    new_row = smartsheet.models.Row()
-    new_row.id = row.id
-
-    for k, v in links.items():
-        rowIdTar = projectSheet.rows[0].id
-        colIdTar = projectSheet.rows[0].cells[v].column_id
-        shtIdTar = projectSheet.id
-
-        if k in relink or row.cells[k].link_in_from_cell is None or \
-            row.cells[k].link_in_from_cell.row_id != rowIdTar or \
-            row.cells[k].link_in_from_cell.column_id != colIdTar or \
-            row.cells[k].link_in_from_cell.sheet_id != shtIdTar:
-
-            print(f"   Incorrect tracking link for row {row.row_number} column {k+1}.")
-
-            cell_link = smartsheet.models.CellLink()
-            cell_link.sheet_id  = shtIdTar
-            cell_link.row_id = rowIdTar
-            cell_link.column_id = colIdTar
-
-            new_cell = smartsheet.models.Cell()
-            new_cell.column_id = row.cells[k].column_id
-            new_cell.value = smartsheet.models.ExplicitNull()
-            new_cell.link_in_from_cell = cell_link
-            new_row.cells.append(new_cell)
-
-    if doFixes and len(new_row.cells) != 0:
-        print(f"   Applying fixes to tracking row {row.row_number}.")
-        client.Sheets.update_rows(sheet.id, [new_row])
-
-
-def check_other_row(*, client, rowIdx, sheet, doFixes):
-    row = sheet.rows[rowIdx]
-
-    # Setup row update structure just in case
-    new_row = smartsheet.models.Row()
-    new_row.id = row.id
-
-    for k in range(len(Columns)):
-
-        if (hasattr(row.cells[k],'formula') and row.cells[k].formula is not None) or \
-           (row.cells[k].link_in_from_cell is not None) or \
-           ((row.cells[k].format != form[k]) and not (form[k] == ",,,,,,,,,,,,,,,," and row.cells[k].format is None)):
-
-            if hasattr(row.cells[k],'formula') and row.cells[k].formula is not None:
-                print(f"   Invalid formula in row {rowIdx+1} cell {k+1} in tracking file. Formula = {row.cells[k].formula}, Value = {row.cells[k].value}")
-
-            if row.cells[k].link_in_from_cell is not None:
-                print(f"   Invalid link in row {rowIdx+1} cell {k+1} in tracking file. Value = {row.cells[k].value}")
-
-            if (row.cells[k].format != form[k]) and not (form[k] == ",,,,,,,,,,,,,,,," and row.cells[k].format is None):
-                print(f"   Incorrect format in row {rowIdx+1} cell {k+1} in tracking file. Got '{row.cells[k].format}' Expect '{form[k]}'")
-
-            new_cell = smartsheet.models.Cell()
-            new_cell.column_id = sheet.columns[k].id
-
-            if row.cells[k].value is None:
-                new_cell.value = ''
-            else:
-                new_cell.value = row.cells[k].value
-
-            new_cell.format = form[k]
-            new_cell.strict = False
-            new_row.cells.append(new_cell)
-
-    if doFixes and len(new_row.cells) != 0:
-        print(f"   Applying fixes to tracking row {row.row_number}.")
-        client.Sheets.update_rows(sheet.id, [new_row])
-
-
-def check(*, client, sheet, projectSheet, doFixes, div, cData, doDownload):
-    if not check_structure(sheet=sheet):
-        #fix_structure(client=client, div=div, sheet=sheet)
-        return False
-
-    check_first_row(client=client, sheet=sheet, projectSheet=projectSheet, doFixes=doFixes, cData=cData)
+    check_first_row(client=client, sheet=sheet, projectSheet=projectSheet, doFixes=doFixes, cData=cData, tData=tData)
 
     for i in range(1,13):
-        check_other_row(client=client, rowIdx=i, sheet=sheet, doFixes=doFixes)
+        check_other_row(client=client, rowIdx=i, sheet=sheet, tData=tData, doFixes=doFixes)
 
     if doDownload is not False:
         client.Sheets.get_sheet_as_excel(sheet.id, doDownload)
