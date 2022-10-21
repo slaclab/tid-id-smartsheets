@@ -86,24 +86,56 @@ ColData = { 'Status Month':
                  'formula'  : None,
                  'link'     : 'Remaining Funds'},
 
-            'Cost Variance' :
+            'Earned Value' :
                { 'position' : 8,
+                 'type'     : 'TEXT_NUMBER',
+                 'forced'   : None,
+                 'format'   : ",,,,,,,,,18,,13,2,1,2,,",
+                 'formula'  : None,
+                 'link'     : 'Earned Value'},
+
+            'Planned Earned Value' :
+               { 'position' : 9,
+                 'type'     : 'TEXT_NUMBER',
+                 'forced'   : None,
+                 'format'   : ",,,,,,,,,18,,13,2,1,2,,",
+                 'formula'  : None,
+                 'link'     : 'Planned Earned Value'},
+
+            'Cost Variance' :
+               { 'position' : 10,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,13,2,1,2,,",
                  'formula'  : None,
                  'link'     : 'Cost Variance'},
 
+            'CPI' :
+               { 'position' : 11,
+                 'type'     : 'TEXT_NUMBER',
+                 'forced'   : None,
+                 'format'   : ",,,,,,,,,18,,,2,1,1,,",
+                 'formula'  : "=[Earned Value]@row / [Actual Cost]@row",
+                 'link'     : None},
+
             'Schedule Variance' :
-               { 'position' : 9,
+               { 'position' : 12,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,13,2,1,2,,",
                  'formula'  : None,
                  'link'     : 'Schedule Variance'},
 
+            'SPI' :
+               { 'position' : 13,
+                 'type'     : 'TEXT_NUMBER',
+                 'forced'   : None,
+                 'format'   : ",,,,,,,,,18,,,2,1,1,,",
+                 'formula'  : "=[Earned Value]@row / [Planned Earned Value]@row",
+                 'link'     : None},
+
             'Reporting Variance' :
-               { 'position' : 10,
+               { 'position' : 14,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,13,2,1,2,,",
@@ -111,7 +143,7 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'Tracking Risk' :
-               { 'position' : 11,
+               { 'position' : 15,
                  'type'     : 'PICKLIST',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,,,,,",
@@ -119,7 +151,7 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'Budget Risk' :
-               { 'position' : 12,
+               { 'position' : 16,
                  'type'     : 'PICKLIST',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,,,,,",
@@ -127,7 +159,7 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'Schedule Risk' :
-               { 'position' : 13,
+               { 'position' : 17,
                  'type'     : 'PICKLIST',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,,,,,",
@@ -135,7 +167,7 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'Scope Risk' :
-               { 'position' : 14,
+               { 'position' : 18,
                  'type'     : 'PICKLIST',
                  'forced'   : None,
                  'format'   : None,
@@ -143,7 +175,7 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'Description Of Status' :
-               { 'position' : 15,
+               { 'position' : 19,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : 'My Status Description',
                  'format'   : None,

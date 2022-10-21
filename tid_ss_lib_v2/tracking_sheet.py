@@ -22,7 +22,7 @@ def find_columns(*, client, sheet, doFixes, tData):
         for i in range(len(sheet.columns)):
             if sheet.columns[i].title == tod:
                 if doFixes:
-                    print(f"Found column to delete {tod} at position {i+1}. Deleting")
+                    print(f"Found tracking column to delete {tod} at position {i+1}. Deleting")
                     client.Sheets.delete_column(sheet.id, sheet.columns[i].id)
                     return False
 
@@ -33,14 +33,14 @@ def find_columns(*, client, sheet, doFixes, tData):
             if sheet.columns[i].title == k:
                 found = True
                 if v['position'] != i:
-                    print(f"Column location mismatch for {k}. Expected at {v['position']+1}, found at {i+1}.")
+                    print(f"Tracking column location mismatch for {k}. Expected at {v['position']+1}, found at {i+1}.")
                     v['position'] = i
 
         if not found:
-            print(f"Column not found: {k}.")
+            print(f"Tracking column not found: {k}.")
 
             if doFixes is True:
-                print(f"Adding column: {k}.")
+                print(f"Adding tracking column: {k}.")
                 col = smartsheet.models.Column({'title': k,
                                                 'type': v['type'],
                                                 'index': v['position']})
@@ -116,7 +116,7 @@ def check_first_row(*, client, sheet, doFixes, tData, projectSheet, cData):
 
             if v['link'] is not None:
                 new_cell.value = smartsheet.models.ExplicitNull()
-                relink.add(k)
+                relink.append(k)
             elif row.cells[idx].value is None:
                 new_cell.value = ''
             else:
@@ -152,7 +152,7 @@ def check_first_row(*, client, sheet, doFixes, tData, projectSheet, cData):
                 row.cells[idx].link_in_from_cell.column_id != colIdTar or \
                 row.cells[idx].link_in_from_cell.sheet_id != shtIdTar:
 
-                print(f"   Incorrect tracking link for row {row.row_number} column {k+1}.")
+                print(f"   Incorrect tracking link for row {row.row_number} column {idx+1}.")
 
                 cell_link = smartsheet.models.CellLink()
                 cell_link.sheet_id  = shtIdTar
@@ -191,7 +191,7 @@ def check_other_row(*, client, rowIdx, sheet, tData, doFixes):
                 print(f"   Invalid link in row {rowIdx+1} cell {idx+1} in tracking file. Value = {row.cells[idx].value}")
 
             if (row.cells[idx].format != v['format']) and not (v['format'] == ",,,,,,,,,,,,,,,," and row.cells[idx].format is None):
-                print(f"   Incorrect format in row {rowIdx+1} cell {idx+1} in tracking file. Got '{row.cells[idx].format}' Expect v['format']")
+                print(f"   Incorrect format in row {rowIdx+1} cell {idx+1} in tracking file. Got '{row.cells[idx].format}' Expect {v['format']}")
 
             new_cell = smartsheet.models.Cell()
             new_cell.column_id = sheet.columns[idx].id
