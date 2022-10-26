@@ -65,6 +65,9 @@ class ProjectFix(QWidget):
         self.do_cost = QCheckBox()
         fl.addRow('Do Cost',self.do_cost)
 
+        self.do_assign = QCheckBox()
+        fl.addRow('Do Assign Check',self.do_assign)
+
         fix_help = QTextEdit()
         fix_help.setPlainText("Check Do Fixes to apply fixes,\notherwise the script will just report problems.")
         fix_help.setReadOnly(True)
@@ -93,6 +96,7 @@ class ProjectFix(QWidget):
             folder = int(self.folder_id.text())
             doFixes = self.do_fixes.isChecked()
             doCost  = self.do_cost.isChecked()
+            doAssign = self.do_assign.isChecked()
             tid_ss_lib_v2.navigate.check_project(client=client, div=self.div, folderId=folder, doFixes=doFixes, doCost=doCost)
             print("Done!")
         except Exception as msg:
