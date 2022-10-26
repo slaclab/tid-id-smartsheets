@@ -43,7 +43,7 @@ ColData = { 'Task': { 'position'    : 0, 'type': 'TEXT_NUMBER',
                            'ms_parent'    : { 'forced': None,          'default': None, 'format': ",,,,,,,,,23,,,,,,1,",    'formula' : None },
                            'ms_task'      : { 'forced': None,          'default': None, 'format': None,                     'formula' : None },
                            'labor_top'    : { 'forced': 'LAB_RATE',    'default': None, 'format': ",,1,,,,,,2,31,,,,,,1,",  'formula' : None },
-                           'labor_parent' : { 'forced': '',            'default': None, 'format': ",,,,,,,,,23,,,,,,1,",    'formula' : None },
+                           'labor_parent' : { 'forced': None,          'default': None, 'format': ",,,,,,,,,23,,,,,,1,",    'formula' : None },
                            'labor_task'   : { 'forced': None,          'default': None, 'format': None,                     'formula' : None }, },
 
            'Budgeted Quantity': { 'position'     : 2, 'type': 'TEXT_NUMBER',
