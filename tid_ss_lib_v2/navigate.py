@@ -69,7 +69,7 @@ def get_folder_data(*, client, div, folderId, path=None):
     return ret
 
 
-def check_project(*, client, div, folderId, doFixes, doCost=False, doDownload=False, path=None, doAssign=False):
+def check_project(*, client, div, folderId, doFixes, doCost=False, doDownload=False, path=None, doTask=False):
     fdata = get_folder_data(client=client, div=div, folderId=folderId)
 
     if path is not None:
@@ -109,7 +109,7 @@ def check_project(*, client, div, folderId, doFixes, doCost=False, doDownload=Fa
     tData = copy.deepcopy(tracking_sheet_columns.ColData)
 
     # Check project file
-    ret = project_sheet.check(client=client, div=div, sheet=fdata['sheets']['Project'], doFixes=doFixes, cData=cData, doCost=doCost, name=fdata['folder'].name, doDownload=doDownload, doAssign=doAssign)
+    ret = project_sheet.check(client=client, div=div, sheet=fdata['sheets']['Project'], doFixes=doFixes, cData=cData, doCost=doCost, name=fdata['folder'].name, doDownload=doDownload, doTask=doTask)
 
     # Fix tracking file
     if ret:

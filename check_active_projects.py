@@ -59,11 +59,11 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--doAssign",
+    "--doTask",
     action   = 'store_true',
     required = False,
     default  = False,
-    help     = "Flag to check for empty task assignments.",
+    help     = "Flag to check for empty task assignments & long duration tasks.",
 )
 
 parser.add_argument(
@@ -71,7 +71,7 @@ parser.add_argument(
     type     = str,
     required = False,
     default  = None,
-    help     = "Flag to generate a backup"
+    help     = "Pass backup director to generate a backup"
 )
 
 
@@ -113,5 +113,5 @@ for div in args.div:
         lst.append(p['id'])
 
     for p in lst:
-        tid_ss_lib_v2.navigate.check_project(client=client, div=div, folderId=p, doFixes=args.fix, doCost=args.doCost, doDownload=doDownload, doAssign=args.doAssign)
+        tid_ss_lib_v2.navigate.check_project(client=client, div=div, folderId=p, doFixes=args.fix, doCost=args.doCost, doDownload=doDownload, doTask=args.doTask)
 

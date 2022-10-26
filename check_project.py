@@ -55,6 +55,30 @@ parser.add_argument(
     help     = "Folder ID to check/fix. Right click on folder, select properties and copy 'Folder ID'",
 )
 
+parser.add_argument(
+    "--doCost",
+    action   = 'store_true',
+    required = False,
+    default  = False,
+    help     = "Flag to generate cost tables.",
+)
+
+parser.add_argument(
+    "--doTask",
+    action   = 'store_true',
+    required = False,
+    default  = False,
+    help     = "Flag to check for empty task assignments & long duration tasks.",
+)
+
+parser.add_argument(
+    "--backup",
+    type     = str,
+    required = False,
+    default  = None,
+    help     = "Pass backup director to generate a backup"
+)
+
 # Get the arguments
 args = parser.parse_args()
 
@@ -62,5 +86,5 @@ client = smartsheet.Smartsheet(args.key)
 print("")
 
 for p in args.folder:
-    tid_ss_lib_v2.navigate.check_project(client=client,div=args.div, folderId=int(p), doFixes=args.fix)
+    tid_ss_lib_v2.navigate.check_project(client=client,div=args.div, folderId=int(p), doFixes=args.fix, doCost=args.doCost, doDownload=args.backup, doTask=args.doTask)
 
