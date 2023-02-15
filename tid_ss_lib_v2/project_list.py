@@ -160,6 +160,15 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
     if ret is not None:
         new_row.cells.append(ret)
 
+    # Check Budget Index
+    col = 27
+    exp = '=[Total Budget]@row / [Real Budget]@row'
+
+    ret = check_cell_formula(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=col, expect=exp)
+
+    if ret is not None:
+        new_row.cells.append(ret)
+
     if doFixes and len(new_row.cells) != 0:
         print(f"   Applying fixes to row {rowIdx+1}.")
         client.Sheets.update_rows(sheet.id, [new_row])
