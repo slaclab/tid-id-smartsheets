@@ -53,6 +53,13 @@ def find_columns(*, client, sheet, doFixes, cData):
 
     return True
 
+def value_is_zero(value):
+    if value is None:
+        return True
+    elif isinstance(value,str) and 'd' in value:
+        return True if value == '0d' else False
+    else:
+        return int(value) == 0
 
 def check_row(*, client, sheet, rowIdx, key, div, cData, doFixes, doTask):
 
@@ -66,6 +73,14 @@ def check_row(*, client, sheet, rowIdx, key, div, cData, doFixes, doTask):
     # Setup row update structure just in case
     new_row = smartsheet.models.Row()
     new_row.id = row.id
+
+    # Detect labor milestones
+    if key == 'labor_task':
+        durIdx = cData['Budgeted Quantity']['position']
+        qtyIdx = cData['Duration']['position']
+
+        if value_is_zero(row.cells[qtyIdx].value) and value_is_zero(row.cells[durIdx].value):
+            key = 'labor_mstone'
 
     for k,v in cData.items():
         doFormat = False
