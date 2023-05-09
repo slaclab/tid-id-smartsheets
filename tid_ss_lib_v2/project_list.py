@@ -32,15 +32,10 @@ def get_project_list(*, client, div):
     sheet = client.Sheets.get_sheet(list_sheet, include='format')
 
     ret = []
-    done = False
 
     for row in sheet.rows:
 
-        if row.cells[0].value is None or row.cells[0].value == "":
-            done = True
-
-        if done is False and \
-           row.cells[0].value is not None and row.cells[0].value != '' and \
+        if row.cells[0].value is not None and row.cells[0].value != '' and \
            row.cells[1].value is not None and row.cells[1].value != '' and \
            row.cells[3].value is not None and row.cells[3].value != '' and \
            row.cells[7].value is not None and row.cells[7].value != '' and \

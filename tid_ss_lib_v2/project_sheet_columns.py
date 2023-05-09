@@ -146,7 +146,7 @@ ColData = { 'Task': { 'position'    : 0, 'type': 'TEXT_NUMBER',
                                     'labor_top'    : { 'forced': '',   'default': None, 'format': None,                       'formula': None },
                                     'labor_parent' : { 'forced': '',   'default': None, 'format': None,                       'formula': None },
                                     'labor_task'   : { 'forced': None, 'default': None, 'format': ",,,,,,,,,18,,,,,3,,",      'formula': '=[Budgeted Quantity]@row / (Duration@row * 8)' },
-                                    'labor_mstone' : { 'forced': '0',  'default': None, 'format': ",,,,,,,,,18,,,,,3,,",      'formula': None }, },
+                                    'labor_mstone' : { 'forced': 0.0,  'default': None, 'format': ",,,,,,,,,18,,,,,3,,",      'formula': None }, },
 
            'Total Budgeted Cost':   { 'position'     : 12, 'type': 'TEXT_NUMBER',
                                       'top'          : { 'forced': None, 'default': None, 'format': ",3,1,,,,,,2,39,,13,2,1,2,,", 'formula': '=SUM(CHILDREN())'},
