@@ -53,14 +53,6 @@ def find_columns(*, client, sheet, doFixes, cData):
 
     return True
 
-def value_is_zero(value):
-    if value is None:
-        return True
-    elif isinstance(value,str) and 'd' in value:
-        return True if value == '0d' else False
-    else:
-        return int(value) == 0
-
 def check_row(*, client, sheet, rowIdx, key, div, cData, doFixes, doTask):
 
     if div == 'id':
@@ -74,12 +66,16 @@ def check_row(*, client, sheet, rowIdx, key, div, cData, doFixes, doTask):
     new_row = smartsheet.models.Row()
     new_row.id = row.id
 
+    # Skip empty rows
+    if row.cells[0].value is None or row.cells[0].value == "":
+        print(f"   Skipping empty row {rowIdx+1}")
+        return
+
     # Detect labor milestones
     if key == 'labor_task':
-        durIdx = cData['Budgeted Quantity']['position']
-        qtyIdx = cData['Duration']['position']
+        notesIdx = cData['Item Notes']['position']
 
-        if value_is_zero(row.cells[qtyIdx].value) and value_is_zero(row.cells[durIdx].value):
+        if row.cells[notesIdx].value is not None and isinstance(row.cells[notesIdx].value,str) and "Milestone" in row.cells[notesIdx].value:
             key = 'labor_mstone'
 
     for k,v in cData.items():
