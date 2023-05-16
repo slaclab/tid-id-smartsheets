@@ -177,6 +177,9 @@ def check_other_row(*, client, rowIdx, sheet, tData, doFixes):
     new_row = smartsheet.models.Row()
     new_row.id = row.id
 
+    if row.cells[0].value is None or row.cells[0].value == "":
+        return
+
     for k,v in tData.items():
         idx = v['position']
 
@@ -227,7 +230,7 @@ def check(*, client, sheet, projectSheet, tData, doFixes, cData, doDownload, div
 
     check_first_row(client=client, sheet=sheet, projectSheet=projectSheet, doFixes=doFixes, cData=cData, tData=tData)
 
-    for i in range(1,13):
+    for i in range(1, len(sheet.rows)):
         check_other_row(client=client, rowIdx=i, sheet=sheet, tData=tData, doFixes=doFixes)
 
     if doDownload is not False:
