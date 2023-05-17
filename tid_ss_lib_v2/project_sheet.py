@@ -244,7 +244,7 @@ def cost_labor(*, sheet, rowIdx, cData, laborTable):
             days += 1
 
     # Compute hours per day
-    hoursPerDay = hours / days
+    hoursPerDay = 0 if days == 0 else hours / days
 
     # Iterate through the weekdays
     for n in range(int((endDate - startDate).days)+1):
