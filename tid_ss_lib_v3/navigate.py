@@ -32,7 +32,7 @@ TID_ID_ACTUALS_END_ROW   = 1256792717715332
 TID_ID_RESOURCE_FOLDER   = 6665944920549252
 TID_ID_TEMPLATE_FOLDER   = 5079595864090500
 
-TID_ID_RATE_NOTE = 'TID-ID Eng Rate FY23 $291; Tech Rate FY23: $167'
+TID_ID_RATE_NOTE = 'TID-ID Eng Rate FY23 $287; Tech Rate FY23: $168'
 
 TID_CDS_ACTIVE_FOLDER     = 8506630263334788
 TID_CDS_LIST_SHEET        = 6128393147180932
@@ -51,7 +51,7 @@ OVERHEAD_NOTE = '12.25% Overhead'
 def get_folder_data(*, client, div, folderId, path=None):
     folder = client.Folders.get_folder(folderId)
 
-    StandardSheets = ['Project', 'Tracking', 'Actuals', 'Report', 'Dashboard', 'PM Scoring', 'Risk Registry']
+    StandardSheets = ['Project', 'Tracking', 'Actuals', 'PM Scoring', 'Risk Registry']
 
     ret = {'folder': folder}
 

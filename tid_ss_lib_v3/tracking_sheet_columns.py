@@ -75,8 +75,8 @@ ColData = { 'Status Month':
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,13,2,1,2,,",
-                 'formula'  : None,
-                 'link'     : 'Remaining Funds'},
+                 'formula'  : '=[Total Budget]@row - [Total Actuals From Finance]@row',
+                 'link'     : None},
 
             'Earned Value' :
                { 'position' : 7,
@@ -99,15 +99,15 @@ ColData = { 'Status Month':
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,13,2,1,2,,",
-                 'formula'  : None,
-                 'link'     : 'Cost Variance'},
+                 'formula'  : '=[Earned Value]@row - [Total Actuals From Finance]@row',
+                 'link'     : None},
 
             'CPI' :
                { 'position' : 10,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,2,1,1,,",
-                 'formula'  : "=[Earned Value]@row / ([Actual Cost]@row + 0.01)",
+                 'formula'  : "=[Earned Value]@row / ([Total Actuals From Finance]@row + 0.01)",
                  'link'     : None},
 
             'Schedule Variance' :
