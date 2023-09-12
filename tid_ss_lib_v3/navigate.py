@@ -32,7 +32,7 @@ TID_ID_ACTUALS_END_ROW   = 1256792717715332
 TID_ID_RESOURCE_FOLDER   = 6665944920549252
 TID_ID_TEMPLATE_FOLDER   = 5079595864090500
 
-TID_ID_RATE_NOTE = 'TID-ID Eng Rate FY23 $287; Tech Rate FY23: $168'
+TID_ID_RATE_NOTE = 'TID-ID Eng Rate FY23 $297; Tech Rate FY23: $173'
 
 TID_CDS_ACTIVE_FOLDER     = 8506630263334788
 TID_CDS_LIST_SHEET        = 6128393147180932
@@ -51,7 +51,9 @@ OVERHEAD_NOTE = '12.25% Overhead'
 def get_folder_data(*, client, div, folderId, path=None):
     folder = client.Folders.get_folder(folderId)
 
-    StandardSheets = ['Project', 'Tracking', 'Actuals', 'PM Scoring', 'Risk Registry']
+    StandardSheets  = ['Project', 'Tracking', 'Actuals', 'PM Scoring', 'Risk Registry']
+    StandardSights  = ['Dashboard']
+    StandardReports = ['Report']
 
     ret = {'folder': folder}
 
@@ -60,11 +62,23 @@ def get_folder_data(*, client, div, folderId, path=None):
     ret['name'] = folder.name
     ret['url'] = folder.permalink
     ret['sheets'] = {k: None for k in StandardSheets}
+    ret['sights'] = {k: None for k in StandardSights}
+    ret['reports'] = {k: None for k in StandardReports}
 
     for s in folder.sheets:
         for k in StandardSheets:
             if k == s.name[-len(k):]:
                 ret['sheets'][k] = s
+
+    for s in folder.reports:
+        for k in StandardReports:
+            if k == s.name[-len(k):]:
+                ret['reports'][k] = s
+
+    for s in folder.sights:
+        for k in StandardSights:
+            if k == s.name[-len(k):]:
+                ret['sights'][k] = s
 
     return ret
 
@@ -96,6 +110,30 @@ def check_project(*, client, div, folderId, doFixes, doCost=False, doDownload=Fa
                 client.Sheets.update_sheet(v.id, smartsheet.models.Sheet({'name': fdata['folder'].name + ' ' + k}))
             else:
                 return
+
+    for k, v in fdata['reports'].items():
+
+        # Copy file if it is missing
+        if v is None:
+            print(f"   Project is missing '{k}' file.")
+            return
+
+        # Check for valid naming, rename if need be
+        elif 'Template Set ' not in fdata['folder'].name and not v.name.startswith(fdata['folder'].name):
+            print(f"   Bad report name {v.name}. Please rename manually.")
+            return
+
+    for k, v in fdata['sights'].items():
+
+        # Copy file if it is missing
+        if v is None:
+            print(f"   Project is missing '{k}' file.")
+            return
+
+        # Check for valid naming, rename if need be
+        elif 'Template Set ' not in fdata['folder'].name and not v.name.startswith(fdata['folder'].name):
+            print(f"   Bad sight name {v.name}. Please rename manually.")
+            return
 
     # Refresh folder data, needed if new files were copied over
     fdata = get_folder_data(client=client, div=div, folderId=folderId)
