@@ -10,8 +10,8 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
-import tid_ss_lib_v2.navigate
-import tid_ss_lib_v2.project_list
+import tid_ss_lib_v3.navigate
+import tid_ss_lib_v3.project_list
 import smartsheet
 import os
 import argparse
@@ -105,13 +105,13 @@ for div in args.div:
         doDownload = False
 
     if div == 'id':
-        lst = [tid_ss_lib_v2.navigate.TID_ID_TEMPLATE_FOLDER]
+        lst = [tid_ss_lib_v3.navigate.TID_ID_TEMPLATE_FOLDER]
     elif div == 'cds':
-        lst = [tid_ss_lib_v2.navigate.TID_CDS_TEMPLATE_FOLDER]
+        lst = [tid_ss_lib_v3.navigate.TID_CDS_TEMPLATE_FOLDER]
 
-    for p in tid_ss_lib_v2.project_list.get_project_list(client=client, div=div):
+    for p in tid_ss_lib_v3.project_list.get_project_list(client=client, div=div):
         lst.append(p['id'])
 
     for p in lst:
-        tid_ss_lib_v2.navigate.check_project(client=client, div=div, folderId=p, doFixes=args.fix, doCost=args.doCost, doDownload=doDownload, doTask=args.doTask)
+        tid_ss_lib_v3.navigate.check_project(client=client, div=div, folderId=p, doFixes=args.fix, doCost=args.doCost, doDownload=doDownload, doTask=args.doTask)
 

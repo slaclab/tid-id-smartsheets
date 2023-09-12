@@ -10,8 +10,8 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
-import tid_ss_lib_v2.navigate
-import tid_ss_lib_v2.resource_sheet
+import tid_ss_lib_v3.navigate
+import tid_ss_lib_v3.resource_sheet
 import smartsheet
 import os
 import argparse
@@ -46,5 +46,5 @@ args = parser.parse_args()
 
 client = smartsheet.Smartsheet(args.key)
 
-tid_ss_lib_v2.resource_sheet.check_resource_files(client=client,div=args.div)
+tid_ss_lib_v3.resource_sheet.check_resource_files(client=client,div=args.div)
 
