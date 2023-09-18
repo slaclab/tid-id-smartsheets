@@ -333,7 +333,7 @@ def check(*, client, sheet, doFixes, div, cData, doCost, name, doDownload, doTas
     if doCost:
         write_cost_table(name=name, laborTable=laborTable, msTable=msTable)
 
-    if doDownload is not False:
+    if isinstance(doDownload,str):
         client.Sheets.get_sheet_as_excel(sheet.id, doDownload)
 
     return True

@@ -233,6 +233,6 @@ def check(*, client, sheet, projectSheet, tData, doFixes, cData, doDownload, div
     for i in range(1, len(sheet.rows)):
         check_other_row(client=client, rowIdx=i, sheet=sheet, tData=tData, doFixes=doFixes)
 
-    if doDownload is not False:
+    if isinstance(doDownload,str):
         client.Sheets.get_sheet_as_excel(sheet.id, doDownload)
 

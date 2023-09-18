@@ -97,7 +97,7 @@ ColData = { 'Task': { 'position'    : 0, 'type': 'TEXT_NUMBER',
                              'labor_top'    : { 'forced': '',   'default': None, 'format': ",,1,,,,,,2,31,,,,,,,",  'formula': None },
                              'labor_parent' : { 'forced': '',   'default': None, 'format': ",,,,,,,,,23,,,,,,,",    'formula': None },
                              'labor_task'   : { 'forced': None, 'default': None, 'format': None,                    'formula': None },
-                             'labor_mstone' : { 'forced': None, 'default': None, 'format': ",,,,,,,,,7,,,,,,1,",    'formula': None }, },
+                             'labor_mstone' : { 'forced': None, 'default': None, 'format': None,                    'formula': None }, },
 
            'Start': { 'position'     : 7, 'type': 'DATETIME',
                       'top'          : { 'forced': None, 'default': None, 'format': None, 'formula': None },
