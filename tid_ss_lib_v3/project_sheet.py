@@ -53,7 +53,7 @@ def find_columns(*, client, sheet, doFixes, cData):
 
     return True
 
-def check_row(*, client, sheet, rowIdx, key, div, cData, doFixes, doTask):
+def check_row(*, client, sheet, rowIdx, key, div, cData, doFixes, doTask, resources):
 
     if div == 'id':
         laborRate = navigate.TID_ID_RATE_NOTE
@@ -163,6 +163,12 @@ def check_row(*, client, sheet, rowIdx, key, div, cData, doFixes, doTask):
         print(f"   Applying fixes to project row {rowIdx+1} {key}.")
         client.Sheets.update_rows(sheet.id, [new_row])
 
+    # Extract resource list
+    if resources is not None:
+        res = row.cells[cData['Assigned To']['position']].value
+        if isinstance(res,str):
+            resources.add(row.cells[cData['Assigned To']['position']].value)
+
     # Check for tasks with non zero hours and not assigned
     if doTask and key == 'labor_task':
         tsk = row.cells[cData['Task']['position']].value
@@ -267,7 +273,7 @@ def cost_labor(*, sheet, rowIdx, cData, laborTable):
             laborTable[k][rate] += hoursPerDay
 
 
-def check(*, client, sheet, doFixes, div, cData, doCost, name, doDownload, doTask):
+def check(*, client, sheet, doFixes, div, cData, doCost, name, doDownload, doTask, resources):
     inLabor = False
     inMS = False
     msTable = {}
@@ -287,7 +293,7 @@ def check(*, client, sheet, doFixes, div, cData, doCost, name, doDownload, doTas
             sheet = client.Sheets.get_sheet(sheet.id, include='format')
 
     # First do row 0
-    check_row(client=client, sheet=sheet, rowIdx=0, key='top', div=div, cData=cData, doFixes=doFixes, doTask=doTask)
+    check_row(client=client, sheet=sheet, rowIdx=0, key='top', div=div, cData=cData, doFixes=doFixes, doTask=doTask, resources=None)
 
     # First walk through the rows and create a parent list
     parents = set()
@@ -299,12 +305,12 @@ def check(*, client, sheet, doFixes, div, cData, doCost, name, doDownload, doTas
 
         # MS Section
         if sheet.rows[rowIdx].cells[0].value == 'M&S':
-            check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='ms_top', div=div, cData=cData, doFixes=doFixes, doTask=doTask)
+            check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='ms_top', div=div, cData=cData, doFixes=doFixes, doTask=doTask, resources=None)
             inMS = True
             inLabor = False
 
         elif sheet.rows[rowIdx].cells[0].value == 'Labor':
-            check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='labor_top', div=div, cData=cData, doFixes=doFixes, doTask=doTask)
+            check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='labor_top', div=div, cData=cData, doFixes=doFixes, doTask=doTask, resources=None)
             inMS = False
             inLabor = True
 
@@ -312,9 +318,9 @@ def check(*, client, sheet, doFixes, div, cData, doCost, name, doDownload, doTas
 
             # In parent
             if sheet.rows[rowIdx].id in parents:
-                check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='ms_parent', div=div, cData=cData, doFixes=doFixes, doTask=doTask)
+                check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='ms_parent', div=div, cData=cData, doFixes=doFixes, doTask=doTask, resources=None)
             else:
-                check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='ms_task', div=div, cData=cData, doFixes=doFixes, doTask=doTask)
+                check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='ms_task', div=div, cData=cData, doFixes=doFixes, doTask=doTask, resources=None)
                 if doCost:
                     cost_ms(sheet=sheet, rowIdx=rowIdx, cData=cData, msTable=msTable)
 
@@ -322,9 +328,10 @@ def check(*, client, sheet, doFixes, div, cData, doCost, name, doDownload, doTas
 
             # In parent
             if sheet.rows[rowIdx].id in parents:
-                check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='labor_parent', div=div, cData=cData, doFixes=doFixes, doTask=doTask)
+                check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='labor_parent', div=div, cData=cData, doFixes=doFixes, doTask=doTask, resources=None)
             else:
-                check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='labor_task', div=div, cData=cData, doFixes=doFixes, doTask=doTask)
+                check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='labor_task', div=div, cData=cData, doFixes=doFixes, doTask=doTask, resources=resources)
+
                 if doCost:
                     cost_labor(sheet=sheet, rowIdx=rowIdx, cData=cData, laborTable=laborTable)
 

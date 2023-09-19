@@ -16,6 +16,7 @@ from . import project_sheet_columns
 from . import project_list
 from . import tracking_sheet
 from . import tracking_sheet_columns
+from . import actuals_sheet
 
 import datetime
 import copy
@@ -141,16 +142,22 @@ def check_project(*, client, div, folderId, doFixes, doCost=False, doDownload=Fa
     # Re-read sheet data
     fdata['sheets']['Project'] = client.Sheets.get_sheet(fdata['sheets']['Project'].id, include='format')
     fdata['sheets']['Tracking'] = client.Sheets.get_sheet(fdata['sheets']['Tracking'].id, include='format')
+    fdata['sheets']['Actuals'] = client.Sheets.get_sheet(fdata['sheets']['Actuals'].id, include='format')
 
     # Used to store column addresses
     cData = copy.deepcopy(project_sheet_columns.ColData)
     tData = copy.deepcopy(tracking_sheet_columns.ColData)
 
     # Check project file
-    ret = project_sheet.check(client=client, div=div, sheet=fdata['sheets']['Project'], doFixes=doFixes, cData=cData, doCost=doCost, name=fdata['folder'].name, doDownload=doDownload, doTask=doTask)
+    resources = set()
+    ret = project_sheet.check(client=client, div=div, sheet=fdata['sheets']['Project'], doFixes=doFixes, cData=cData, doCost=doCost, name=fdata['folder'].name, doDownload=doDownload, doTask=doTask, resources=resources)
 
     # Fix tracking file
     if ret:
+
+        # Update actuals file
+        actuals_sheet.check(client=client, sheet=fdata['sheets']['Actuals'], doFixes=doFixes, resources=resources)
+
         # Reload project file
         fdata['sheets']['Project'] = client.Sheets.get_sheet(fdata['sheets']['Project'].id, include='format')
 
