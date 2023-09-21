@@ -38,7 +38,8 @@ def get_project_list(*, client, div):
         if row.cells[0].value is not None and row.cells[0].value != '' and \
            row.cells[1].value is not None and row.cells[1].value != '' and \
            row.cells[3].value is not None and row.cells[3].value != '' and \
-           row.cells[7].value is not None and row.cells[7].value != '':
+           row.cells[7].value is not None and row.cells[7].value != '' and \
+           row.cells[26].value is not None and row.cells[26].value == 'Yes':
 
             proj = {'program': row.cells[0].value,
                     'name': row.cells[1].value,

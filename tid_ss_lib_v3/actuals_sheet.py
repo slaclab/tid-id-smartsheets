@@ -42,9 +42,8 @@ def check(*, client, sheet, doFixes, resources):
     for k,v in resFound.items():
 
         if v is False:
-            print(f"   Adding missing resource to actuals: {k}")
-
             if doFixes:
+                print(f"   Adding missing resource to actuals: {k}")
                 new_row = smartsheet.models.Row()
                 new_row.parent_id = parentId
 
@@ -76,6 +75,9 @@ def check(*, client, sheet, doFixes, resources):
                 new_cell.strict = False
                 new_row.cells.append(new_cell)
                 addRows.append(new_row)
+
+            else:
+                print(f"   Missing resource in actuals: {k}")
 
     # Process add rows
     if len(addRows) > 0:

@@ -24,7 +24,7 @@ def find_columns(*, client, sheet, doFixes, cData):
         for i in range(len(sheet.columns)):
             if sheet.columns[i].title == tod:
                 if doFixes:
-                    print(f"Found project column to delete {tod} at position {i+1}. Deleting")
+                    print(f"   Found project column to delete {tod} at position {i+1}. Deleting")
                     client.Sheets.delete_column(sheet.id, sheet.columns[i].id)
                     return False
 
@@ -35,14 +35,14 @@ def find_columns(*, client, sheet, doFixes, cData):
             if sheet.columns[i].title == k:
                 found = True
                 if v['position'] != i:
-                    print(f"Project column location mismatch for {k}. Expected at {v['position']+1}, found at {i+1}.")
+                    print(f"   Project column location mismatch for {k}. Expected at {v['position']+1}, found at {i+1}.")
                     v['position'] = i
 
         if not found:
-            print(f"Project column not found: {k}.")
+            print(f"   Project column not found: {k}.")
 
             if doFixes is True:
-                print(f"Adding project column: {k}.")
+                print(f"   Adding project column: {k}.")
                 col = smartsheet.models.Column({'title': k,
                                                 'type': v['type'],
                                                 'index': v['position']})
@@ -68,7 +68,7 @@ def check_row(*, client, sheet, rowIdx, key, div, cData, doFixes, doTask, resour
 
     # Skip empty rows
     if row.cells[0].value is None or row.cells[0].value == "":
-        print(f"   Skipping empty row {rowIdx+1}")
+        #print(f"   Skipping empty row {rowIdx+1}")
         return
 
     # Detect labor milestones
