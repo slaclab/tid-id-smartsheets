@@ -22,31 +22,45 @@ import datetime
 import copy
 
 TID_WORKSPACE = 4728845933799300
-OVERHEAD_NOTE = '13.99% Overhead'
+MS_OVERHEAD_NOTE = '13.99% Overhead'
 
 TID_ID_ACTIVE_FOLDER     = 1039693589571460
 TID_ID_LIST_SHEET        = 2931334483076996
 TID_ID_FOLDER_PREFIX     = 'TID/ID'
-TID_ID_ACTUALS_SHEET     = 7403570111768452
-TID_ID_ACTUALS_START_ROW = 5693264191481732
-TID_ID_ACTUALS_END_ROW   = 1256792717715332
 TID_ID_RESOURCE_FOLDER   = 6665944920549252
-TID_ID_TEMPLATE_FOLDER   = 5079595864090500
+TID_ID_TEMPLATE_FOLDER   = 7582721024255876
 
 TID_ID_RATE_NOTE = 'TID-ID Eng Rate FY23 $297; Tech Rate FY23: $173'
 
 TID_CDS_ACTIVE_FOLDER     = 8506630263334788
 TID_CDS_LIST_SHEET        = 6128393147180932
 TID_CDS_FOLDER_PREFIX     = 'TID/CDS'
-TID_CDS_ACTUALS_SHEET     = 2695469978675076
-TID_CDS_ACTUALS_START_ROW = 3233931241645956
-TID_CDS_ACTUALS_END_ROW   = 8729290357270404
 TID_CDS_RESOURCE_FOLDER   = 7728176030869380
 TID_CDS_TEMPLATE_FOLDER   = 5389860509902724
 
 TID_CDS_RATE_NOTE = 'TID-CDS Eng Rate FY23 $287; Tech Rate FY23: $168'
 
-OVERHEAD_NOTE = '12.25% Overhead'
+
+def get_division(div):
+
+    ret = None
+
+    if div == 'id':
+        ret = { 'name'            : 'Instrumentation',
+                'key'             : 'div',
+                'workspace'       : 4728845933799300,
+                'ms_overhead'     : '13.99% Overhead',
+                'active_folder'   : 1039693589571460,
+                'list_sheet'      : 2931334483076996,
+                'folder_prefix'   : 'TID/ID',
+                'resource_folder' : 6665944920549252,
+                'template_folder' : 7582721024255876,
+                'rate_note'       : 'TID-ID Eng Rate FY23 $297; Tech Rate FY23: $173'}
+
+    else:
+        raise Exception(f"Invalid division name {div}")
+
+    return ret
 
 
 def get_folder_data(*, client, div, folderId, path=None):

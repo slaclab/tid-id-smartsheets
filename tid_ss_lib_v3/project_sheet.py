@@ -112,7 +112,7 @@ def check_row(*, client, sheet, rowIdx, key, div, cData, doFixes, doTask, resour
             doRow = False
 
             if data['forced'] == 'MS_OVERHEAD':
-                data['forced'] = navigate.OVERHEAD_NOTE
+                data['forced'] = navigate.MS_OVERHEAD_NOTE
             elif data['forced'] == 'LAB_RATE':
                 data['forced'] = laborRate
 

@@ -34,19 +34,16 @@ def get_project_list(*, client, div):
     ret = []
 
     for row in sheet.rows:
+        proj = {}
 
-        if row.cells[0].value is not None and row.cells[0].value != '' and \
-           row.cells[1].value is not None and row.cells[1].value != '' and \
-           row.cells[3].value is not None and row.cells[3].value != '' and \
-           row.cells[7].value is not None and row.cells[7].value != '' and \
-           row.cells[26].value is not None and row.cells[26].value == 'Yes':
+        proj['program']   = row.cells[0].value  if row.cells[0].value  is not None else 'Unkown'
+        proj['name']      = row.cells[1].value  if row.cells[1].value  is not None else ''
+        proj['pm']        = row.cells[3].value  if row.cells[3].value  is not None else 'Unknown'
+        proj['pa_number'] = row.cells[6].value  if row.cells[6].value  is not None else ''
+        proj['id']        = int(row.cells[7].value) if row.cells[7].value  is not None else ''
+        proj['updated']   = row.cells[26].value if row.cells[26].value is not None else ''
 
-            proj = {'program': row.cells[0].value,
-                    'name': row.cells[1].value,
-                    'pm': row.cells[3].value,
-                    'pa_number': row.cells[6].value,
-                    'id': int(row.cells[7].value)}
-
+        if proj['name'] != '' and proj['id'] != '' and proj['updated'] == 'Yes':
             ret.append(proj)
 
     return ret
@@ -101,6 +98,9 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
     if ret is not None:
         new_row.cells.append(ret)
 
+    if len(p['name']) > 30:
+        print(f"    Project name {p['name']} is too long")
+
     # Status Month
     if rowIdx != 0:
         ret = check_cell_formula(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=8, expect='=[Status Month]1')
@@ -108,15 +108,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
         if ret is not None:
             new_row.cells.append(ret)
 
-    # Use new format
-    if row.cells[26].value == 'Yes':
-
-        LookupIndexes = { 9: 2, 10: 6, 11: 5, 12: 7, 13: 10, 14: 11, 15: 12, 16: 13, 17: 14, 18: 15, 19: 16, 20: 17 }
-
-    # Use old format
-    else:
-
-        LookupIndexes = { 9: 2, 10: 6, 11: 7, 12: 8, 13: 11, 14: 12, 15: 13, 16: 14, 17: 17, 18: 18, 19: 19, 20: 20 }
+    LookupIndexes = { 9: 2, 10: 6, 11: 5, 12: 7, 13: 10, 14: 11, 15: 12, 16: 13, 17: 14, 18: 15, 19: 16, 20: 17 }
 
     for col, enum in LookupIndexes.items():
         exp = "=VLOOKUP([Status Month]@row, {"
