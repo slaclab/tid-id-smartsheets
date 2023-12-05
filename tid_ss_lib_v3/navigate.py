@@ -29,7 +29,7 @@ def get_division(div):
 
     if div == 'id':
         d = { 'name'            : 'Instrumentation',
-              'key'             : 'div',
+              'key'             : div,
               'workspace'       : 4728845933799300,
               'ms_overhead'     : '13.99% Overhead',
               'active_folder'   : 1039693589571460,
