@@ -55,11 +55,6 @@ def find_columns(*, client, sheet, doFixes, cData):
 
 def check_row(*, client, sheet, rowIdx, key, div, cData, doFixes, doTask, resources):
 
-    if div == 'id':
-        laborRate = navigate.TID_ID_RATE_NOTE
-    elif div == 'cds':
-        laborRate = navigate.TID_CDS_RATE_NOTE
-
     row = sheet.rows[rowIdx]
 
     # Setup row update structure just in case
@@ -112,9 +107,9 @@ def check_row(*, client, sheet, rowIdx, key, div, cData, doFixes, doTask, resour
             doRow = False
 
             if data['forced'] == 'MS_OVERHEAD':
-                data['forced'] = navigate.MS_OVERHEAD_NOTE
+                data['forced'] = div.ms_overhead
             elif data['forced'] == 'LAB_RATE':
-                data['forced'] = laborRate
+                data['forced'] = div.rate_note
 
             if (not (row.cells[idx].value is None and data['forced'] == '')) and (row.cells[idx].value is None or row.cells[idx].value != data['forced']):
                 print(f"   Incorrect value in row {rowIdx+1} {key} cell {idx+1} in project file. Got {row.cells[idx].value} Exp {data['forced']}")

@@ -75,10 +75,7 @@ def check_resource_file(*, client, sheet, alist):
 def check_resource_files(*, client, div=None, alist=None, folderId=None):
 
     if folderId is None and div is not None:
-        if div == 'id':
-            folderId = navigate.TID_ID_RESOURCE_FOLDER
-        elif div == 'cds':
-            folderId = navigate.TID_CDS_RESOURCE_FOLDER
+        folderId = div.resource_folder
 
     folder = client.Folders.get_folder(folderId)
 

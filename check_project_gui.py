@@ -142,7 +142,7 @@ parser.add_argument(
     type     = str,
     required = True,
     default  = False,
-    choices  = ['id', 'cds'],
+    choices  = tid_ss_lib_v3.navigate.division_list,
     help     = "Division for project tracking. Either --div=id or --div=cds"
 )
 
@@ -151,7 +151,7 @@ args = parser.parse_args()
 
 appTop = QApplication(sys.argv)
 
-gui = ProjectFix(key=args.key, div=args.div)
+gui = ProjectFix(key=args.key, div=tid_ss_lib_v3.navigate.get_division(args.div))
 gui.show()
 appTop.exec_()
 

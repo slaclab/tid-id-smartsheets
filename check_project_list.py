@@ -36,7 +36,7 @@ parser.add_argument(
     type     = str,
     required = True,
     default  = False,
-    choices  = ['id', 'cds'],
+    choices  = tid_ss_lib_v3.navigate.division_list,
     help     = "Division for project tracking. Either --div=id or --div=cds"
 )
 
@@ -53,5 +53,5 @@ args = parser.parse_args()
 
 client = smartsheet.Smartsheet(args.key)
 
-tid_ss_lib_v3.project_list.check(client=client, div=args.div, doFixes=args.fix)
+tid_ss_lib_v3.project_list.check(client=client, div=tid_ss_lib_v3.navigate.get_division(args.div), doFixes=args.fix)
 

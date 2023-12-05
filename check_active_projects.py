@@ -30,7 +30,7 @@ parser.add_argument(
     type     = str,
     action   = 'append',
     required = True,
-    choices  = ['id', 'cds'],
+    choices  = tid_ss_lib_v3.navigate.division_list,
     help     = "Division for project tracking. Either --div=id or --div=cds"
 )
 
@@ -90,12 +90,14 @@ if args.backup is not None:
 else:
     backupDir = None
 
-for div in args.div:
+for k in args.div:
 
-    print(f"\n-------------- {div} ------------------------\n")
+    div = tid_ss_lib_v3.navigate.get_division(k)
+
+    print(f"\n-------------- {div.name} ------------------------\n")
 
     if backupDir is not None:
-        doDownload = f"{backupDir}/{div}"
+        doDownload = f"{backupDir}/{div.key}"
         try:
             os.mkdir(doDownload)
         except FileExistsError:
@@ -104,10 +106,7 @@ for div in args.div:
     else:
         doDownload = False
 
-    if div == 'id':
-        lst = [tid_ss_lib_v3.navigate.TID_ID_TEMPLATE_FOLDER]
-    elif div == 'cds':
-        lst = [tid_ss_lib_v3.navigate.TID_CDS_TEMPLATE_FOLDER]
+    lst = [div.template_folder]
 
     for p in tid_ss_lib_v3.project_list.get_project_list(client=client, div=div):
         lst.append(p['id'])

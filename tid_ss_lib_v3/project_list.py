@@ -24,12 +24,7 @@ from . import navigate
 
 def get_project_list(*, client, div):
 
-    if div == 'id':
-        list_sheet = navigate.TID_ID_LIST_SHEET
-    elif div == 'cds':
-        list_sheet = navigate.TID_CDS_LIST_SHEET
-
-    sheet = client.Sheets.get_sheet(list_sheet, include='format')
+    sheet = client.Sheets.get_sheet(div.list_sheet, include='format')
 
     ret = []
 
@@ -168,12 +163,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
 
 def check(*, client, doFixes, div):
 
-    if div == 'id':
-        list_sheet = navigate.TID_ID_LIST_SHEET
-    elif div == 'cds':
-        list_sheet = navigate.TID_CDS_LIST_SHEET
-
-    sheet = client.Sheets.get_sheet(list_sheet, include='format')
+    sheet = client.Sheets.get_sheet(div.list_sheet, include='format')
 
     # Get folder list:
     folderList = navigate.get_active_list(client=client,div=div)
