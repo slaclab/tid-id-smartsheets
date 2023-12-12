@@ -37,7 +37,7 @@ def get_division(div):
               'folder_prefix'   : 'TID/ID',
               'resource_folder' : 6665944920549252,
               'template_folder' : 7582721024255876,
-              'rate_note'       : 'TID-ID Eng Rate FY23 $297; Tech Rate FY23: $173'}
+              'rate_note'       : 'TID-ID Eng Rate FY24 $297; Tech Rate FY24: $173'}
 
     else:
         raise Exception(f"Invalid division name {div}")
