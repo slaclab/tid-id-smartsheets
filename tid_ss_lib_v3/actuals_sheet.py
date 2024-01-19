@@ -195,7 +195,15 @@ def update_columns(*, client, sheet, wbsData):
     newCols = []
     delCols = []
 
-    # Update existing columns
+    # Update existing columns, use index number to avoid duplicates
+    for i in range(4, len(wbsData['months'])+4):
+        if i < len(sheet.columns):
+            col = smartsheet.models.Column({'title': str(i),
+                                            'type': 'TEXT_NUMBER',
+                                            'index': i})
+            client.Sheets.update_column(sheet.id, sheet.columns[i].id, col)
+
+    # Update existing columns, with proper name
     for i in range(4, len(wbsData['months'])+4):
         if i < len(sheet.columns):
             col = smartsheet.models.Column({'title': wbsData['months'][i-4] + " Hours",
@@ -215,7 +223,7 @@ def update_columns(*, client, sheet, wbsData):
 
     # Too many colmumns
     for i in range(len(wbsData['months'])+4, len(sheet.columns)):
-        client.Sheets.delete_column(sheet.id, sheets.columns[i])
+        client.Sheets.delete_column(sheet.id, sheet.columns[i].id)
 
 
 def update_actuals_labor(*, client, sheet, wbsData):
