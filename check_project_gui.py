@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 import sys
 import os
 import traceback
@@ -10,6 +9,7 @@ from PyQt5.QtCore    import *
 from PyQt5.QtGui     import *
 
 import tid_ss_lib_v3.navigate
+import tid_ss_lib_v3.configuration
 import tid_ss_lib_v3.project_list
 import smartsheet
 import argparse
@@ -142,7 +142,7 @@ parser.add_argument(
     type     = str,
     required = True,
     default  = False,
-    choices  = tid_ss_lib_v3.navigate.division_list,
+    choices  = tid_ss_lib_v3.configuration.division_list,
     help     = "Division for project tracking. Either --div=id or --div=cds"
 )
 
@@ -151,7 +151,7 @@ args = parser.parse_args()
 
 appTop = QApplication(sys.argv)
 
-gui = ProjectFix(key=args.key, div=tid_ss_lib_v3.navigate.get_division(args.div))
+gui = ProjectFix(key=args.key, div=tid_ss_lib_v3.configuration.get_division(args.div))
 gui.show()
 appTop.exec_()
 

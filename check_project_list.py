@@ -11,6 +11,7 @@
 #-----------------------------------------------------------------------------
 
 import tid_ss_lib_v3.project_list
+import tid_ss_lib_v3.configuration
 import smartsheet  # pip3 install smartsheet-python-sdk
 import os
 import argparse
@@ -36,7 +37,7 @@ parser.add_argument(
     type     = str,
     required = True,
     default  = False,
-    choices  = tid_ss_lib_v3.navigate.division_list,
+    choices  = tid_ss_lib_v3.configuration.division_list,
     help     = "Division for project tracking. Either --div=id or --div=cds"
 )
 
@@ -53,5 +54,5 @@ args = parser.parse_args()
 
 client = smartsheet.Smartsheet(args.key)
 
-tid_ss_lib_v3.project_list.check(client=client, div=tid_ss_lib_v3.navigate.get_division(args.div), doFixes=args.fix)
+tid_ss_lib_v3.project_list.check(client=client, div=tid_ss_lib_v3.configuration.get_division(args.div), doFixes=args.fix)
 

@@ -11,6 +11,7 @@
 #-----------------------------------------------------------------------------
 
 import tid_ss_lib_v3.navigate
+import tid_ss_lib_v3.configuration
 import tid_ss_lib_v3.project_list
 import smartsheet
 import os
@@ -30,7 +31,7 @@ parser.add_argument(
     type     = str,
     action   = 'append',
     required = True,
-    choices  = tid_ss_lib_v3.navigate.division_list,
+    choices  = tid_ss_lib_v3.configuration.division_list,
     help     = "Division for project tracking. Either --div=id or --div=cds"
 )
 
@@ -92,7 +93,7 @@ else:
 
 for k in args.div:
 
-    div = tid_ss_lib_v3.navigate.get_division(k)
+    div = tid_ss_lib_v3.configuration.get_division(k)
 
     print(f"\n-------------- {div.name} ------------------------\n")
 

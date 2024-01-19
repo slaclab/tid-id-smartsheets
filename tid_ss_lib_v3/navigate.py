@@ -20,29 +20,7 @@ from . import actuals_sheet
 
 import datetime
 import copy
-from types import SimpleNamespace
 
-division_list = ['id']
-
-def get_division(div):
-    d = {}
-
-    if div == 'id':
-        d = { 'name'            : 'Instrumentation',
-              'key'             : div,
-              'workspace'       : 4728845933799300,
-              'ms_overhead'     : '13.99% Overhead',
-              'active_folder'   : 1039693589571460,
-              'list_sheet'      : 2931334483076996,
-              'folder_prefix'   : 'TID/ID',
-              'resource_folder' : 6665944920549252,
-              'template_folder' : 7582721024255876,
-              'rate_note'       : 'TID-ID Eng Rate FY24 $297; Tech Rate FY24: $173'}
-
-    else:
-        raise Exception(f"Invalid division name {div}")
-
-    return SimpleNamespace(**d)
 
 def get_folder_data(*, client, div, folderId, path=None):
     folder = client.Folders.get_folder(folderId)
@@ -185,4 +163,15 @@ def get_active_list(*, client, div, path=None, folderId=None):
             ret.update(get_active_list(client=client, div=div, path=path, folderId=sub.id))
 
     return ret
+
+
+def update_project_actuals(*, client, div, folderId, wbsData):
+    fdata = get_folder_data(client=client, div=div, folderId=folderId)
+
+    print(f"Updating Actuals For Project {fdata['folder'].name} : {folderId}")
+
+    # Re-read sheet data
+    fdata['sheets']['Actuals'] = client.Sheets.get_sheet(fdata['sheets']['Actuals'].id, include='format')
+
+    actuals_sheet.update_actuals(client=client, sheet=fdata['sheets']['Actuals'], wbsData=wbsData[folderId])
 

@@ -11,6 +11,7 @@
 #-----------------------------------------------------------------------------
 
 import tid_ss_lib_v3.navigate
+import tid_ss_lib_v3.configuration
 import smartsheet
 import os
 import argparse
@@ -36,7 +37,7 @@ parser.add_argument(
     type     = str,
     required = True,
     default  = False,
-    choices  = tid_ss_lib_v3.navigate.division_list,
+    choices  = tid_ss_lib_v3.configuration.division_list,
     help     = "Division for project tracking. Either --div=id or --div=cds"
 )
 
@@ -86,5 +87,5 @@ client = smartsheet.Smartsheet(args.key)
 print("")
 
 for p in args.folder:
-    tid_ss_lib_v3.navigate.check_project(client=client,div=tid_ss_lib_v3.navigate.get_division(args.div), folderId=int(p), doFixes=args.fix, doCost=args.doCost, doDownload=args.backup, doTask=args.doTask)
+    tid_ss_lib_v3.navigate.check_project(client=client,div=tid_ss_lib_v3.configuration.get_division(args.div), folderId=int(p), doFixes=args.fix, doCost=args.doCost, doDownload=args.backup, doTask=args.doTask)
 
