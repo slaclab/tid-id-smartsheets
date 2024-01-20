@@ -24,7 +24,7 @@ from . import navigate
 
 def get_project_list(*, client, div):
 
-    sheet = client.Sheets.get_sheet(div.list_sheet, include='format')
+    sheet = client.Sheets.get_sheet(int(div.project_list), include='format')
 
     ret = []
 
@@ -163,7 +163,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
 
 def check(*, client, doFixes, div):
 
-    sheet = client.Sheets.get_sheet(div.list_sheet, include='format')
+    sheet = client.Sheets.get_sheet(div.project_list, include='format')
 
     # Get folder list:
     folderList = navigate.get_active_list(client=client,div=div)

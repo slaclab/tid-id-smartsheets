@@ -70,7 +70,6 @@ def check_project(*, client, div, folderId, doFixes, doCost=False, doDownload=Fa
     ##########################################################
     for k, v in fdata['sheets'].items():
 
-        # Copy file if it is missing
         if v is None:
             print(f"   Project is missing '{k}' file.")
             return
@@ -87,7 +86,6 @@ def check_project(*, client, div, folderId, doFixes, doCost=False, doDownload=Fa
 
     for k, v in fdata['reports'].items():
 
-        # Copy file if it is missing
         if v is None:
             print(f"   Project is missing '{k}' file.")
             return
@@ -99,7 +97,6 @@ def check_project(*, client, div, folderId, doFixes, doCost=False, doDownload=Fa
 
     for k, v in fdata['sights'].items():
 
-        # Copy file if it is missing
         if v is None:
             print(f"   Project is missing '{k}' file.")
             return
@@ -144,7 +141,7 @@ def get_active_list(*, client, div, path=None, folderId=None):
 
     if path is None and folderId is None:
         path = div.folder_prefix
-        folderId = div.active_folder
+        folderId = int(div.active_folder)
 
     folder = client.Folders.get_folder(folderId)
     ret = {}
