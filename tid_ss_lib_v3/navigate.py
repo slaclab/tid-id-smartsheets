@@ -163,10 +163,14 @@ def get_active_list(*, client, div, path=None, folderId=None):
 
 
 def update_project_actuals(*, client, div, folderId, wbsData):
-    fdata = get_folder_data(client=client, div=div, folderId=folderId)
+    folderId=int(folderId)
 
-    print(f"Updating Actuals For Project {fdata['folder'].name} : {folderId}")
+    fdata = get_folder_data(client=client, div=div, folderId=folderId)
 
     # Re-read sheet data
     fdata['sheets']['Actuals'] = client.Sheets.get_sheet(fdata['sheets']['Actuals'].id, include='format')
+
+    if folderId in wbsData:
+        print(f"Updating Actuals For Project {fdata['folder'].name} : {folderId}")
+        actuals_sheet.update_actuals(client=client, sheet=fdata['sheets']['Actuals'], wbsData=wbsData[folderId])
 

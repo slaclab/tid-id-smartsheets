@@ -174,7 +174,7 @@ def parse_wbs_actuals_sheet(*, client, div, sheetId, year, paData, projData):
                 missMap.add(name)
                 email = name
 
-            if dStr in pData['months']:
+            if dStr in pData['months'] and (cost > 0.0 or hours > 0.0):
 
                 if dStr == pData['months'][-1]:
                     currCost = cost

@@ -16,6 +16,7 @@ from . import navigate
 import datetime
 
 StdColumns = 5
+CostFormat = ",,,,,,,,,,,13,2,1,2,,"
 
 def check(*, client, sheet, doFixes, resources):
     inLabor = False
@@ -74,6 +75,7 @@ def check(*, client, sheet, doFixes, resources):
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = sheet.columns[3].id
                 new_cell.value = "0"
+                new_cell.format = CostFormat
                 new_cell.strict = False
                 new_row.cells.append(new_cell)
 
@@ -81,6 +83,7 @@ def check(*, client, sheet, doFixes, resources):
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = sheet.columns[4].id
                 new_cell.value = "0"
+                new_cell.format = CostFormat
                 new_cell.strict = False
                 new_row.cells.append(new_cell)
 
@@ -134,6 +137,7 @@ def update_actuals_row(*, sheet, row, parentId, resName, data, months):
     else:
         new_cell.value = 0.0
     new_cell.strict = False
+    new_cell.format = CostFormat
     new_row.cells.append(new_cell)
 
     # Current Cost
@@ -144,6 +148,7 @@ def update_actuals_row(*, sheet, row, parentId, resName, data, months):
     else:
         new_cell.value = 0.0
     new_cell.strict = False
+    new_cell.format = CostFormat
     new_row.cells.append(new_cell)
 
     for i in range(len(months)):
@@ -179,7 +184,7 @@ def update_pas_row(*, sheet, row, parentId, paName, data, months):
     # Assigned To
     new_cell = smartsheet.models.Cell()
     new_cell.column_id = sheet.columns[1].id
-    new_cell.value = paName
+    new_cell.value = ''
     new_cell.strict = False
     new_row.cells.append(new_cell)
 
@@ -198,6 +203,7 @@ def update_pas_row(*, sheet, row, parentId, paName, data, months):
     else:
         new_cell.value = 0.0
     new_cell.strict = False
+    new_cell.format = CostFormat
     new_row.cells.append(new_cell)
 
     # Current Cost
@@ -208,6 +214,7 @@ def update_pas_row(*, sheet, row, parentId, paName, data, months):
     else:
         new_cell.value = 0.0
     new_cell.strict = False
+    new_cell.format = CostFormat
     new_row.cells.append(new_cell)
 
     for i in range(StdColumns,len(months)+StdColumns):

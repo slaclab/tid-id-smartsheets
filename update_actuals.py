@@ -13,6 +13,7 @@
 import tid_ss_lib_v3.navigate
 import tid_ss_lib_v3.configuration
 import tid_ss_lib_v3.project_list
+import tid_ss_lib_v3.division_actuals
 import smartsheet
 import os
 import argparse
@@ -43,6 +44,13 @@ parser.add_argument(
     help     = "API Key from smartsheets. See https://help.smartsheet.com/articles/2482389-generate-API-key"
 )
 
+parser.add_argument(
+    "--folder",
+    action   = 'append',
+    required = True,
+    help     = "Folder ID to check/fix, or 'all'. Right click on folder, select properties and copy 'Folder ID'",
+)
+
 # Get the arguments
 args = parser.parse_args()
 
@@ -50,12 +58,19 @@ client = smartsheet.Smartsheet(args.key)
 
 for k in args.div:
     div = tid_ss_lib_v3.configuration.get_division(client=client, div=k)
+    folders = []
+
+    if 'all' in args.folder:
+        for p in tid_ss_lib_v3.project_list.get_project_list(client=client, div=div):
+            folders.append(p['id'])
+    else:
+        folders = args.folder
 
     print(f"\n-------------- {k} ------------------------\n")
 
     print("Collecting Division Actuals")
     data = tid_ss_lib_v3.division_actuals.get_wbs_actuals(client=client,div=div)
 
-    for p in tid_ss_lib_v3.project_list.get_project_list(client=client, div=div):
+    for p in folders:
         tid_ss_lib_v3.navigate.update_project_actuals(client=client,div=div, folderId=p, wbsData=data)
 
