@@ -281,7 +281,7 @@ def update_actuals_labor(*, client, sheet, wbsData):
             data = None
 
             if isinstance(resName, str) and resName != "":
-                if resName in resFound:
+                if resName in resFound and not resFound[resName]:
                     resFound[resName] = True
                     data = wbsData['person'][resName]
 
@@ -320,11 +320,11 @@ def update_actuals_pas(*, client, sheet, wbsData):
             inPas = True
 
         elif inPas:
-            paName = sheet.rows[rowIdx].cells[1].value
+            paName = sheet.rows[rowIdx].cells[0].value
             data = None
 
             if isinstance(paName, str) and paName != "":
-                if paName in paFound:
+                if paName in paFound and not paFound[paName]:
                     paFound[paName] = True
                     data = wbsData['pas'][paName]
 
