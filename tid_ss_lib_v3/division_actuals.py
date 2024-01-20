@@ -64,6 +64,7 @@ def find_columns(*, client, sheet, cData):
 #                   (inititally empty as no persons are added initially)
 #            'total_cost'    = Total amount charged to the project
 #            'total_hours'   = Total amount charged to the project
+#            'current_cost'  = Current month cost
 #            'monthly_hours' = Hours by month, dictionary with YY_MM as key
 #            'monthly_cost'  = Cost by month, dictionary with YY_MM as key
 #
@@ -80,9 +81,6 @@ def get_div_actuals_data (*, client, div):
 
     lastYear = int(div.earned_value_date.split('-')[0])
     lastMonth = int(div.earned_value_date.split('-')[1])
-
-    if lastMonth >= 10:
-        lastYear += 1
 
     # Process the rows
     for rowIdx in range(0,len(sheet.rows)):
@@ -107,16 +105,15 @@ def get_div_actuals_data (*, client, div):
         # Set start date for actuals, use first dictionary entry
         year  = int(v['pas'][firstPa]['Actuals Start Date'].split('-')[0])
         month = int(v['pas'][firstPa]['Actuals Start Date'].split('-')[1])
+
         v['months'].append(f"{year:04}_{month:02}")
 
         while True:
             if  year == lastYear and month == lastMonth:
                 break;
-            elif month == 9:
-                month = 10
-                year += 1
             elif month == 12:
                 month = 1
+                year += 1
             else:
                 month += 1
 
@@ -157,15 +154,18 @@ def parse_wbs_actuals_sheet(*, client, div, sheetId, year, paData, projData):
 
             month = int(entry['Period-Month'].split('-')[0])
 
+            # Convert fiscal date to calendar date
             if month < 4:
-                month += 9
+                calMonth = month + 9
+                calYear = int(year) - 1
             else:
-                month -= 3
+                calMonth = month - 3
+                calYear = int(year)
 
             name  = entry['Employee Name']
             hours = float(entry['Values Hrs ACTUALS'])
             cost  = float(entry['Cost ACTUALS'])
-            dStr = f"{year:04}_{month:02}"
+            dStr = f"{calYear:04}_{calMonth:02}"
 
             if name in userMap:
                 email = userMap[name]
@@ -174,16 +174,25 @@ def parse_wbs_actuals_sheet(*, client, div, sheetId, year, paData, projData):
                 missMap.add(name)
                 email = name
 
-            if email not in pData['person']:
-                pData['person'][email] = {'total_cost' : cost,
-                                          'total_hours'  : hours,
-                                          'monthly_hours' : { dStr : hours},
-                                          'monthly_cost'  : { dStr : cost}}
-            else:
-                pData['person'][email]['total_cost'] += cost
-                pData['person'][email]['total_hours'] += hours
-                pData['person'][email]['monthly_hours'][dStr] = hours
-                pData['person'][email]['monthly_cost'][dStr] = cost
+            if dStr in pData['months']:
+
+                if dStr == pData['months'][-1]:
+                    currCost = cost
+                else:
+                    currCost = 0.0
+
+                if email not in pData['person']:
+                    pData['person'][email] = {'total_cost' : cost,
+                                              'total_hours'  : hours,
+                                              'current_cost' : currCost,
+                                              'monthly_hours' : { dStr : hours},
+                                              'monthly_cost'  : { dStr : cost}}
+                else:
+                    pData['person'][email]['total_cost'] += cost
+                    pData['person'][email]['total_hours'] += hours
+                    pData['person'][email]['current_cost'] = currCost
+                    pData['person'][email]['monthly_hours'][dStr] = hours
+                    pData['person'][email]['monthly_cost'][dStr] = cost
 
     configuration.add_missing_user_map(client=client, div=div, miss=missMap)
 

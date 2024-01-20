@@ -142,8 +142,8 @@ parser.add_argument(
     type     = str,
     required = True,
     default  = False,
-    choices  = [k in tid_ss_lib_v3.configuration.division_list],
-    help     = "Division for project tracking. Either --div=id or --div=cds"
+    choices  = [k for k in tid_ss_lib_v3.configuration.division_list],
+    help     = "Division for project tracking."
 )
 
 # Get the arguments

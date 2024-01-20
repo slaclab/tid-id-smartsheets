@@ -170,5 +170,3 @@ def update_project_actuals(*, client, div, folderId, wbsData):
     # Re-read sheet data
     fdata['sheets']['Actuals'] = client.Sheets.get_sheet(fdata['sheets']['Actuals'].id, include='format')
 
-    actuals_sheet.update_actuals(client=client, sheet=fdata['sheets']['Actuals'], wbsData=wbsData[folderId])
-

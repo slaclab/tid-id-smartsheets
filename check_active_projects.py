@@ -31,8 +31,8 @@ parser.add_argument(
     type     = str,
     action   = 'append',
     required = True,
-    choices  = [k in tid_ss_lib_v3.configuration.division_list],
-    help     = "Division for project tracking. Either --div=id or --div=cds"
+    choices  = [k for k in tid_ss_lib_v3.configuration.division_list],
+    help     = "Division for project tracking."
 )
 
 parser.add_argument(
@@ -95,7 +95,7 @@ for k in args.div:
 
     div = tid_ss_lib_v3.configuration.get_division(client=client, div=k)
 
-    print(f"\n-------------- {div.name} ------------------------\n")
+    print(f"\n-------------- {k} ------------------------\n")
 
     if backupDir is not None:
         doDownload = f"{backupDir}/{div.key}"

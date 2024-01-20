@@ -15,6 +15,8 @@ from . import navigate
 
 import datetime
 
+StdColumns = 5
+
 def check(*, client, sheet, doFixes, resources):
     inLabor = False
 
@@ -74,6 +76,14 @@ def check(*, client, sheet, doFixes, resources):
                 new_cell.value = "0"
                 new_cell.strict = False
                 new_row.cells.append(new_cell)
+
+                # Current Cost
+                new_cell = smartsheet.models.Cell()
+                new_cell.column_id = sheet.columns[4].id
+                new_cell.value = "0"
+                new_cell.strict = False
+                new_row.cells.append(new_cell)
+
                 addRows.append(new_row)
 
             else:
@@ -126,9 +136,19 @@ def update_actuals_row(*, sheet, row, parentId, resName, data, months):
     new_cell.strict = False
     new_row.cells.append(new_cell)
 
+    # Current Cost
+    new_cell = smartsheet.models.Cell()
+    new_cell.column_id = sheet.columns[4].id
+    if data is not None:
+        new_cell.value = data['current_cost']
+    else:
+        new_cell.value = 0.0
+    new_cell.strict = False
+    new_row.cells.append(new_cell)
+
     for i in range(len(months)):
         new_cell = smartsheet.models.Cell()
-        new_cell.column_id = sheet.columns[4+i].id
+        new_cell.column_id = sheet.columns[StdColumns+i].id
 
         if data is None or months[i] not in data['monthly_hours']:
             new_cell.value = 0
@@ -180,7 +200,17 @@ def update_pas_row(*, sheet, row, parentId, paName, data, months):
     new_cell.strict = False
     new_row.cells.append(new_cell)
 
-    for i in range(4,len(months)+4):
+    # Current Cost
+    new_cell = smartsheet.models.Cell()
+    new_cell.column_id = sheet.columns[4].id
+    if data is not None:
+        new_cell.value = data['Monthly Actuals']
+    else:
+        new_cell.value = 0.0
+    new_cell.strict = False
+    new_row.cells.append(new_cell)
+
+    for i in range(StdColumns,len(months)+StdColumns):
         new_cell = smartsheet.models.Cell()
         new_cell.column_id = sheet.columns[i].id
         new_cell.value = ''
@@ -195,8 +225,12 @@ def update_columns(*, client, sheet, wbsData):
     newCols = []
     delCols = []
 
+    # Too many colmumns
+    for i in range(len(wbsData['months'])+StdColumns, len(sheet.columns)):
+        client.Sheets.delete_column(sheet.id, sheet.columns[i].id)
+
     # Update existing columns, use index number to avoid duplicates
-    for i in range(4, len(wbsData['months'])+4):
+    for i in range(StdColumns, len(wbsData['months'])+StdColumns):
         if i < len(sheet.columns):
             col = smartsheet.models.Column({'title': str(i),
                                             'type': 'TEXT_NUMBER',
@@ -204,26 +238,22 @@ def update_columns(*, client, sheet, wbsData):
             client.Sheets.update_column(sheet.id, sheet.columns[i].id, col)
 
     # Update existing columns, with proper name
-    for i in range(4, len(wbsData['months'])+4):
+    for i in range(StdColumns, len(wbsData['months'])+StdColumns):
         if i < len(sheet.columns):
-            col = smartsheet.models.Column({'title': wbsData['months'][i-4] + " Hours",
+            col = smartsheet.models.Column({'title': wbsData['months'][i-StdColumns] + " Hours",
                                             'type': 'TEXT_NUMBER',
                                             'index': i})
             client.Sheets.update_column(sheet.id, sheet.columns[i].id, col)
 
     # Too few columns
-    for i in range(len(sheet.columns), len(wbsData['months'])+4):
-        col = smartsheet.models.Column({'title': wbsData['months'][i-4] + "Hours",
+    for i in range(len(sheet.columns), len(wbsData['months'])+StdColumns):
+        col = smartsheet.models.Column({'title': wbsData['months'][i-StdColumns] + " Hours",
                                         'type': 'TEXT_NUMBER',
                                         'index': len(sheet.columns)})
         newCols.append(col)
 
     if len(newCols) > 0:
         client.Sheets.add_columns(sheet.id, newCols)
-
-    # Too many colmumns
-    for i in range(len(wbsData['months'])+4, len(sheet.columns)):
-        client.Sheets.delete_column(sheet.id, sheet.columns[i].id)
 
 
 def update_actuals_labor(*, client, sheet, wbsData):
@@ -248,7 +278,7 @@ def update_actuals_labor(*, client, sheet, wbsData):
                     resFound[resName] = True
                     data = wbsData['person'][resName]
 
-            updRows.append(update_actuals_row(sheet=sheet, row=sheet.rows[rowIdx], parentId=parentId, resName=resName, data=data, months=wbsData['months']))
+                updRows.append(update_actuals_row(sheet=sheet, row=sheet.rows[rowIdx], parentId=parentId, resName=resName, data=data, months=wbsData['months']))
 
     # Process update rows
     if len(updRows) > 0:
@@ -291,7 +321,7 @@ def update_actuals_pas(*, client, sheet, wbsData):
                     paFound[paName] = True
                     data = wbsData['pas'][paName]
 
-            updRows.append(update_pas_row(sheet=sheet, row=sheet.rows[rowIdx], parentId=parentId, paName=paName, data=data, months=wbsData['months']))
+                updRows.append(update_pas_row(sheet=sheet, row=sheet.rows[rowIdx], parentId=parentId, paName=paName, data=data, months=wbsData['months']))
 
     # Process update rows
     if len(updRows) > 0:
