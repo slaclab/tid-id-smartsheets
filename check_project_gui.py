@@ -97,7 +97,12 @@ class ProjectFix(QWidget):
             doFixes = self.do_fixes.isChecked()
             doCost  = self.do_cost.isChecked()
             doTask  = self.do_task.isChecked()
-            tid_ss_lib_v3.navigate.check_project(client=client, div=self.div, folderId=folder, doFixes=doFixes, doCost=doCost, doTask=doTask)
+            tid_ss_lib_v3.navigate.check_project(client=client,
+                                                 div=tid_ss_lib_v3.configuration.get_division(client=client, div=self.div),
+                                                 folderId=folder,
+                                                 doFixes=doFixes,
+                                                 doCost=doCost,
+                                                 doTask=doTask)
             print("Done!")
         except Exception as msg:
             traceback.print_exc()
@@ -108,7 +113,8 @@ class ProjectFix(QWidget):
     def refreshPressed(self):
         try:
             client = smartsheet.Smartsheet(self.api_key.text())
-            lst = tid_ss_lib_v3.project_list.get_project_list(client=client, div=self.div)
+            lst = tid_ss_lib_v3.project_list.get_project_list(client=client,
+                                                              div=tid_ss_lib_v3.configuration.get_division(client=client, div=self.div))
 
             self.proj_list.clear()
             self.projects = {0: ''}
@@ -151,7 +157,7 @@ args = parser.parse_args()
 
 appTop = QApplication(sys.argv)
 
-gui = ProjectFix(key=args.key, div=tid_ss_lib_v3.configuration.get_division(client=client, div=args.div))
+gui = ProjectFix(key=args.key, div=args.div)
 gui.show()
 appTop.exec_()
 

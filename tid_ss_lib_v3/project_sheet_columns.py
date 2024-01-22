@@ -12,7 +12,7 @@
 
 PlannedPct = '=IF(Start@row > {Configuration Range 1}, 0, IF(End@row > {Configuration Range 1}, NETWORKDAYS(Start@row, {Configuration Range 1}) / Duration@row, 1))'
 
-Contingency = '=(IF([Risk Factor]@row = "Low (5% Contingency)", 0.05, IF([Risk Factor]@row = "Medium (10% Contingency)", 1, ' \
+Contingency = '=(IF([Risk Factor]@row = "Low (5% Contingency)", 0.05, IF([Risk Factor]@row = "Medium (10% Contingency)", 0.1, ' \
               'IF([Risk Factor]@row = "Med-High (25% Contingency)", 0.25, IF([Risk Factor]@row = "High (50% Contingency)", 0.5))))) * [Total Budgeted Cost]@row'
 
 ToDelete = [ 'Actual Labor Hours Or M&S Cost', 'Remaining Hours', 'Actual Cost', 'Remaining Funds', 'Cost Variance',
