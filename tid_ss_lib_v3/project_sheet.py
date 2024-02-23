@@ -218,6 +218,10 @@ def cost_ms(*, sheet, rowIdx, cData, msTable):
 
 def cost_labor(*, sheet, rowIdx, cData, laborTable):
 
+    if sheet.rows[rowIdx].cells[cData['Task']['position']].value is None or \
+       sheet.rows[rowIdx].cells[cData['Task']['position']].value  == '':
+        return
+
     # Extract key columns
     hours = float(sheet.rows[rowIdx].cells[cData['Budgeted Quantity']['position']].value)
     rate = sheet.rows[rowIdx].cells[cData['Cost Per Item']['position']].value
