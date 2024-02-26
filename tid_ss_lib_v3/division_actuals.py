@@ -125,8 +125,8 @@ def get_div_actuals_data (*, client, div):
 
     return retPaData, retProjData
 
-def add_entry_to_pdata(*, year, paData, projData, period, name, hours, cost):
-    month = int(entry['period'].split('-')[0])
+def add_entry_to_pdata(*, year, pa, paData, projData, period, name, hours, cost):
+    month = int(period.split('-')[0])
 
     pid = paData[pa]['Project Folder ID']
     pData = projData[pid]
@@ -148,22 +148,22 @@ def add_entry_to_pdata(*, year, paData, projData, period, name, hours, cost):
         else:
             currCost = 0.0
 
-        if email not in pData['person']:
-            pData['person'][email] = {'total_cost' : cost,
-                                      'total_hours'  : hours,
-                                      'current_cost' : currCost,
-                                      'monthly_hours' : { dStr : hours},
-                                      'monthly_cost'  : { dStr : cost}}
+        if name not in pData['person']:
+            pData['person'][name] = {'total_cost' : cost,
+                                     'total_hours'  : hours,
+                                     'current_cost' : currCost,
+                                     'monthly_hours' : { dStr : hours},
+                                     'monthly_cost'  : { dStr : cost}}
         else:
-            pData['person'][email]['total_cost'] += cost
-            pData['person'][email]['total_hours'] += hours
-            pData['person'][email]['current_cost'] = currCost
-            pData['person'][email]['monthly_hours'][dStr] = hours
-            pData['person'][email]['monthly_cost'][dStr] = cost
+            pData['person'][name]['total_cost'] += cost
+            pData['person'][name]['total_hours'] += hours
+            pData['person'][name]['current_cost'] = currCost
+            pData['person'][name]['monthly_hours'][dStr] = hours
+            pData['person'][name]['monthly_cost'][dStr] = cost
 
 
 def parse_wbs_actuals_sheet(*, client, div, sheetId, year, paData, projData):
-    cData = copy.deepcopy(ColDataMs)
+    cData = copy.deepcopy(ColDataWbs)
 
     sheet = client.Sheets.get_sheet(sheetId)
 
@@ -197,19 +197,20 @@ def parse_wbs_actuals_sheet(*, client, div, sheetId, year, paData, projData):
                 missMap.add(name)
                 email = name
 
-            self.add_entry_to_pdata(year=year,
-                                    paData=paData,
-                                    projData=projData,
-                                    period = entry['Period-Month'],
-                                    name = email,
-                                    hours = float(entry['Values Hrs Actuals']),
-                                    cost  = float(entry['Cost ACTUALS']))
+            add_entry_to_pdata(year=year,
+                               paData=paData,
+                               projData=projData,
+                               pa=pa,
+                               period = entry['Period-Month'],
+                               name = email,
+                               hours = float(entry['Values Hrs ACTUALS']),
+                               cost  = float(entry['Cost ACTUALS']))
 
     configuration.add_missing_user_map(client=client, div=div, miss=missMap)
 
 
 def parse_ms_actuals_sheet(*, client, div, sheetId, year, paData, projData):
-    cData = copy.deepcopy(ColDataWbs)
+    cData = copy.deepcopy(ColDataMs)
 
     sheet = client.Sheets.get_sheet(sheetId)
 
@@ -227,14 +228,15 @@ def parse_ms_actuals_sheet(*, client, div, sheetId, year, paData, projData):
         if pa not in paData:
             pass
 
-        elif entry['Period-Month'] is not None and and entry['Cost ACTUALS'] is not None:
-            self.add_entry_to_pdata(year=year,
-                                    paData=paData,
-                                    projData=projData,
-                                    period = entry['Period-Month'],
-                                    name = 'M&S',
-                                    hours = 0.0,
-                                    cost  = float(entry['Cost ACTUALS']))
+        elif entry['Period-Month'] is not None and entry['Cost ACTUALS'] is not None:
+            add_entry_to_pdata(year=year,
+                               paData=paData,
+                               projData=projData,
+                               pa=pa,
+                               period = entry['Period-Month'],
+                               name = 'M&S',
+                               hours = 0.0,
+                               cost  = float(entry['Cost ACTUALS']))
 
 
 def get_wbs_actuals(*, client, div):
@@ -245,9 +247,11 @@ def get_wbs_actuals(*, client, div):
     retPaData, retProjData = get_div_actuals_data (client=client, div=div)
 
     for k,v in div.wbs_exports.items():
+        print(f"Processing WBS {k}")
         parse_wbs_actuals_sheet(client=client, div=div, sheetId=int(v), year=k, paData=retPaData, projData=retProjData)
 
     for k,v in div.ms_exports.items():
+        print(f"Processing MS {k}")
         parse_ms_actuals_sheet(client=client, div=div, sheetId=int(v), year=k, paData=retPaData, projData=retProjData)
 
     return retProjData

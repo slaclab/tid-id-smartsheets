@@ -263,17 +263,36 @@ def update_columns(*, client, sheet, wbsData):
         client.Sheets.add_columns(sheet.id, newCols)
 
 
-def update_actuals_breakdown(*, client, sheet, wbsData):
-    addRows = []
-    updRows = []
+def update_actuals_ms(*, client, sheet, wbsData):
     parentId = None
 
-    resFound = {v : False for v in wbsData['person']}
+    if 'M&S' not in wbsData['person']:
+        return
 
     # Process the rows
     for rowIdx in range(0,len(sheet.rows)):
 
-        if sheet.rows[rowIdx].cells[0].value == 'Labor Actuals' or sheet.rows[rowIdx].cells[0].value == 'M&S Actuals':
+        if sheet.rows[rowIdx].cells[0].value == 'M&S Actuals':
+            parentId = sheet.rows[rowIdx].id
+
+        elif parentId is not None and sheet.rows[rowIdx].cells[0].value == 'M&S':
+            updRow = update_actuals_row(sheet=sheet, row=sheet.rows[rowIdx], parentId=parentId,
+                                        resName='M&S', data=wbsData['person']['M&S'], months=wbsData['months'])
+            client.Sheets.update_rows(sheet.id, [updRow])
+            parentId = None
+
+
+def update_actuals_labor(*, client, sheet, wbsData):
+    addRows = []
+    updRows = []
+    parentId = None
+
+    resFound = {v : False for v in wbsData['person'] if v != 'M&S'}
+
+    # Process the rows
+    for rowIdx in range(0,len(sheet.rows)):
+
+        if sheet.rows[rowIdx].cells[0].value == 'Labor Actuals':
             parentId = sheet.rows[rowIdx].id
 
         elif parentId is not None:
@@ -349,5 +368,6 @@ def update_actuals(*, client, sheet, wbsData):
     sheet = client.Sheets.get_sheet(sheet.id, include='format')
 
     update_actuals_pas(client=client, sheet=sheet, wbsData=wbsData)
-    update_actuals_breakdown(client=client, sheet=sheet, wbsData=wbsData)
+    update_actuals_ms(client=client, sheet=sheet, wbsData=wbsData)
+    update_actuals_labor(client=client, sheet=sheet, wbsData=wbsData)
 
