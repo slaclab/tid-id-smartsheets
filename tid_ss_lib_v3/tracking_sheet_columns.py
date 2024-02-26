@@ -20,7 +20,7 @@
 #        18 - Gray
 #           = White
 
-ToDelete = ['Actual Cost', 'Reporting Index', 'Tracking Risk', 'Reporting Variance']
+ToDelete = [ 'Lookup PA' , 'Monthly Actuals Date' ]
 
 ColData = { 'Status Month':
                { 'position' : 0,
@@ -30,48 +30,32 @@ ColData = { 'Status Month':
                  'formula'  : None,
                  'link'     : None},
 
-            'Lookup PA' :
+            'Monthly Actuals From Finance' :
                { 'position' : 1,
-                 'type'     : 'DATETIME',
+                 'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
-                 'format'   : None,
+                 'format'   : ",,,,,,,,,18,,13,2,1,2,,",
                  'formula'  : None,
-                 'link'     : None},
+                 'link'     : ('actuals', 4)},
 
-            'Monthly Actuals Date' :
+            'Total Actuals From Finance' :
                { 'position' : 2,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
-                 'format'   : ",,,,,,,,,18,,13,,,,,",
-                 'formula'  : '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 5, false)',
-                 'link'     : None},
+                 'format'   : ",,,,,,,,,18,,13,2,1,2,,",
+                 'formula'  : None,
+                 'link'     : ('actuals', 3)},
 
-            'Monthly Actuals From Finance' :
+            'Total Budget' :
                { 'position' : 3,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,13,2,1,2,,",
-                 'formula'  : '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 3, false)',
-                 'link'     : None},
-
-            'Total Actuals From Finance' :
-               { 'position' : 4,
-                 'type'     : 'TEXT_NUMBER',
-                 'forced'   : None,
-                 'format'   : ",,,,,,,,,18,,13,2,1,2,,",
-                 'formula'  : '=VLOOKUP([Lookup PA]@row, {Actuals Range 1}, 4, false)',
-                 'link'     : None},
-
-            'Total Budget' :
-               { 'position' : 5,
-                 'type'     : 'TEXT_NUMBER',
-                 'forced'   : None,
-                 'format'   : ",,,,,,,,,18,,13,2,1,2,,",
                  'formula'  : None,
-                 'link'     : 'Total Budgeted Cost'},
+                 'link'     : ('project', 'Total Budgeted Cost')},
 
             'Remaining Funds' :
-               { 'position' : 6,
+               { 'position' : 4,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,13,2,1,2,,",
@@ -79,23 +63,23 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'Earned Value' :
-               { 'position' : 7,
+               { 'position' : 5,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,13,2,1,2,,",
                  'formula'  : None,
-                 'link'     : 'Earned Value'},
+                 'link'     : ('project', 'Earned Value')},
 
             'Planned Earned Value' :
-               { 'position' : 8,
+               { 'position' : 6,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,13,2,1,2,,",
                  'formula'  : None,
-                 'link'     : 'Planned Earned Value'},
+                 'link'     : ('project', 'Planned Earned Value')},
 
             'Cost Variance' :
-               { 'position' : 9,
+               { 'position' : 7,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,13,2,1,2,,",
@@ -103,7 +87,7 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'CPI' :
-               { 'position' : 10,
+               { 'position' : 8,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,2,1,1,,",
@@ -111,15 +95,15 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'Schedule Variance' :
-               { 'position' : 11,
+               { 'position' : 9,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,13,2,1,2,,",
                  'formula'  : None,
-                 'link'     : 'Schedule Variance'},
+                 'link'     : ('project', 'Schedule Variance')},
 
             'SPI' :
-               { 'position' : 12,
+               { 'position' : 10,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,2,1,1,,",
@@ -127,7 +111,7 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'Budget Risk' :
-               { 'position' : 13,
+               { 'position' : 11,
                  'type'     : 'PICKLIST',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,,,,,",
@@ -135,7 +119,7 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'Schedule Risk' :
-               { 'position' : 14,
+               { 'position' : 12,
                  'type'     : 'PICKLIST',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,,,,,",
@@ -143,7 +127,7 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'Scope Risk' :
-               { 'position' : 15,
+               { 'position' : 13,
                  'type'     : 'PICKLIST',
                  'forced'   : None,
                  'format'   : None,
@@ -151,7 +135,7 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'Description Of Status' :
-               { 'position' : 16,
+               { 'position' : 14,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : 'My Status Description',
                  'format'   : None,

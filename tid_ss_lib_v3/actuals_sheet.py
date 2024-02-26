@@ -263,7 +263,7 @@ def update_columns(*, client, sheet, wbsData):
         client.Sheets.add_columns(sheet.id, newCols)
 
 
-def update_actuals_labor(*, client, sheet, wbsData):
+def update_actuals_breakdown(*, client, sheet, wbsData):
     addRows = []
     updRows = []
     parentId = None
@@ -273,7 +273,7 @@ def update_actuals_labor(*, client, sheet, wbsData):
     # Process the rows
     for rowIdx in range(0,len(sheet.rows)):
 
-        if sheet.rows[rowIdx].cells[0].value == 'Labor Actuals':
+        if sheet.rows[rowIdx].cells[0].value == 'Labor Actuals' or sheet.rows[rowIdx].cells[0].value == 'M&S Actuals':
             parentId = sheet.rows[rowIdx].id
 
         elif parentId is not None:
@@ -349,5 +349,5 @@ def update_actuals(*, client, sheet, wbsData):
     sheet = client.Sheets.get_sheet(sheet.id, include='format')
 
     update_actuals_pas(client=client, sheet=sheet, wbsData=wbsData)
-    update_actuals_labor(client=client, sheet=sheet, wbsData=wbsData)
+    update_actuals_breakdown(client=client, sheet=sheet, wbsData=wbsData)
 

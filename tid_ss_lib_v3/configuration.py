@@ -25,6 +25,7 @@ def get_division(*, client, div):
 
     config = {'configuration' : division_list['id'],
               'wbs_exports'   : {},
+              'ms_exports'    : {},
               'key'           : div }
 
     # Process the rows
@@ -38,6 +39,9 @@ def get_division(*, client, div):
 
             elif key.startswith('WBS Export'):
                 config['wbs_exports'][key.split(' ')[2]] = sheet.rows[rowIdx].cells[1].value
+
+            elif key.startswith('MS Export'):
+                config['ms_exports'][key.split(' ')[2]] = sheet.rows[rowIdx].cells[1].value
 
             else:
                 k = key.replace(' ', '_').lower()

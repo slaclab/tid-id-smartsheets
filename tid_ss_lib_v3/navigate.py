@@ -131,7 +131,7 @@ def check_project(*, client, div, folderId, doFixes, doCost=False, doDownload=Fa
         # Reload project file
         fdata['sheets']['Project'] = client.Sheets.get_sheet(fdata['sheets']['Project'].id, include='format')
 
-        tracking_sheet.check(client=client, sheet=fdata['sheets']['Tracking'], projectSheet=fdata['sheets']['Project'], div=div, doFixes=doFixes, cData=cData, tData=tData, doDownload=doDownload)
+        tracking_sheet.check(client=client, sheet=fdata['sheets']['Tracking'], projectSheet=fdata['sheets']['Project'], actualsSheet=fdata['sheets']['Actuals'], div=div, doFixes=doFixes, cData=cData, tData=tData, doDownload=doDownload)
 
     else:
         print("   Skipping remaining processing")

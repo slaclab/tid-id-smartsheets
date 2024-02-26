@@ -52,7 +52,7 @@ def find_columns(*, client, sheet, doFixes, tData):
     return True
 
 
-def check_first_row(*, client, sheet, doFixes, tData, projectSheet, cData):
+def check_first_row(*, client, sheet, doFixes, tData, projectSheet, actualsSheet, cData):
     row = sheet.rows[0]
 
     relink = []
@@ -141,11 +141,18 @@ def check_first_row(*, client, sheet, doFixes, tData, projectSheet, cData):
 
         if v['link'] is not None:
 
-            remCol = cData[v['link']]['position']
+            if v['link'][0] == 'project':
+                remCol = cData[v['link'][1]]['position']
 
-            rowIdTar = projectSheet.rows[0].id
-            colIdTar = projectSheet.rows[0].cells[remCol].column_id
-            shtIdTar = projectSheet.id
+                rowIdTar = projectSheet.rows[0].id
+                colIdTar = projectSheet.rows[0].cells[remCol].column_id
+                shtIdTar = projectSheet.id
+            else:
+                remCol = v['link'][1]
+
+                rowIdTar = actualsSheet.rows[0].id
+                colIdTar = actualsSheet.rows[0].cells[remCol].column_id
+                shtIdTar = actualsSheet.id
 
             if k in relink or row.cells[idx].link_in_from_cell is None or \
                 row.cells[idx].link_in_from_cell.row_id != rowIdTar or \
@@ -213,7 +220,7 @@ def check_other_row(*, client, rowIdx, sheet, tData, doFixes):
         client.Sheets.update_rows(sheet.id, [new_row])
 
 
-def check(*, client, sheet, projectSheet, tData, doFixes, cData, doDownload, div):
+def check(*, client, sheet, projectSheet, actualsSheet, tData, doFixes, cData, doDownload, div):
 
     # First check structure
     while True:
@@ -228,7 +235,7 @@ def check(*, client, sheet, projectSheet, tData, doFixes, cData, doDownload, div
         else:
             sheet = client.Sheets.get_sheet(sheet.id, include='format')
 
-    check_first_row(client=client, sheet=sheet, projectSheet=projectSheet, doFixes=doFixes, cData=cData, tData=tData)
+    check_first_row(client=client, sheet=sheet, projectSheet=projectSheet, actualsSheet=actualsSheet, doFixes=doFixes, cData=cData, tData=tData)
 
     for i in range(1, len(sheet.rows)):
         check_other_row(client=client, rowIdx=i, sheet=sheet, tData=tData, doFixes=doFixes)
