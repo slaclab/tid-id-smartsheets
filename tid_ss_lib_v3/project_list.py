@@ -31,12 +31,11 @@ def get_project_list(*, client, div):
     for row in sheet.rows:
         proj = {}
 
-        proj['program']   = row.cells[0].value  if row.cells[0].value  is not None else 'Unkown'
-        proj['name']      = row.cells[1].value  if row.cells[1].value  is not None else ''
+        proj['name']      = row.cells[0].value  if row.cells[0].value  is not None else ''
+        proj['program']   = row.cells[1].value  if row.cells[1].value  is not None else 'Unkown'
         proj['pm']        = row.cells[3].value  if row.cells[3].value  is not None else 'Unknown'
-        proj['pa_number'] = row.cells[6].value  if row.cells[6].value  is not None else ''
-        proj['id']        = int(row.cells[7].value) if row.cells[7].value  is not None else ''
-        proj['updated']   = row.cells[26].value if row.cells[26].value is not None else ''
+        proj['id']        = int(row.cells[6].value) if row.cells[6].value  is not None else ''
+        proj['updated']   = row.cells[23].value if row.cells[23].value is not None else ''
 
         if proj['name'] != '' and proj['id'] != '' and proj['updated'] == 'Yes':
             ret.append(proj)
@@ -103,7 +102,17 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
         if ret is not None:
             new_row.cells.append(ret)
 
-    LookupIndexes = { 9: 2, 10: 6, 11: 5, 12: 7, 13: 10, 14: 11, 15: 12, 16: 13, 17: 14, 18: 15, 19: 16, 20: 17 }
+    LookupIndexes = { 8: 3,  # Total Budget
+                      9: 2,  # Actual Cost
+                     10: 4,  # Remaining Funds
+                     11: 7,  # Cost Variance
+                     12: 8,  # CPI
+                     13: 9,  # Schedule Variance
+                     14: 10, # SPI
+                     15: 11, # Budget Risk
+                     16: 12, # Schedule Risk
+                     17: 13, # Scope    Risk
+                     18: 14} # Description Of Status
 
     for col, enum in LookupIndexes.items():
         exp = "=VLOOKUP([Status Month]@row, {"
@@ -118,7 +127,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
             new_row.cells.append(ret)
 
     # Check hyperlink Column
-    col = 22
+    col = 20
     if row.cells[col].hyperlink is None or row.cells[col].hyperlink.url != p['url'] or row.cells[col].value != p['path']:
 
         if row.cells[col].hyperlink is None:
@@ -138,17 +147,8 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
         new_cell.strict = False
         new_row.cells.append(new_cell)
 
-    # Check PA Compare Column
-    col = 23
-    exp = '=IF([PA Number]@row = [Lookup PA]@row, "True", "False")'
-
-    ret = check_cell_formula(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=col, expect=exp)
-
-    if ret is not None:
-        new_row.cells.append(ret)
-
     # Check Budget Index
-    col = 25
+    col = 22
     exp = '=[Total Budget]@row / [Real Budget]@row'
 
     ret = check_cell_formula(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=col, expect=exp)
@@ -163,10 +163,14 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
 
 def check(*, client, doFixes, div):
 
-    sheet = client.Sheets.get_sheet(div.project_list, include='format')
 
     # Get folder list:
-    folderList = navigate.get_active_list(client=client,div=div)
+    print("Searching active directory for projects ...")
+    #folderList = navigate.get_active_list(client=client,div=div)
+
+    print("Processing division project sheet ...\n")
+    #sheet = client.Sheets.get_sheet(div.project_list, include='format')
+    sheet = client.Sheets.get_sheet(div.project_list)
 
     for rowIdx in range(len(sheet.rows)):
 
