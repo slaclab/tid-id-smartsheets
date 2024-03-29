@@ -224,7 +224,7 @@ def cost_labor(*, sheet, rowIdx, cData, laborTable):
 
     # Extract key columns
     hours = float(sheet.rows[rowIdx].cells[cData['Budgeted Quantity']['position']].value)
-    rate = sheet.rows[rowIdx].cells[cData['Cost Per Item']['position']].value
+    rate = float(sheet.rows[rowIdx].cells[cData['Cost Per Item']['position']].value)
     startStr = sheet.rows[rowIdx].cells[cData['Start']['position']].value
     endStr = sheet.rows[rowIdx].cells[cData['End']['position']].value
 
