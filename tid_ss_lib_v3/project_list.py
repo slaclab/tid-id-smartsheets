@@ -32,12 +32,12 @@ def get_project_list(*, client, div):
         proj = {}
 
         proj['name']      = row.cells[0].value  if row.cells[0].value  is not None else ''
-        proj['program']   = row.cells[1].value  if row.cells[1].value  is not None else 'Unkown'
+        proj['program']   = row.cells[1].value  if row.cells[1].value  is not None else 'Unknown'
         proj['pm']        = row.cells[3].value  if row.cells[3].value  is not None else 'Unknown'
         proj['id']        = int(row.cells[6].value) if row.cells[6].value  is not None else ''
-        proj['updated']   = row.cells[23].value if row.cells[23].value is not None else ''
+        #proj['updated']   = row.cells[23].value if row.cells[23].value is not None else ''
 
-        if proj['name'] != '' and proj['id'] != '' and proj['updated'] == 'Yes':
+        if proj['name'] != '' and proj['id'] != '':
             ret.append(proj)
 
     return ret
@@ -77,7 +77,11 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
     new_row.id = row.id
 
     # First we get the project ID
-    fid = int(row.cells[7].value)
+    try:
+        fid = int(row.cells[6].value)
+    except Exception:
+        print(f"    Row {rowIdx+1} contains bad project ID")
+        return
 
     if fid not in folderList:
         print(f"    Row {rowIdx+1} contains unknown project ID {fid}")
@@ -86,8 +90,8 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
     p = folderList[fid]
     p['tracked'] = True
 
-    # Project Name
-    ret = check_cell_value(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=1, expect=p['name'])
+    # Project Name, column 0
+    ret = check_cell_value(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=0, expect=p['name'])
 
     if ret is not None:
         new_row.cells.append(ret)
@@ -95,24 +99,29 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
     if len(p['name']) > 30:
         print(f"    Project name {p['name']} is too long")
 
-    # Status Month
+    # Check update state
+    if row.cells[23].value != "Yes":
+        print(f"    Skipping row {rowIdx +1} project {p['name']} updated = No")
+        return
+
+    # Status Month, column 7
     if rowIdx != 0:
-        ret = check_cell_formula(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=8, expect='=[Status Month]1')
+        ret = check_cell_formula(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=7, expect='=[Status Month]1')
 
         if ret is not None:
             new_row.cells.append(ret)
 
-    LookupIndexes = { 8: 3,  # Total Budget
-                      9: 2,  # Actual Cost
-                     10: 4,  # Remaining Funds
-                     11: 7,  # Cost Variance
-                     12: 8,  # CPI
-                     13: 9,  # Schedule Variance
-                     14: 10, # SPI
-                     15: 11, # Budget Risk
-                     16: 12, # Schedule Risk
-                     17: 13, # Scope    Risk
-                     18: 14} # Description Of Status
+    LookupIndexes = { 8: 4,  # Total Budget
+                      9: 3,  # Actual Cost
+                     10: 5,  # Remaining Funds
+                     11: 8,  # Cost Variance
+                     12: 9,  # CPI
+                     13: 10, # Schedule Variance
+                     14: 11, # SPI
+                     15: 12, # Budget Risk
+                     16: 13, # Schedule Risk
+                     17: 14, # Scope    Risk
+                     18: 15} # Description Of Status
 
     for col, enum in LookupIndexes.items():
         exp = "=VLOOKUP([Status Month]@row, {"
@@ -163,14 +172,12 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
 
 def check(*, client, doFixes, div):
 
-
     # Get folder list:
     print("Searching active directory for projects ...")
-    #folderList = navigate.get_active_list(client=client,div=div)
+    folderList = navigate.get_active_list(client=client,div=div)
 
     print("Processing division project sheet ...\n")
-    #sheet = client.Sheets.get_sheet(div.project_list, include='format')
-    sheet = client.Sheets.get_sheet(div.project_list)
+    sheet = client.Sheets.get_sheet(int(div.project_list), include='format')
 
     for rowIdx in range(len(sheet.rows)):
 
@@ -181,5 +188,4 @@ def check(*, client, doFixes, div):
     for k, v in folderList.items():
         if v['tracked'] is False:
             print(f"    Project {v['name']} with id {k} is not tracked")
-
 
