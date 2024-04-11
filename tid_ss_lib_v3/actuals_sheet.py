@@ -228,40 +228,32 @@ def update_pas_row(*, sheet, row, parentId, paName, data, months):
 
 
 def update_columns(*, client, sheet, wbsData):
-    updCols = []
-    newCols = []
-    delCols = []
+    refresh = False
 
-    # Too many colmumns
-    for i in range(len(wbsData['months'])+StdColumns, len(sheet.columns)):
-        client.Sheets.delete_column(sheet.id, sheet.columns[i].id)
+    # Create found table
+    colMap = {f'{v} Hours':None for v in wbsData['months']}
 
-    # Update existing columns, use index number to avoid duplicates
-    for i in range(StdColumns, len(wbsData['months'])+StdColumns):
-        if i < len(sheet.columns):
-            col = smartsheet.models.Column({'title': str(i),
-                                            'type': 'TEXT_NUMBER',
-                                            'index': i})
-            client.Sheets.update_column(sheet.id, sheet.columns[i].id, col)
+    # Look through existing columns
+    for i in range(StdColumns, len(sheet.columns)):
+        if sheet.columns[i].title in colMap:
+            colMap[sheet.columns[i].title] = i
+        else:
+            #print(f"   Deleting column {sheet.columns[i].title}")
+            client.Sheets.delete_column(sheet.id, sheet.columns[i].id)
+            refresh = True
 
-    # Update existing columns, with proper name
-    for i in range(StdColumns, len(wbsData['months'])+StdColumns):
-        if i < len(sheet.columns):
-            col = smartsheet.models.Column({'title': wbsData['months'][i-StdColumns] + " Hours",
-                                            'type': 'TEXT_NUMBER',
-                                            'index': i})
-            client.Sheets.update_column(sheet.id, sheet.columns[i].id, col)
+    # Add missing columns
+    for i,v in enumerate(colMap):
+        if colMap[v] is None:
 
-    # Too few columns
-    for i in range(len(sheet.columns), len(wbsData['months'])+StdColumns):
-        col = smartsheet.models.Column({'title': wbsData['months'][i-StdColumns] + " Hours",
-                                        'type': 'TEXT_NUMBER',
-                                        'index': len(sheet.columns)})
-        newCols.append(col)
+            #print(f"   Adding Missing Column: {v} at {i+StdColumns}")
+            newCol = smartsheet.models.Column({'title': v,
+                                               'type': 'TEXT_NUMBER',
+                                               'index': i + StdColumns})
+            client.Sheets.add_columns(sheet.id, [newCol])
+            refresh = True
 
-    if len(newCols) > 0:
-        client.Sheets.add_columns(sheet.id, newCols)
-
+    return refresh
 
 def update_actuals_ms(*, client, sheet, wbsData):
     parentId = None
@@ -364,8 +356,9 @@ def update_actuals_pas(*, client, sheet, wbsData):
 
 
 def update_actuals(*, client, sheet, wbsData):
-    update_columns(client=client, sheet=sheet, wbsData=wbsData)
-    sheet = client.Sheets.get_sheet(sheet.id, include='format')
+
+    if update_columns(client=client, sheet=sheet, wbsData=wbsData):
+        sheet = client.Sheets.get_sheet(sheet.id, include='format')
 
     update_actuals_pas(client=client, sheet=sheet, wbsData=wbsData)
     update_actuals_ms(client=client, sheet=sheet, wbsData=wbsData)
