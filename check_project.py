@@ -65,11 +65,12 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--doTask",
-    action   = 'store_true',
+    "--doCost",
+    type     = str,
     required = False,
-    default  = False,
-    help     = "Flag to check for empty task assignments & long duration tasks.",
+    choices  = ['None', 'Baseline', 'Contingency'],
+    default  = "None",
+    help     = "Do cost enable / mode.",
 )
 
 parser.add_argument(

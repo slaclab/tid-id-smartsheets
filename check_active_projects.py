@@ -53,10 +53,11 @@ parser.add_argument(
 
 parser.add_argument(
     "--doCost",
-    action   = 'store_true',
+    type     = str,
     required = False,
-    default  = False,
-    help     = "Flag to generate cost tables.",
+    choices  = ['None', 'Baseline', 'Contingency'],
+    default  = "None",
+    help     = "Do cost enable / mode.",
 )
 
 parser.add_argument(

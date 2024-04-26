@@ -57,7 +57,7 @@ def get_folder_data(*, client, div, folderId, path=None):
     return ret
 
 
-def check_project(*, client, div, folderId, doFixes, doCost=False, doDownload=False, path=None, doTask=False):
+def check_project(*, client, div, folderId, doFixes, doCost="None", doDownload=False, path=None, doTask=False):
     fdata = get_folder_data(client=client, div=div, folderId=folderId)
 
     if path is not None:

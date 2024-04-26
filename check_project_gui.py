@@ -62,8 +62,11 @@ class ProjectFix(QWidget):
         self.do_fixes = QCheckBox()
         fl.addRow('Do Fixes',self.do_fixes)
 
-        self.do_cost = QCheckBox()
-        fl.addRow('Do Cost',self.do_cost)
+        self.do_cost = QComboBox()
+        self.do_cost.addItem('None')
+        self.do_cost.addItem('Baseline')
+        self.do_cost.addItem('Contingency')
+        fl.addRow('Do Cost Mode',self.do_cost)
 
         self.do_task = QCheckBox()
         fl.addRow('Do Task Check',self.do_task)
@@ -95,8 +98,9 @@ class ProjectFix(QWidget):
             client = smartsheet.Smartsheet(self.api_key.text())
             folder = int(self.folder_id.text())
             doFixes = self.do_fixes.isChecked()
-            doCost  = self.do_cost.isChecked()
+            doCost  = self.do_cost.currentText()
             doTask  = self.do_task.isChecked()
+
             tid_ss_lib_v3.navigate.check_project(client=client,
                                                  div=tid_ss_lib_v3.configuration.get_division(client=client, div=self.div),
                                                  folderId=folder,

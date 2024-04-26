@@ -216,14 +216,19 @@ def cost_ms(*, sheet, rowIdx, cData, msTable):
     msTable[k] += (qty * perItem)
 
 
-def cost_labor(*, sheet, rowIdx, cData, laborTable):
+def cost_labor(*, sheet, rowIdx, cData, laborTable, doCost):
 
     if sheet.rows[rowIdx].cells[cData['Task']['position']].value is None or \
        sheet.rows[rowIdx].cells[cData['Task']['position']].value  == '':
         return
 
     # Extract key columns
-    hours = float(sheet.rows[rowIdx].cells[cData['Budgeted Quantity']['position']].value)
+
+    if doCost == "Contingency":
+        hours = float(sheet.rows[rowIdx].cells[cData['Contingency Hours']['position']].value)
+    else:
+        hours = float(sheet.rows[rowIdx].cells[cData['Budgeted Quantity']['position']].value)
+
     rate = float(sheet.rows[rowIdx].cells[cData['Cost Per Item']['position']].value)
     startStr = sheet.rows[rowIdx].cells[cData['Start']['position']].value
     endStr = sheet.rows[rowIdx].cells[cData['End']['position']].value
@@ -320,7 +325,7 @@ def check(*, client, sheet, doFixes, div, cData, doCost, name, doDownload, doTas
                 check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='ms_parent', div=div, cData=cData, doFixes=doFixes, doTask=doTask, resources=None)
             else:
                 check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='ms_task', div=div, cData=cData, doFixes=doFixes, doTask=doTask, resources=None)
-                if doCost:
+                if doCost != "None":
                     cost_ms(sheet=sheet, rowIdx=rowIdx, cData=cData, msTable=msTable)
 
         elif inLabor:
@@ -331,12 +336,12 @@ def check(*, client, sheet, doFixes, div, cData, doCost, name, doDownload, doTas
             else:
                 check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='labor_task', div=div, cData=cData, doFixes=doFixes, doTask=doTask, resources=resources)
 
-                if doCost:
-                    cost_labor(sheet=sheet, rowIdx=rowIdx, cData=cData, laborTable=laborTable)
+                if doCost != "None":
+                    cost_labor(sheet=sheet, rowIdx=rowIdx, cData=cData, laborTable=laborTable, doCost=doCost)
 
 
     # Generate excel friend view of monthly spending
-    if doCost:
+    if doCost != "None":
         write_cost_table(name=name, laborTable=laborTable, msTable=msTable)
 
     if isinstance(doDownload,str):
