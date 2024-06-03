@@ -12,11 +12,11 @@
 
 PlannedPct = '=IF(Start@row > {Configuration Range 1}, 0, IF(End@row > {Configuration Range 1}, NETWORKDAYS(Start@row, {Configuration Range 1}) / Duration@row, 1))'
 
-Contingency = '=(IF([Risk Factor]@row = "Low (5% Contingency)", 0.05, IF([Risk Factor]@row = "Medium (10% Contingency)", 0.1, ' \
-              'IF([Risk Factor]@row = "Med-High (25% Contingency)", 0.25, IF([Risk Factor]@row = "High (50% Contingency)", 0.5))))) * [Total Budgeted Cost]@row'
+Contingency = '=(IF([Risk Factor]@row = "None (0% Contingency)", 0, IF([Risk Factor]@row = "Low (5% Contingency)", 0.05, IF([Risk Factor]@row = "Medium (10% Contingency)", 0.1, ' \
+              'IF([Risk Factor]@row = "Med-High (25% Contingency)", 0.25, IF([Risk Factor]@row = "High (50% Contingency)", 0.5, [Risk Factor]@row)))))) * [Total Budgeted Cost]@row'
 
-ContingencyHours = '=(IF([Risk Factor]@row = "Low (5% Contingency)", 1.05, IF([Risk Factor]@row = "Medium (10% Contingency)", 1.1, ' \
-                   'IF([Risk Factor]@row = "Med-High (25% Contingency)", 1.25, IF([Risk Factor]@row = "High (50% Contingency)", 1.5))))) * [Budgeted Quantity]@row'
+ContingencyHours = '=(IF([Risk Factor]@row = "None (0% Contingency)", 1, IF([Risk Factor]@row = "Low (5% Contingency)", 1.05, IF([Risk Factor]@row = "Medium (10% Contingency)", 1.1, ' \
+                   'IF([Risk Factor]@row = "Med-High (25% Contingency)", 1.25, IF([Risk Factor]@row = "High (50% Contingency)", 1.5, [Risk Factor]@row + 1)))))) * [Budgeted Quantity]@row'
 
 ToDelete = [ 'Actual Labor Hours Or M&S Cost', 'Remaining Hours', 'Actual Cost', 'Remaining Funds', 'Cost Variance',
              'Total Budgeted Cost With Contingency', 'Earned Value With Contingency', 'Cost Variance With Contingency' ]

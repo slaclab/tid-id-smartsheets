@@ -58,19 +58,19 @@ parser.add_argument(
 
 parser.add_argument(
     "--doCost",
-    action   = 'store_true',
-    required = False,
-    default  = False,
-    help     = "Flag to generate cost tables.",
-)
-
-parser.add_argument(
-    "--doCost",
     type     = str,
     required = False,
     choices  = ['None', 'Baseline', 'Contingency'],
     default  = "None",
     help     = "Do cost enable / mode.",
+)
+
+parser.add_argument(
+    "--doTask",
+    action   = 'store_true',
+    required = False,
+    default  = False,
+    help     = "Flag to check for empty task assignments & long duration tasks.",
 )
 
 parser.add_argument(
