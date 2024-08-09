@@ -157,9 +157,14 @@ def add_entry_to_pdata(*, year, pa, paData, projData, period, name, hours, cost)
         else:
             pData['person'][name]['total_cost'] += cost
             pData['person'][name]['total_hours'] += hours
-            pData['person'][name]['current_cost'] = currCost
-            pData['person'][name]['monthly_hours'][dStr] = hours
-            pData['person'][name]['monthly_cost'][dStr] = cost
+            pData['person'][name]['current_cost'] += currCost
+
+            if dStr in pData['person'][name]['monthly_cost']:
+                pData['person'][name]['monthly_cost'][dStr] += cost
+                pData['person'][name]['monthly_hours'][dStr] += hours
+            else:
+                pData['person'][name]['monthly_cost'][dStr] = cost
+                pData['person'][name]['monthly_hours'][dStr] = hours
 
 
 def parse_wbs_actuals_sheet(*, client, div, sheetId, year, paData, projData):

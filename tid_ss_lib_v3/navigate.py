@@ -167,6 +167,10 @@ def update_project_actuals(*, client, div, folderId, wbsData):
 
     fdata = get_folder_data(client=client, div=div, folderId=folderId)
 
+    if fdata['sheets']['Actuals'] is None:
+        print(f"Skipping Project {fdata['folder'].name}  which is missing its actuals sheet")
+        return
+
     # Re-read sheet data
     fdata['sheets']['Actuals'] = client.Sheets.get_sheet(fdata['sheets']['Actuals'].id, include='format')
 

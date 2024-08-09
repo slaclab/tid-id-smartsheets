@@ -88,6 +88,9 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
         return
 
     p = folderList[fid]
+
+    if p['tracked']:
+        print(f"    Project {p['name']} is on line {rowIdx+1} is already tracked!")
     p['tracked'] = True
 
     # Project Name, column 0
@@ -100,9 +103,9 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
         print(f"    Project name {p['name']} is too long")
 
     # Check update state
-    if row.cells[23].value != "Yes":
-        print(f"    Skipping row {rowIdx +1} project {p['name']} updated = No")
-        return
+    #if row.cells[23].value != "Yes":
+        #print(f"    Skipping row {rowIdx +1} project {p['name']} updated = No")
+        #return
 
     # Status Month, column 7
     if rowIdx != 0:
@@ -111,17 +114,17 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
         if ret is not None:
             new_row.cells.append(ret)
 
-    LookupIndexes = { 8: 4,  # Total Budget
-                      9: 3,  # Actual Cost
-                     10: 5,  # Remaining Funds
-                     11: 8,  # Cost Variance
-                     12: 9,  # CPI
-                     13: 10, # Schedule Variance
-                     14: 11, # SPI
-                     15: 12, # Budget Risk
-                     16: 13, # Schedule Risk
-                     17: 14, # Scope    Risk
-                     18: 15} # Description Of Status
+    LookupIndexes = { 9: 4,  # Total Budget
+                     10: 3,  # Actual Cost
+                     11: 5,  # Remaining Funds
+                     12: 8,  # Cost Variance
+                     13: 9,  # CPI
+                     14: 10, # Schedule Variance
+                     15: 11, # SPI
+                     16: 12, # Budget Risk
+                     17: 13, # Schedule Risk
+                     18: 14, # Scope    Risk
+                     19: 15} # Description Of Status
 
     for col, enum in LookupIndexes.items():
         exp = "=VLOOKUP([Status Month]@row, {"
@@ -136,7 +139,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
             new_row.cells.append(ret)
 
     # Check hyperlink Column
-    col = 20
+    col = 21
     if row.cells[col].hyperlink is None or row.cells[col].hyperlink.url != p['url'] or row.cells[col].value != p['path']:
 
         if row.cells[col].hyperlink is None:
@@ -158,7 +161,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
 
     # Check Budget Index
     col = 22
-    exp = '=[Total Budget]@row / [Real Budget]@row'
+    exp = '=[Total Budget From Project]@row / [Real Budget]@row'
 
     ret = check_cell_formula(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=col, expect=exp)
 
@@ -182,7 +185,7 @@ def check(*, client, doFixes, div):
     for rowIdx in range(len(sheet.rows)):
 
         # Skip rows that don't have a project ID
-        if sheet.rows[rowIdx].cells[7].value is not None and sheet.rows[rowIdx].cells[7].value != "":
+        if sheet.rows[rowIdx].cells[6].value is not None and sheet.rows[rowIdx].cells[6].value != "":
             check_row(client=client, sheet=sheet, rowIdx=rowIdx, folderList=folderList, doFixes=doFixes)
 
     for k, v in folderList.items():
