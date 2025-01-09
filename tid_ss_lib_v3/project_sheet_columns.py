@@ -12,11 +12,29 @@
 
 PlannedPct = '=IF(Start@row > {Configuration Range 1}, 0, IF(End@row > {Configuration Range 1}, NETWORKDAYS(Start@row, {Configuration Range 1}) / Duration@row, 1))'
 
-Contingency = '=(IF([Risk Factor]@row = "None (0% Contingency)", 0, IF([Risk Factor]@row = "Low (5% Contingency)", 0.05, IF([Risk Factor]@row = "Medium (10% Contingency)", 0.1, ' \
-              'IF([Risk Factor]@row = "Med-High (25% Contingency)", 0.25, IF([Risk Factor]@row = "High (50% Contingency)", 0.5, [Risk Factor]@row)))))) * [Total Budgeted Cost]@row'
+Contingency = '=(IF([Risk Factor]@row = "None 0%", 0, '  \
+              'IF([Risk Factor]@row = "Low 20%", 0.2, '  \
+              'IF([Risk Factor]@row = "Medium 30%", 0.3, '  \
+              'IF([Risk Factor]@row = "Med-High 40%", 0.4, '  \
+              'IF([Risk Factor]@row = "High 50%", 0.5, '  \
+              'IF([Risk Factor]@row = "None (0% Contingency)", 0, '  \
+              'IF([Risk Factor]@row = "Low (5% Contingency)", 0.05, '  \
+              'IF([Risk Factor]@row = "Medium (10% Contingency)", 0.1, ' \
+              'IF([Risk Factor]@row = "Med-High (25% Contingency)", 0.25, ' \
+              'IF([Risk Factor]@row = "High (50% Contingency)", 0.5, ' \
+              '[Risk Factor]@row))))))))))) * [Total Budgeted Cost]@row'
 
-ContingencyHours = '=(IF([Risk Factor]@row = "None (0% Contingency)", 1, IF([Risk Factor]@row = "Low (5% Contingency)", 1.05, IF([Risk Factor]@row = "Medium (10% Contingency)", 1.1, ' \
-                   'IF([Risk Factor]@row = "Med-High (25% Contingency)", 1.25, IF([Risk Factor]@row = "High (50% Contingency)", 1.5, [Risk Factor]@row + 1)))))) * [Budgeted Quantity]@row'
+ContingencyHours = '=(IF([Risk Factor]@row = "None 0%", 1, '  \
+                   'IF([Risk Factor]@row = "Low 20%", 1.2, '  \
+                   'IF([Risk Factor]@row = "Medium 30%", 1.3, '  \
+                   'IF([Risk Factor]@row = "Med-High 40%", 1.4, '  \
+                   'IF([Risk Factor]@row = "High 50%", 1.5, '  \
+                   'IF([Risk Factor]@row = "None (0% Contingency)", 1, '  \
+                   'IF([Risk Factor]@row = "Low (5% Contingency)", 1.05, '  \
+                   'IF([Risk Factor]@row = "Medium (10% Contingency)", 1.1, ' \
+                   'IF([Risk Factor]@row = "Med-High (25% Contingency)", 1.25, ' \
+                   'IF([Risk Factor]@row = "High (50% Contingency)", 1.5, ' \
+                   '[Risk Factor]@row))))))))))) * [Budgeted Quantity]@row'
 
 ToDelete = [ 'Actual Labor Hours Or M&S Cost', 'Remaining Hours', 'Actual Cost', 'Remaining Funds', 'Cost Variance',
              'Total Budgeted Cost With Contingency', 'Earned Value With Contingency', 'Cost Variance With Contingency' ]
@@ -61,24 +79,24 @@ ColData = { 'Task': { 'position'    : 0, 'type': 'TEXT_NUMBER',
                                   'labor_mstone' : { 'forced': None, 'default': '0',  'format': ",,,,,,,,,7,,,,,,1,",    'formula': None }, },
 
            'Cost Per Item': { 'position'     : 3, 'type': 'TEXT_NUMBER',
-                              'top'          : { 'forced': '',   'default': None, 'format': ",3,1,,,,,,2,39,,,,,,,",  'formula': None },
-                              'ms_top'       : { 'forced': '',   'default': None, 'format': ",,1,,,,,,2,31,,,,,,,",   'formula': None },
-                              'ms_parent'    : { 'forced': '',   'default': None, 'format': ",,,,,,,,,23,,,,,,,",     'formula': None },
-                              'ms_task'      : { 'forced': None, 'default': '0',  'format': ",,,,,,,,,,,13,2,1,2,,",  'formula': None },
-                              'labor_top'    : { 'forced': '',   'default': None, 'format': ",,1,,,,,,2,31,,,,,,,",   'formula': None },
-                              'labor_parent' : { 'forced': '',   'default': None, 'format': ",,,,,,,,,23,,,,,,,",     'formula': None },
-                              'labor_task'   : { 'forced': None, 'default': '0',  'format': ",,,,,,,,,,,13,2,1,2,,",  'formula': None },
-                              'labor_mstone' : { 'forced': None, 'default': '0',  'format': ",,,,,,,,,7,,13,2,1,2,,", 'formula': None }, },
+                              'top'          : { 'forced': '',   'default': None, 'format': ",3,1,,,,,,2,39,,,,,,,",   'formula': None },
+                              'ms_top'       : { 'forced': '',   'default': None, 'format': ",,1,,,,,,2,31,,,,,,,",    'formula': None },
+                              'ms_parent'    : { 'forced': '',   'default': None, 'format': ",,,,,,,,,23,,,,,,,",      'formula': None },
+                              'ms_task'      : { 'forced': None, 'default': '0',  'format': ",,,,,,,,,,,13,2,1,2,,",   'formula': None },
+                              'labor_top'    : { 'forced': '',   'default': None, 'format': ",,1,,,,,,2,31,,,,,,,",    'formula': None },
+                              'labor_parent' : { 'forced': '',   'default': None, 'format': ",,,,,,,,,23,,,,,,,",      'formula': None },
+                              'labor_task'   : { 'forced': None, 'default': '0',  'format': ",,,,,,,,,,,13,2,1,2,,",   'formula': None },
+                              'labor_mstone' : { 'forced': None, 'default': '0',  'format': ",,,,,,,,,7,,13,2,1,2,,",  'formula': None }, },
 
            'Risk Factor': { 'position'     : 4, 'type': 'PICKLIST',
-                            'top'          : { 'forced': '',   'default': None,                   'format': ",3,1,,,,,,2,39,,,,,,,", 'formula': None },
-                            'ms_top'       : { 'forced': '',   'default': None,                   'format': ",,1,,,,,,2,31,,,,,,,",  'formula': None },
-                            'ms_parent'    : { 'forced': '',   'default': None,                   'format': ",,,,,,,,,23,,,,,,,",    'formula': None },
-                            'ms_task'      : { 'forced': None, 'default': 'Low (5% Contingency)', 'format': None,                    'formula': None },
-                            'labor_top'    : { 'forced': '',   'default': None,                   'format': ",,1,,,,,,2,31,,,,,,,",  'formula': None },
-                            'labor_parent' : { 'forced': '',   'default': None,                   'format': ",,,,,,,,,23,,,,,,,",    'formula': None },
-                            'labor_task'   : { 'forced': None, 'default': 'Low (5% Contingency)', 'format': None,                    'formula': None },
-                            'labor_mstone' : { 'forced': None, 'default': 'Low (5% Contingency)', 'format': ",,,,,,,,,7,,,,,,1,",    'formula': None }, },
+                            'top'          : { 'forced': '',   'default': None,      'format': ",3,1,,,,,,2,39,,,,,,,", 'formula': None },
+                            'ms_top'       : { 'forced': '',   'default': None,      'format': ",,1,,,,,,2,31,,,,,,,",  'formula': None },
+                            'ms_parent'    : { 'forced': '',   'default': None,      'format': ",,,,,,,,,23,,,,,,,",    'formula': None },
+                            'ms_task'      : { 'forced': None, 'default': 'Low 20%', 'format': None,                    'formula': None },
+                            'labor_top'    : { 'forced': '',   'default': None,      'format': ",,1,,,,,,2,31,,,,,,,",  'formula': None },
+                            'labor_parent' : { 'forced': '',   'default': None,      'format': ",,,,,,,,,23,,,,,,,",    'formula': None },
+                            'labor_task'   : { 'forced': None, 'default': 'Low 20%', 'format': None,                    'formula': None },
+                            'labor_mstone' : { 'forced': None, 'default': 'Low 20%', 'format': ",,,,,,,,,7,,,,,,1,",    'formula': None }, },
 
            'Assigned To': { 'position'     : 5, 'type': 'TEXT_NUMBER',
                             'top'          : { 'forced': '',    'default': None, 'format': ",3,1,,,,,,2,39,,,,,,,", 'formula': None },
@@ -150,7 +168,17 @@ ColData = { 'Task': { 'position'    : 0, 'type': 'TEXT_NUMBER',
                            'labor_task'   : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,16,,,,,3,,",      'formula': None },
                            'labor_mstone' : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,16,,,,,3,,",      'formula': None }, },
 
-           'Resource Allocation': { 'position'     : 12, 'type': 'TEXT_NUMBER',
+           'Hours Spent': { 'position'     : 12, 'type': 'TEXT_NUMBER',
+                            'top'          : { 'forced': None, 'default': None, 'format': ",3,1,,,,,,2,39,,,,,,,", 'formula': '=SUM(CHILDREN())'},
+                            'ms_top'       : { 'forced': None, 'default': None, 'format': ",,1,,,,,,2,31,,,,,,1,", 'formula': '=SUM(CHILDREN())'},
+                            'ms_parent'    : { 'forced': None, 'default': None, 'format': ",,,,,,,,,23,,,,,,1,",   'formula': '=SUM(CHILDREN())'},
+                            'ms_task'      : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,16,,,,,,1,",   'formula': '=SUM(CHILDREN())'},
+                            'labor_top'    : { 'forced': None, 'default': None, 'format': ",,1,,,,,,2,31,,,,,,1,", 'formula': '=SUM(CHILDREN())'},
+                            'labor_parent' : { 'forced': None, 'default': None, 'format': ",,,,,,,,,23,,,,,,,",    'formula': '=SUM(CHILDREN())'},
+                            'labor_task'   : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,16,,,,,,,",    'formula': None },
+                            'labor_mstone' : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,16,,,,,,,",    'formula': None }, },
+
+           'Resource Allocation': { 'position'     : 13, 'type': 'TEXT_NUMBER',
                                     'top'          : { 'forced': '',   'default': None, 'format': None,                       'formula': None },
                                     'ms_top'       : { 'forced': '',   'default': None, 'format': None,                       'formula': None },
                                     'ms_parent'    : { 'forced': '',   'default': None, 'format': None,                       'formula': None },
@@ -160,7 +188,7 @@ ColData = { 'Task': { 'position'    : 0, 'type': 'TEXT_NUMBER',
                                     'labor_task'   : { 'forced': None, 'default': None, 'format': ",,,,,,,,,18,,,,,3,,",      'formula': '=[Budgeted Quantity]@row / (Duration@row * 8)' },
                                     'labor_mstone' : { 'forced': 0.0,  'default': None, 'format': ",,,,,,,,,18,,,,,3,,",      'formula': None }, },
 
-           'Total Budgeted Cost':   { 'position'     : 13, 'type': 'TEXT_NUMBER',
+           'Total Budgeted Cost':   { 'position'     : 14, 'type': 'TEXT_NUMBER',
                                       'top'          : { 'forced': None, 'default': None, 'format': ",3,1,,,,,,2,39,,13,2,1,2,,", 'formula': '=SUM(CHILDREN())'},
                                       'ms_top'       : { 'forced': None, 'default': None, 'format': ",,1,,,,,,2,31,,13,2,1,2,,",  'formula': '=SUM(CHILDREN())'},
                                       'ms_parent'    : { 'forced': None, 'default': None, 'format': ",,,,,,,,,23,,13,2,1,2,,",    'formula': '=SUM(CHILDREN())'},
@@ -170,7 +198,7 @@ ColData = { 'Task': { 'position'    : 0, 'type': 'TEXT_NUMBER',
                                       'labor_task'   : { 'forced': None, 'default': None, 'format': ",,,,,,,,,18,,13,2,1,2,,",    'formula': '=[Budgeted Quantity]@row * [Cost Per Item]@row'},
                                       'labor_mstone' : { 'forced': None, 'default': None, 'format': ",,,,,,,,,18,,13,2,1,2,,",    'formula': '=[Budgeted Quantity]@row * [Cost Per Item]@row'}, },
 
-           'Earned Hours': { 'position'     : 14, 'type': 'TEXT_NUMBER',
+           'Earned Hours': { 'position'     : 15, 'type': 'TEXT_NUMBER',
                              'top'          : { 'forced': '',   'default': None, 'format': None,                   'formula': None },
                              'ms_top'       : { 'forced': '',   'default': None, 'format': None,                   'formula': None },
                              'ms_parent'    : { 'forced': '',   'default': None, 'format': None,                   'formula': None },
@@ -180,7 +208,7 @@ ColData = { 'Task': { 'position'    : 0, 'type': 'TEXT_NUMBER',
                              'labor_task'   : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,18,,,2,1,,,", 'formula': '=[% Complete]@row * [Budgeted Quantity]@row' },
                              'labor_mstone' : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,18,,,2,1,,,", 'formula': '=[% Complete]@row * [Budgeted Quantity]@row' }, },
 
-           'Earned Value': { 'position'     : 15, 'type': 'TEXT_NUMBER',
+           'Earned Value': { 'position'     : 16, 'type': 'TEXT_NUMBER',
                              'top'          : { 'forced': None, 'default': None, 'format': ",3,1,,,,,,2,39,,13,2,1,2,,", 'formula': '=SUM(CHILDREN())'},
                              'ms_top'       : { 'forced': None, 'default': None, 'format': ",,1,,,,,,2,31,,13,2,1,2,,",  'formula': '=SUM(CHILDREN())'},
                              'ms_parent'    : { 'forced': None, 'default': None, 'format': ",,,,,,,,,23,,13,2,1,2,,",    'formula': '=SUM(CHILDREN())'},
@@ -190,7 +218,7 @@ ColData = { 'Task': { 'position'    : 0, 'type': 'TEXT_NUMBER',
                              'labor_task'   : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,18,,13,2,1,2,,",    'formula': '=[Total Budgeted Cost]@row * [% Complete]@row'},
                              'labor_mstone' : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,18,,13,2,1,2,,",    'formula': '=[Total Budgeted Cost]@row * [% Complete]@row'}, },
 
-           'Planned % Complete': { 'position'     : 16, 'type': 'TEXT_NUMBER',
+           'Planned % Complete': { 'position'     : 17, 'type': 'TEXT_NUMBER',
                                    'top'          : { 'forced': '',   'default': None, 'format': ",3,1,,,,,,2,39,,,0,1,3,,", 'formula': PlannedPct},
                                    'ms_top'       : { 'forced': '',   'default': None, 'format': ",,1,,,,,,2,31,,,0,1,3,,",  'formula': PlannedPct},
                                    'ms_parent'    : { 'forced': '',   'default': None, 'format': ",,,,,,,,,23,,,0,1,3,,",    'formula': PlannedPct},
@@ -200,7 +228,7 @@ ColData = { 'Task': { 'position'    : 0, 'type': 'TEXT_NUMBER',
                                    'labor_task'   : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,18,,,0,1,3,,",    'formula': PlannedPct},
                                    'labor_mstone' : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,18,,,0,1,3,,",    'formula': PlannedPct}, },
 
-           'Planned Earned Value': { 'position'     : 17, 'type': 'TEXT_NUMBER',
+           'Planned Earned Value': { 'position'     : 18, 'type': 'TEXT_NUMBER',
                                      'top'          : { 'forced': None, 'default': None, 'format': ",3,1,,,,,,2,39,,13,2,1,2,,", 'formula': '=SUM(CHILDREN())'},
                                      'ms_top'       : { 'forced': None, 'default': None, 'format': ",,1,,,,,,2,31,,13,2,1,2,,",  'formula': '=SUM(CHILDREN())'},
                                      'ms_parent'    : { 'forced': None, 'default': None, 'format': ",,,,,,,,,23,,13,2,1,2,,",    'formula': '=SUM(CHILDREN())'},
@@ -210,7 +238,7 @@ ColData = { 'Task': { 'position'    : 0, 'type': 'TEXT_NUMBER',
                                      'labor_task'   : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,18,,13,2,1,2,,",    'formula': '=[Planned % Complete]@row * [Total Budgeted Cost]@row'},
                                      'labor_mstone' : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,18,,13,2,1,2,,",    'formula': '=[Planned % Complete]@row * [Total Budgeted Cost]@row'},},
 
-           'Schedule Variance': { 'position'     : 18, 'type': 'TEXT_NUMBER',
+           'Schedule Variance': { 'position'     : 19, 'type': 'TEXT_NUMBER',
                                   'top'          : { 'forced': None, 'default': None, 'format': ",3,1,,,,,,2,39,,13,2,1,2,,", 'formula': '=SUM(CHILDREN())'},
                                   'ms_top'       : { 'forced': None, 'default': None, 'format': ",,1,,,,,,2,31,,13,2,1,2,,",  'formula': '=SUM(CHILDREN())'},
                                   'ms_parent'    : { 'forced': None, 'default': None, 'format': ",,,,,,,,,23,,13,2,1,2,,",    'formula': '=SUM(CHILDREN())'},
@@ -220,7 +248,7 @@ ColData = { 'Task': { 'position'    : 0, 'type': 'TEXT_NUMBER',
                                   'labor_task'   : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,18,,13,2,1,2,,",    'formula': '=[Earned Value]@row - [Planned Earned Value]@row'},
                                   'labor_mstone' : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,18,,13,2,1,2,,",    'formula': '=[Earned Value]@row - [Planned Earned Value]@row'},},
 
-           'Contingency': { 'position'     : 19, 'type': 'TEXT_NUMBER',
+           'Contingency': { 'position'     : 20, 'type': 'TEXT_NUMBER',
                             'top'          : { 'forced': '',   'default': None, 'format': ",3,1,,,,,,2,39,,13,2,1,2,,", 'formula':'=SUM(CHILDREN())' },
                             'ms_top'       : { 'forced': '',   'default': None, 'format': ",,1,,,,,,2,31,,13,2,1,2,,",  'formula': '=SUM(CHILDREN())' },
                             'ms_parent'    : { 'forced': '',   'default': None, 'format': ",,,,,,,,,23,,13,2,1,2,,",    'formula': '=SUM(CHILDREN())'},
@@ -230,7 +258,7 @@ ColData = { 'Task': { 'position'    : 0, 'type': 'TEXT_NUMBER',
                             'labor_task'   : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,18,,13,2,1,2,,",    'formula': Contingency},
                             'labor_mstone' : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,18,,13,2,1,2,,",    'formula': Contingency},},
 
-           'Contingency Hours': { 'position'     : 20, 'type': 'TEXT_NUMBER',
+           'Contingency Hours': { 'position'     : 21, 'type': 'TEXT_NUMBER',
                                   'top'          : { 'forced': '',   'default': None, 'format': None,                     'formula': None },
                                   'ms_top'       : { 'forced': '',   'default': None, 'format': None,                     'formula': None },
                                   'ms_parent'    : { 'forced': '',   'default': None, 'format': None,                     'formula': None },
@@ -240,7 +268,7 @@ ColData = { 'Task': { 'position'    : 0, 'type': 'TEXT_NUMBER',
                                   'labor_task'   : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,18,,,2,1,,,",   'formula': ContingencyHours },
                                   'labor_mstone' : { 'forced': None, 'default': 0,    'format': ",,,,,,,,,18,,,2,1,,,",   'formula': ContingencyHours }, },
 
-#           'Baseline Start': { 'position'     : 21, 'type': 'DATETIME',
+#           'Baseline Start': { 'position'     : 22, 'type': 'DATETIME',
 #                            'top'          : { 'forced': None, 'default': None, 'format': None, 'formula': None },
 #                            'ms_top'       : { 'forced': None, 'default': None, 'format': None, 'formula': None },
 #                            'ms_parent'    : { 'forced': None, 'default': None, 'format': None, 'formula': None },
@@ -250,7 +278,7 @@ ColData = { 'Task': { 'position'    : 0, 'type': 'TEXT_NUMBER',
 #                            'labor_task'   : { 'forced': None, 'default': None, 'format': None, 'formula': None },
 #                            'labor_mstone' : { 'forced': None, 'default': None, 'format': None, 'formula': None }, },
 #
-#           'Baseline Finish':   { 'position'     : 22, 'type': 'DATETIME',
+#           'Baseline Finish':   { 'position'     : 23, 'type': 'DATETIME',
 #                            'top'          : { 'forced': None, 'default': None, 'format': None, 'formula': None },
 #                            'ms_top'       : { 'forced': None, 'default': None, 'format': None, 'formula': None },
 #                            'ms_parent'    : { 'forced': None, 'default': None, 'format': None, 'formula': None },
@@ -260,7 +288,7 @@ ColData = { 'Task': { 'position'    : 0, 'type': 'TEXT_NUMBER',
 #                            'labor_task'   : { 'forced': None, 'default': None, 'format': None, 'formula': None },
 #                            'labor_mstone' : { 'forced': None, 'default': None, 'format': None, 'formula': None }, },
 #
-#           'Variance': { 'position'     : 23, 'type': 'DURATION',
+#           'Variance': { 'position'     : 24, 'type': 'DURATION',
 #                         'top'          : { 'forced': None, 'default': None, 'format': None, 'formula': None },
 #                         'ms_top'       : { 'forced': None, 'default': None, 'format': None, 'formula': None },
 #                         'ms_parent'    : { 'forced': None, 'default': None, 'format': None, 'formula': None },
