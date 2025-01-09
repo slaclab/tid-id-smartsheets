@@ -62,8 +62,16 @@ ColData = { 'Status Month':
                  'formula'  : '=[Total Budget]@row - [Total Actuals From Finance]@row',
                  'link'     : None},
 
-            'Earned Value' :
+            'Percent Spent' :
                { 'position' : 5,
+                 'type'     : 'TEXT_NUMBER',
+                 'forced'   : None,
+                 'format'   : ",,,,,,,,,18,,13,0,1,3,,",
+                 'formula'  : '=[Total Actuals From Finance]@row / [Total Budget]@row',
+                 'link'     : None},
+
+            'Earned Value' :
+               { 'position' : 6,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,13,2,1,2,,",
@@ -71,7 +79,7 @@ ColData = { 'Status Month':
                  'link'     : ('project', 'Earned Value')},
 
             'Planned Earned Value' :
-               { 'position' : 6,
+               { 'position' : 7,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,13,2,1,2,,",
@@ -79,7 +87,7 @@ ColData = { 'Status Month':
                  'link'     : ('project', 'Planned Earned Value')},
 
             'Cost Variance' :
-               { 'position' : 7,
+               { 'position' : 8,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,13,2,1,2,,",
@@ -87,7 +95,7 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'CPI' :
-               { 'position' : 8,
+               { 'position' : 9,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,2,1,1,,",
@@ -95,7 +103,7 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'Schedule Variance' :
-               { 'position' : 9,
+               { 'position' : 10,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,13,2,1,2,,",
@@ -103,7 +111,7 @@ ColData = { 'Status Month':
                  'link'     : ('project', 'Schedule Variance')},
 
             'SPI' :
-               { 'position' : 10,
+               { 'position' : 11,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,2,1,1,,",
@@ -111,7 +119,7 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'Budget Risk' :
-               { 'position' : 11,
+               { 'position' : 12,
                  'type'     : 'PICKLIST',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,,,,,",
@@ -119,7 +127,7 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'Schedule Risk' :
-               { 'position' : 12,
+               { 'position' : 13,
                  'type'     : 'PICKLIST',
                  'forced'   : None,
                  'format'   : ",,,,,,,,,18,,,,,,,",
@@ -127,7 +135,7 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'Scope Risk' :
-               { 'position' : 13,
+               { 'position' : 14,
                  'type'     : 'PICKLIST',
                  'forced'   : None,
                  'format'   : None,
@@ -135,7 +143,7 @@ ColData = { 'Status Month':
                  'link'     : None},
 
             'Description Of Status' :
-               { 'position' : 14,
+               { 'position' : 15,
                  'type'     : 'TEXT_NUMBER',
                  'forced'   : 'My Status Description',
                  'format'   : None,
