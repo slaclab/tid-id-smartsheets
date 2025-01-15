@@ -11,6 +11,7 @@
 #-----------------------------------------------------------------------------
 import smartsheet
 from . import navigate
+from . import division_actuals
 
 # Set formats
 #
@@ -24,7 +25,8 @@ from . import navigate
 
 def get_project_list(*, client, div):
 
-    sheet = client.Sheets.get_sheet(int(div.project_list), include='format')
+    #sheet = client.Sheets.get_sheet(int(div.project_list), include='format')
+    sheet = client.Sheets.get_sheet(int(div.project_list_test), include='format')
 
     ret = []
 
@@ -69,7 +71,7 @@ def check_cell_formula(*, client, sheet, rowIdx, row, col, expect):
     return new_cell
 
 
-def check_row(*, client, sheet, rowIdx, folderList, doFixes):
+def check_row(*, client, sheet, rowIdx, folderList, doFixes, projData):
 
     row = sheet.rows[rowIdx]
 
@@ -107,24 +109,35 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
         #print(f"    Skipping row {rowIdx +1} project {p['name']} updated = No")
         #return
 
-    # Status Month, column 7
+    # Update PA Numbers
+    pa_col = 7
+    if fid in projData:
+        pas = ",".join([k for k,v in projData[fid]['pas'].items()])
+        new_cell = smartsheet.models.Cell()
+        new_cell.column_id = sheet.columns[pa_col].id
+        new_cell.value = pas
+        new_cell.strict = False
+        new_row.cells.append(new_cell)
+
+    # Status Month, column 8
+    sm_col = 8
     if rowIdx != 0:
-        ret = check_cell_formula(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=7, expect='=[Status Month]1')
+        ret = check_cell_formula(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=sm_col, expect='=[Status Month]1')
 
         if ret is not None:
             new_row.cells.append(ret)
 
-    LookupIndexes = { 9: 4,  # Total Budget
-                     10: 3,  # Actual Cost
-                     11: 5,  # Remaining Funds
-                     12: 9,  # Cost Variance
-                     13: 10, # CPI
-                     14: 11, # Schedule Variance
-                     15: 12, # SPI
-                     16: 13, # Budget Risk
-                     17: 14, # Schedule Risk
-                     18: 15, # Scope    Risk
-                     19: 16} # Description Of Status
+    LookupIndexes = {10: 4,  # Total Budget
+                     11: 3,  # Actual Cost
+                     12: 5,  # Remaining Funds
+                     13: 9,  # Cost Variance
+                     14: 10, # CPI
+                     15: 11, # Schedule Variance
+                     16: 12, # SPI
+                     17: 13, # Budget Risk
+                     18: 14, # Schedule Risk
+                     19: 15, # Scope    Risk
+                     20: 16} # Description Of Status
 
     for col, enum in LookupIndexes.items():
         exp = "=VLOOKUP([Status Month]@row, {"
@@ -139,7 +152,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
             new_row.cells.append(ret)
 
     # Check hyperlink Column
-    col = 21
+    col = 22
     if row.cells[col].hyperlink is None or row.cells[col].hyperlink.url != p['url'] or row.cells[col].value != p['path']:
 
         if row.cells[col].hyperlink is None:
@@ -160,7 +173,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes):
         new_row.cells.append(new_cell)
 
     # Check Budget Index
-    col = 22
+    col = 23
     exp = '=[Total Budget From Project]@row / [Real Budget]@row'
 
     ret = check_cell_formula(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=col, expect=exp)
@@ -182,11 +195,14 @@ def check(*, client, doFixes, div):
     print("Processing division project sheet ...\n")
     sheet = client.Sheets.get_sheet(int(div.project_list), include='format')
 
+    print("Reading division actuals sheet")
+    paData, projData = division_actuals.get_div_actuals_data(client=client, div=div)
+
     for rowIdx in range(len(sheet.rows)):
 
         # Skip rows that don't have a project ID
         if sheet.rows[rowIdx].cells[6].value is not None and sheet.rows[rowIdx].cells[6].value != "":
-            check_row(client=client, sheet=sheet, rowIdx=rowIdx, folderList=folderList, doFixes=doFixes)
+            check_row(client=client, sheet=sheet, rowIdx=rowIdx, folderList=folderList, doFixes=doFixes, projData=projData)
 
     for k, v in folderList.items():
         if v['tracked'] is False:

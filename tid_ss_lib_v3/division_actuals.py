@@ -91,9 +91,9 @@ def get_div_actuals_data (*, client, div):
         entry = {}
 
         for k,v in cData.items():
-            entry[k] = sheet.rows[rowIdx].cells[v['position']].value;
+            entry[k] = sheet.rows[rowIdx].cells[v['position']].value
 
-        retPaData[sheet.rows[rowIdx].cells[cData['Lookup PA']['position']].value] = entry;
+        retPaData[sheet.rows[rowIdx].cells[cData['Lookup PA']['position']].value] = entry
 
         fid = entry['Project Folder ID']
 
