@@ -25,8 +25,7 @@ from . import division_actuals
 
 def get_project_list(*, client, div):
 
-    #sheet = client.Sheets.get_sheet(int(div.project_list), include='format')
-    sheet = client.Sheets.get_sheet(int(div.project_list_test), include='format')
+    sheet = client.Sheets.get_sheet(int(div.project_list), include='format')
 
     ret = []
 
