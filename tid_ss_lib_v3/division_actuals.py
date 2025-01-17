@@ -174,7 +174,7 @@ def parse_wbs_actuals_sheet(*, client, div, sheetId, year, paData, projData):
 
     find_columns(client=client, sheet=sheet, cData=cData)
 
-    userMap = configuration.get_user_map(client=client, div=div)
+    userMapByName, userMapBYEmail = configuration.get_user_map(client=client, div=div)
     missMap = set()
 
     # Process the rows
@@ -195,8 +195,8 @@ def parse_wbs_actuals_sheet(*, client, div, sheetId, year, paData, projData):
 
             name  = entry['Employee Name']
 
-            if name in userMap:
-                email = userMap[name]
+            if name in userMapByName:
+                email = userMapByName[name]
             else:
                 print(f"User name {name} not found in email map")
                 missMap.add(name)

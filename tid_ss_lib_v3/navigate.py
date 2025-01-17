@@ -57,7 +57,7 @@ def get_folder_data(*, client, div, folderId, path=None):
     return ret
 
 
-def check_project(*, client, div, folderId, doFixes, doCost="None", doDownload=False, path=None, doTask=False):
+def check_project(*, client, div, folderId, doFixes, doCost=None, doDownload=False, path=None, doTask=False, resourceTable=None):
     fdata = get_folder_data(client=client, div=div, folderId=folderId)
 
     if path is not None:
@@ -120,7 +120,7 @@ def check_project(*, client, div, folderId, doFixes, doCost="None", doDownload=F
 
     # Check project file
     resources = set()
-    ret = project_sheet.check(client=client, div=div, sheet=fdata['sheets']['Project'], doFixes=doFixes, cData=cData, doCost=doCost, name=fdata['folder'].name, doDownload=doDownload, doTask=doTask, resources=resources)
+    ret = project_sheet.check(client=client, div=div, sheet=fdata['sheets']['Project'], doFixes=doFixes, cData=cData, doCost=doCost, name=fdata['folder'].name, doDownload=doDownload, doTask=doTask, resources=resources, resourceTable=resourceTable)
 
     # Fix tracking file
     if ret:

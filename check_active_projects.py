@@ -92,6 +92,8 @@ if args.backup is not None:
 else:
     backupDir = None
 
+resourceTable={}
+
 for k in args.div:
 
     div = tid_ss_lib_v3.configuration.get_division(client=client, div=k)
@@ -114,5 +116,20 @@ for k in args.div:
         lst.append(p['id'])
 
     for p in lst:
-        tid_ss_lib_v3.navigate.check_project(client=client, div=div, folderId=p, doFixes=args.fix, doCost=args.doCost, doDownload=doDownload, doTask=args.doTask)
+
+        if p.... :
+            rt = resourceTable
+        else:
+            rt = None
+
+        tid_ss_lib_v3.navigate.check_project(client=client,
+                                             div=div,
+                                             folderId=p,
+                                             doFixes=args.fix,
+                                             doCost=args.doCost,
+                                             doDownload=doDownload,
+                                             doTask=args.doTask,
+                                             resourceTable=rt)
+
+print(resourceTable)
 

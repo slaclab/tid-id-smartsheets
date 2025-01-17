@@ -13,6 +13,7 @@
 import smartsheet
 from . import navigate
 from . import project_sheet_columns
+from . import configuration
 
 import datetime
 
@@ -216,15 +217,18 @@ def cost_ms(*, sheet, rowIdx, cData, msTable):
     msTable[k] += (qty * perItem)
 
 
-def cost_labor(*, sheet, rowIdx, cData, laborTable, doCost):
+def cost_labor(*, client, div, sheet, rowIdx, cData, laborTable, resourceTable, doCost):
+
+    userMapByName, userMapByEmail = configuration.get_user_map(client=client, div=div)
 
     if sheet.rows[rowIdx].cells[cData['Task']['position']].value is None or \
-       sheet.rows[rowIdx].cells[cData['Task']['position']].value  == '':
+       sheet.rows[rowIdx].cells[cData['Task']['position']].value  == '' or \
+       sheet.rows[rowIdx].cells[cData['Assigned To']['position']].value is None or \
+       sheet.rows[rowIdx].cells[cData['Assigned To']['position']].value  == '':
         return
 
     # Extract key columns
-
-    if doCost == "Contingency":
+    if doCost == 'Contingency':
         hours = float(sheet.rows[rowIdx].cells[cData['Contingency Hours']['position']].value)
     else:
         hours = float(sheet.rows[rowIdx].cells[cData['Budgeted Quantity']['position']].value)
@@ -236,9 +240,23 @@ def cost_labor(*, sheet, rowIdx, cData, laborTable, doCost):
     if endStr is None or startStr is None:
         return
 
+    # Add entry to resourceTable is applicable
+    resource = sheet.rows[rowIdx].cells[cData['Assigned To']['position']].value
+
+    # Convert email to name
+    if resource in userMapByEmail:
+        resource = userMapByEmail[resource]
+
+    if resourceTable is not None:
+        if resource not in resourceTable:
+            resourceTable[resource] = {sheet.name: {}}
+
+        if sheet.name not in resourceTable[resource]:
+            resourceTable[resource][sheet.name] = {}
+
     # Split date fields
     startFields = startStr.split('T')[0].split('-')  # Start date fields
-    endFields = endStr.split('T')[0].split('-')    # End date fields
+    endFields = endStr.split('T')[0].split('-')      # End date fields
 
     # Convert to python date object
     startDate = datetime.date(int(startFields[0]),int(startFields[1]),int(startFields[2]))
@@ -267,17 +285,26 @@ def cost_labor(*, sheet, rowIdx, cData, laborTable, doCost):
 
             # Add year/month to dictionary if it does not exist
             if k not in laborTable:
-                laborTable[k] = {rate: 0.0}
+                laborTable[k] = {resource: {'rate' : rate, 'hours' : 0.0}}
 
             # Add rate to sub-dictionrary for month
-            elif rate not in laborTable[k]:
-                laborTable[k][rate] = 0.0
+            elif resource not in laborTable[k]:
+                laborTable[k][resource] = {'rate' : rate, 'hours' : 0.0}
 
             # Increment the number of hours in that year/month, for the given rate
-            laborTable[k][rate] += hoursPerDay
+            laborTable[k][resource]['hours'] += hoursPerDay
+
+            if resourceTable is not None:
+
+                # Add year/month to dictionary if it does not exist
+                if k not in resourceTable[resource][sheet.name]:
+                    resourceTable[resource][sheet.name][k] = 0.0
+
+                # Increment the number of hours in that year/month, for the given rate
+                resourceTable[resource][sheet.name][k] += hoursPerDay
 
 
-def check(*, client, sheet, doFixes, div, cData, doCost, name, doDownload, doTask, resources):
+def check(*, client, sheet, doFixes, div, cData, doCost, name, doDownload, doTask, resources, resourceTable):
     inLabor = False
     inMS = False
     msTable = {}
@@ -325,7 +352,7 @@ def check(*, client, sheet, doFixes, div, cData, doCost, name, doDownload, doTas
                 check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='ms_parent', div=div, cData=cData, doFixes=doFixes, doTask=doTask, resources=None)
             else:
                 check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='ms_task', div=div, cData=cData, doFixes=doFixes, doTask=doTask, resources=None)
-                if doCost != "None":
+                if doCost != 'None':
                     cost_ms(sheet=sheet, rowIdx=rowIdx, cData=cData, msTable=msTable)
 
         elif inLabor:
@@ -336,12 +363,11 @@ def check(*, client, sheet, doFixes, div, cData, doCost, name, doDownload, doTas
             else:
                 check_row(client=client, sheet=sheet, rowIdx=rowIdx, key='labor_task', div=div, cData=cData, doFixes=doFixes, doTask=doTask, resources=resources)
 
-                if doCost != "None":
-                    cost_labor(sheet=sheet, rowIdx=rowIdx, cData=cData, laborTable=laborTable, doCost=doCost)
-
+                if doCost != 'None' or resourceTable is not None:
+                    cost_labor(client=client, div=div, sheet=sheet, rowIdx=rowIdx, cData=cData, laborTable=laborTable, resourceTable=resourceTable, doCost=doCost)
 
     # Generate excel friend view of monthly spending
-    if doCost != "None":
+    if doCost != 'None':
         write_cost_table(name=name, laborTable=laborTable, msTable=msTable)
 
     if isinstance(doDownload,str):
@@ -354,29 +380,29 @@ def write_cost_table(*, name, laborTable, msTable):
 
     # Generate excel friend view of monthly spending
     months = set([])
-    rates = set([])
+    resources = set([])
 
     # First generate month and rate lists to create excel grid
     for mnth in laborTable:
         months.add(mnth)
-        for rte in laborTable[mnth]:
-            rates.add(rte)
+        for res in laborTable[mnth]:
+            resources.add(res)
 
     for mnth in msTable:
         months.add(mnth)
 
     months = sorted(months)
-    rates = sorted(rates)
+    resources = sorted(resources)
 
     with open(f'{name} Cost.csv', 'w') as f:
 
         # Create Header
-        f.write('Month,M&S,')
+        f.write('Month\tM&S\t')
 
-        for rte in rates:
-            f.write(f'{float(rte):0.2f} Hours, {float(rte):0.2f} Dollars,')
+        for k in resources:
+            f.write(f'{k} Rate\t{k} Hours\t{k} Dollars\t')
 
-        f.write("Total Labor Hours, Total Labor Dollars, Total Dollars\n")
+        f.write("Total Labor Hours\tTotal Labor Dollars\tTotal Dollars\n")
 
         # Each month
         for m in months:
@@ -390,15 +416,17 @@ def write_cost_table(*, name, laborTable, msTable):
             else:
                 val = 0.0
 
-            f.write(f'{m}, {val:0.2f},')
+            f.write(f'{m}\t{val:0.2f}\t')
             totDollars += val
 
             # Put in Labor
-            for rte in rates:
-                if m in laborTable and rte in laborTable[m]:
-                    hrs = float(laborTable[m][rte])
+            for res in resources:
+                if m in laborTable and res in laborTable[m]:
+                    rte = float(laborTable[m][res]['rate'])
+                    hrs = float(laborTable[m][res]['hours'])
                     val = float(hrs) * float(rte)
                 else:
+                    rte = 0.0
                     hrs = 0.0
                     val = 0.0
 
@@ -406,7 +434,7 @@ def write_cost_table(*, name, laborTable, msTable):
                 totLabDollars += val
                 totDollars += val
 
-                f.write(f'{hrs:0.2f}, {val:0.2f},')
+                f.write(f'{rte}\t{hrs:0.2f}\t{val:0.2f}\t')
 
-            f.write(f"{totLabHours:0.2f}, {totLabDollars:0.2f},{totDollars:0.2f}\n")
+            f.write(f"{totLabHours:0.2f}\t{totLabDollars:0.2f}\t{totDollars:0.2f}\n")
 
