@@ -34,6 +34,7 @@ def get_project_list(*, client, div):
 
         proj['name']      = row.cells[0].value  if row.cells[0].value  is not None else ''
         proj['program']   = row.cells[1].value  if row.cells[1].value  is not None else 'Unknown'
+        proj['status']    = row.cells[2].value  if row.cells[2].value  is not None else 'Unknown'
         proj['pm']        = row.cells[3].value  if row.cells[3].value  is not None else 'Unknown'
         proj['id']        = int(row.cells[6].value) if row.cells[6].value  is not None else ''
         #proj['updated']   = row.cells[23].value if row.cells[23].value is not None else ''

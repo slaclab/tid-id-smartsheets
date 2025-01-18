@@ -76,6 +76,14 @@ parser.add_argument(
     help     = "Pass backup director to generate a backup"
 )
 
+parser.add_argument(
+    "--resources",
+    type     = str,
+    action   = 'append',
+    required = False,
+    choices  = ['PD0', 'PD1', 'PD2', 'PD3'],
+    help     = "Projects states for tracking."
+)
 
 # Get the arguments
 args = parser.parse_args()
@@ -110,21 +118,26 @@ for k in args.div:
     else:
         doDownload = False
 
-    lst = [int(div.template_folder)]
+    tid_ss_lib_v3.navigate.check_project(client=client,
+                                         div=div,
+                                         folderId=int(div.template_folder),
+                                         doFixes=args.fix,
+                                         doCost=args.doCost,
+                                         doDownload=doDownload,
+                                         doTask=args.doTask,
+                                         resourceTable=None)
 
     for p in tid_ss_lib_v3.project_list.get_project_list(client=client, div=div):
-        lst.append(p['id'])
 
-    for p in lst:
+        rt = None
 
-        if p.... :
-            rt = resourceTable
-        else:
-            rt = None
+        for r in args.resources:
+            if r in p['status']:
+                rt = resourceTable
 
         tid_ss_lib_v3.navigate.check_project(client=client,
                                              div=div,
-                                             folderId=p,
+                                             folderId=p['id'],
                                              doFixes=args.fix,
                                              doCost=args.doCost,
                                              doDownload=doDownload,

@@ -229,11 +229,22 @@ def cost_labor(*, client, div, sheet, rowIdx, cData, laborTable, resourceTable, 
 
     # Extract key columns
     if doCost == 'Contingency':
-        hours = float(sheet.rows[rowIdx].cells[cData['Contingency Hours']['position']].value)
+        v = sheet.rows[rowIdx].cells[cData['Contingency Hours']['position']].value
     else:
-        hours = float(sheet.rows[rowIdx].cells[cData['Budgeted Quantity']['position']].value)
+        v = sheet.rows[rowIdx].cells[cData['Budgeted Quantity']['position']].value
 
-    rate = float(sheet.rows[rowIdx].cells[cData['Cost Per Item']['position']].value)
+    if v is not None:
+        hours = float(v)
+    else:
+        hours = 0.0
+
+    v = sheet.rows[rowIdx].cells[cData['Cost Per Item']['position']].value
+
+    if v is not None:
+        rate = float(v)
+    else:
+        rate = 0.0
+
     startStr = sheet.rows[rowIdx].cells[cData['Start']['position']].value
     endStr = sheet.rows[rowIdx].cells[cData['End']['position']].value
 
