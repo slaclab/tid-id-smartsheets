@@ -144,5 +144,9 @@ for k in args.div:
                                              doTask=args.doTask,
                                              resourceTable=rt)
 
-print(resourceTable)
+    if len(resourceTable) > 0:
+        import json
+
+        with open("data.json", "w") as outfile:
+            json.dump(resourceTable, outfile)
 
