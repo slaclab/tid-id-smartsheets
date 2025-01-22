@@ -219,8 +219,6 @@ def cost_ms(*, sheet, rowIdx, cData, msTable):
 
 def cost_labor(*, client, div, sheet, rowIdx, cData, laborTable, resourceTable, doCost):
 
-    userMapByName, userMapByEmail = configuration.get_user_map(client=client, div=div)
-
     if sheet.rows[rowIdx].cells[cData['Task']['position']].value is None or \
        sheet.rows[rowIdx].cells[cData['Task']['position']].value  == '' or \
        sheet.rows[rowIdx].cells[cData['Assigned To']['position']].value is None or \
@@ -253,10 +251,6 @@ def cost_labor(*, client, div, sheet, rowIdx, cData, laborTable, resourceTable, 
 
     # Add entry to resourceTable is applicable
     resource = sheet.rows[rowIdx].cells[cData['Assigned To']['position']].value
-
-    # Convert email to name
-    if resource in userMapByEmail:
-        resource = userMapByEmail[resource]
 
     if resourceTable is not None:
         if resource not in resourceTable:

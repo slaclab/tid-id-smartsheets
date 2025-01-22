@@ -174,7 +174,7 @@ def parse_wbs_actuals_sheet(*, client, div, sheetId, year, paData, projData):
 
     find_columns(client=client, sheet=sheet, cData=cData)
 
-    userMapByName, userMapBYEmail = configuration.get_user_map(client=client, div=div)
+    userMapByName = configuration.get_user_map(client=client, div=div)
     missMap = set()
 
     # Process the rows

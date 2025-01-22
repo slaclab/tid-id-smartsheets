@@ -52,7 +52,6 @@ def get_division(*, client, div):
 
 def get_user_map(*, client, div):
     userMapByName = {}
-    userMapByEmail = {}
 
     sheet = client.Sheets.get_sheet(int(div.wbs_name_lookup))
 
@@ -62,9 +61,24 @@ def get_user_map(*, client, div):
         email = sheet.rows[rowIdx].cells[1].value
 
         userMapByName[name] = email
-        userMapByEmail[email] = name
 
-    return userMapByName, userMapByEmail
+    return userMapByName
+
+
+def get_user_map_by_email(*, client, div):
+    userMapByEmail = {}
+
+    sheet = client.Sheets.get_sheet(int(div.wbs_name_lookup))
+
+    # Process the rows
+    for rowIdx in range(0,len(sheet.rows)):
+        name = sheet.rows[rowIdx].cells[0].value
+        email = sheet.rows[rowIdx].cells[1].value
+        dep = sheet.rows[rowIdx].cells[2].value
+
+        userMapByEmail[email] = {'name' : name, 'dep' : dep}
+
+    return userMapByEmail
 
 
 def add_missing_user_map(*, client, div, miss):
