@@ -13,6 +13,7 @@
 import tid_ss_lib_v3.navigate
 import tid_ss_lib_v3.configuration
 import tid_ss_lib_v3.project_list
+import tid_ss_lib_v3.division_resource
 import smartsheet
 import os
 import argparse
@@ -145,8 +146,5 @@ for k in args.div:
                                              resourceTable=rt)
 
     if len(resourceTable) > 0:
-        import json
-
-        with open("data.json", "w") as outfile:
-            json.dump(resourceTable, outfile)
+        tid_ss_lib_v3.division_resource.update(client=client, div=div, resourceTable=resourceTable)
 
