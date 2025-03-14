@@ -87,7 +87,9 @@ def get_div_actuals_data (*, client, div):
     lastMonth = int(div.earned_value_date.split('-')[1])
 
     # Process the rows
+    print(f"Processing top level actuals sheet. Total rows = {len(sheet.rows)}")
     for rowIdx in range(0,len(sheet.rows)):
+        #print(f"    Row: {rowIdx+1}")
         entry = {}
 
         for k,v in cData.items():
@@ -103,7 +105,9 @@ def get_div_actuals_data (*, client, div):
         retProjData[fid]['pas'][entry['Lookup PA']] = entry
 
     # Generate date list per project
+    print("Generating date lists for each Project")
     for k,v in retProjData.items():
+        #print(f"    {k}")
         firstPa = next(iter(v['pas']))
 
         # Set start date for actuals, use first dictionary entry
@@ -113,7 +117,7 @@ def get_div_actuals_data (*, client, div):
         v['months'].append(f"{year:04}_{month:02}")
 
         while True:
-            if  year == lastYear and month == lastMonth:
+            if  year >= lastYear and month >= lastMonth:
                 break;
             elif month == 12:
                 month = 1
@@ -122,6 +126,8 @@ def get_div_actuals_data (*, client, div):
                 month += 1
 
             v['months'].append(f"{year:04}_{month:02}")
+
+    print("Done with actuals sheet")
 
     return retPaData, retProjData
 
