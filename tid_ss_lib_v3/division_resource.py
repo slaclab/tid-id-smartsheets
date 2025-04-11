@@ -25,12 +25,11 @@ from . import configuration
 #        18 - Gray
 #           = White
 
-ToDelete = [ 'Lookup PA' , 'Monthly Actuals Date' ]
-
-Months = [ '2024_10', '2024_11', '2024_12', '2025_01', '2025_02', '2025_03', '2025_04', '2025_05', '2025_06', '2025_07', '2025_08', '2025_09' ]
+Months = { 'FY2025': [ '2024_10', '2024_11', '2024_12', '2025_01', '2025_02', '2025_03', '2025_04', '2025_05', '2025_06', '2025_07', '2025_08', '2025_09' ],
+           'FY2026': [ '2025_10', '2025_11', '2025_12', '2026_01', '2026_02', '2026_03', '2026_04', '2026_05', '2026_06', '2026_07', '2026_08', '2026_09' ]}
 
 HoursPerMonth = 160
-TotalHours = 1780
+HoursPerYear = 1780
 
 ColData = { 'Resource / Project': { 'position' : 0, 'type': 'TEXT_NUMBER',
                                     'resource' : { 'format': ",,1,,,,,,2,31,,,,,,1,",  'formula' : None },
@@ -38,36 +37,36 @@ ColData = { 'Resource / Project': { 'position' : 0, 'type': 'TEXT_NUMBER',
 
             'Department': { 'position' : 1, 'type': 'TEXT_NUMBER',
                             'resource' : { 'format': ",,1,,,,,,2,31,,,,,,1,",  'formula' : None },
-                            'project'  : { 'format': None,                     'formula' : None } },
+                            'project'  : { 'format': None,                     'formula' : None } }}
 
-            'Total Hours': { 'position' : 2, 'type': 'TEXT_NUMBER',
-                             'resource' : { 'format': ",,1,,,,,,2,31,,,0,,1,1,",  'formula' : '=SUM(CHILDREN())' },
-                             'project'  : { 'format': ",,,,,,,,,,,,0,,1,,",       'formula' : None } },
+idx = 2;
 
-            'Total Pct' : { 'position' : 3, 'type': 'TEXT_NUMBER',
-                            'resource' : { 'format': ",,1,,,,,,2,31,,,0,1,3,1,",  'formula' : f'=[Total Hours]@row / {TotalHours}' },
-                            'project'  : { 'format': ",,,,,,,,,18,,,0,1,3,,",     'formula' : f'=[Total Hours]@row / {TotalHours}' } } }
-
-for i,m in enumerate(Months):
-
-    ColData[f'{m} Hours'] = { 'position' : i*2+4, 'type': 'TEXT_NUMBER',
+for k in Months:
+    ColData[f'{k} Hours'] = { 'position' : idx, 'type': 'TEXT_NUMBER',
                               'resource' : { 'format': ",,1,,,,,,2,31,,,0,,1,1,",  'formula' : '=SUM(CHILDREN())' },
                               'project'  : { 'format': ",,,,,,,,,,,,0,,1,,",       'formula' : None } }
+    idx += 1
 
-    ColData[f'{m} Pct'] = { 'position' : i*2+5, 'type': 'TEXT_NUMBER',
-                            'resource' : { 'format': ",,1,,,,,,2,31,,,0,1,3,1,",  'formula' : f'=[{m} Hours]@row / {HoursPerMonth}' },
-                            'project'  : { 'format': ",,,,,,,,,18,,,0,1,3,,",    'formula' : f'=[{m} Hours]@row / {HoursPerMonth}' } }
+    ColData[f'{k} Pct'] = { 'position' : idx, 'type': 'TEXT_NUMBER',
+                            'resource' : { 'format': ",,1,,,,,,2,31,,,0,1,3,1,",  'formula' : f'=[{k} Hours]@row / {HoursPerYear}' },
+                            'project'  : { 'format': ",,,,,,,,,18,,,0,1,3,,",    'formula' : f'=[{k} Hours]@row / {HoursPerYear}' } }
+    idx += 1
+
+for k,v in Months.items():
+    for m in v:
+
+        ColData[f'{m} Hours'] = { 'position' : idx, 'type': 'TEXT_NUMBER',
+                                  'resource' : { 'format': ",,1,,,,,,2,31,,,0,,1,1,",  'formula' : '=SUM(CHILDREN())' },
+                                  'project'  : { 'format': ",,,,,,,,,,,,0,,1,,",       'formula' : None } }
+        idx += 1
+
+        ColData[f'{m} Pct'] = { 'position' : idx, 'type': 'TEXT_NUMBER',
+                                'resource' : { 'format': ",,1,,,,,,2,31,,,0,1,3,1,",  'formula' : f'=[{m} Hours]@row / {HoursPerMonth}' },
+                                'project'  : { 'format': ",,,,,,,,,18,,,0,1,3,,",    'formula' : f'=[{m} Hours]@row / {HoursPerMonth}' } }
+        idx += 1
 
 
 def find_columns(*, client, sheet, rData):
-
-    # Look for columns we want to delete
-    for tod in tracking_sheet_columns.ToDelete:
-        for i in range(len(sheet.columns)):
-            if sheet.columns[i].title == tod:
-                print(f"    Found resource column to delete {tod} at position {i+1}. Deleting")
-                client.Sheets.delete_column(sheet.id, sheet.columns[i].id)
-                return False
 
     # Look for each expected column
     for k,v in rData.items():
@@ -148,7 +147,6 @@ def add_projects(*, client, sheet, rData, resourceData):
         for proj,projMonths in resourceData[entry]['projects'].items():
             new_row = smartsheet.models.Row()
             new_row.parent_id = sheet.rows[r].id
-            totHours = 0
 
             # Project Name
             new_cell = smartsheet.models.Cell()
@@ -172,23 +170,53 @@ def add_projects(*, client, sheet, rData, resourceData):
             new_cell.strict = False
             new_row.cells.append(new_cell)
 
-            # Months
-            for month in Months:
+            for k,v in Months.items():
+                totHours = 0
 
-                # Add hours cell
-                key = f"{month} Hours"
+                for month in v:
 
-                if month in projMonths:
-                    value = projMonths[month]
-                    totHours += value
-                else:
-                    value = 0.0
+                    # Add hours cell
+                    key = f"{month} Hours"
 
-                pos = rData[key]['position']
+                    if month in projMonths:
+                        value = projMonths[month]
+                        totHours += value
+                    else:
+                        value = 0.0
+
+                    pos = rData[key]['position']
+
+                    new_cell = smartsheet.models.Cell()
+                    new_cell.column_id = sheet.columns[rData[key]['position']].id
+                    new_cell.value = value
+
+                    if rData[key]['project']['format'] is not None:
+                        new_cell.format = rData[key]['project']['format']
+
+                    new_cell.strict = False
+                    new_row.cells.append(new_cell)
+
+                    # Add percentage cell
+                    key = f"{month} Pct"
+
+                    pos = rData[key]['position']
+
+                    new_cell = smartsheet.models.Cell()
+                    new_cell.column_id = sheet.columns[rData[key]['position']].id
+                    new_cell.formula = rData[key]['project']['formula']
+
+                    if rData[key]['project']['format'] is not None:
+                        new_cell.format = rData[key]['project']['format']
+
+                    new_cell.strict = False
+                    new_row.cells.append(new_cell)
+
+                # Total Hours
+                key = f"{k} Hours"
 
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = sheet.columns[rData[key]['position']].id
-                new_cell.value = value
+                new_cell.value = totHours
 
                 if rData[key]['project']['format'] is not None:
                     new_cell.format = rData[key]['project']['format']
@@ -196,10 +224,8 @@ def add_projects(*, client, sheet, rData, resourceData):
                 new_cell.strict = False
                 new_row.cells.append(new_cell)
 
-                # Add percentage cell
-                key = f"{month} Pct"
-
-                pos = rData[key]['position']
+                # Total Pct
+                key = f"{k} Pct"
 
                 new_cell = smartsheet.models.Cell()
                 new_cell.column_id = sheet.columns[rData[key]['position']].id
@@ -210,28 +236,6 @@ def add_projects(*, client, sheet, rData, resourceData):
 
                 new_cell.strict = False
                 new_row.cells.append(new_cell)
-
-            # Total Hours
-            new_cell = smartsheet.models.Cell()
-            new_cell.column_id = sheet.columns[rData['Total Hours']['position']].id
-            new_cell.value = totHours
-
-            if rData['Total Hours']['project']['format'] is not None:
-                new_cell.format = rData['Total Hours']['project']['format']
-
-            new_cell.strict = False
-            new_row.cells.append(new_cell)
-
-            # Total Pct
-            new_cell = smartsheet.models.Cell()
-            new_cell.column_id = sheet.columns[rData['Total Pct']['position']].id
-            new_cell.formula = rData['Total Pct']['project']['formula']
-
-            if rData[key]['project']['format'] is not None:
-                new_cell.format = rData['Total Pct']['project']['format']
-
-            new_cell.strict = False
-            new_row.cells.append(new_cell)
 
             addRows.append(new_row)
 
