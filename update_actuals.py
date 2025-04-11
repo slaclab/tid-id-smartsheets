@@ -71,6 +71,7 @@ for k in args.div:
     print("Collecting Division Actuals")
     data = tid_ss_lib_v3.division_actuals.get_wbs_actuals(client=client,div=div)
 
+    print("Updating Project Actuals Files")
     for p in folders:
         tid_ss_lib_v3.navigate.update_project_actuals(client=client,div=div, folderId=p, wbsData=data)
 

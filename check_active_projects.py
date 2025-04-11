@@ -80,6 +80,7 @@ parser.add_argument(
 parser.add_argument(
     "--resources",
     type     = str,
+    default  = [],
     action   = 'append',
     required = False,
     choices  = ['PD0', 'PD1', 'PD2', 'PD3'],
