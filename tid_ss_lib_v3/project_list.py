@@ -96,7 +96,8 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes, projData):
     p['tracked'] = True
 
     # Project Name, column 0
-    ret = check_cell_value(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=0, expect=p['name'])
+    col = 0
+    ret = check_cell_value(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=col, expect=p['name'])
 
     if ret is not None:
         new_row.cells.append(ret)
@@ -110,14 +111,14 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes, projData):
         #return
 
     # Update PA Numbers
-    pa_col = 7
+    col = 7
     if fid in projData:
         pas = ",".join([k for k,v in projData[fid]['pas'].items()])
-        new_cell = smartsheet.models.Cell()
-        new_cell.column_id = sheet.columns[pa_col].id
-        new_cell.value = pas
-        new_cell.strict = False
-        new_row.cells.append(new_cell)
+
+        ret = check_cell_value(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=col, expect=pas)
+
+        if ret is not None:
+            new_row.cells.append(ret)
 
     # Status Month, column 8
     sm_col = 8
@@ -127,17 +128,27 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes, projData):
         if ret is not None:
             new_row.cells.append(ret)
 
+    # Check Spent Percentage
+    col = 13
+    exp = '=[Remaining Funds]@row / [Total Budget From Project]@row'
+
+    ret = check_cell_formula(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=col, expect=exp)
+
+    if ret is not None:
+        new_row.cells.append(ret)
+
+    # Lookup columns
     LookupIndexes = {10: 4,  # Total Budget
                      11: 3,  # Actual Cost
                      12: 5,  # Remaining Funds
-                     13: 9,  # Cost Variance
-                     14: 10, # CPI
-                     15: 11, # Schedule Variance
-                     16: 12, # SPI
-                     17: 13, # Budget Risk
-                     18: 14, # Schedule Risk
-                     19: 15, # Scope    Risk
-                     20: 16} # Description Of Status
+                     14: 9,  # Cost Variance
+                     15: 10, # CPI
+                     16: 11, # Schedule Variance
+                     17: 12, # SPI
+                     18: 13, # Budget Risk
+                     19: 14, # Schedule Risk
+                     20: 15, # Scope    Risk
+                     21: 16} # Description Of Status
 
     for col, enum in LookupIndexes.items():
         exp = "=VLOOKUP([Status Month]@row, {"
@@ -152,7 +163,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes, projData):
             new_row.cells.append(ret)
 
     # Check hyperlink Column
-    col = 22
+    col = 23
     if row.cells[col].hyperlink is None or row.cells[col].hyperlink.url != p['url'] or row.cells[col].value != p['path']:
 
         if row.cells[col].hyperlink is None:
@@ -173,7 +184,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes, projData):
         new_row.cells.append(new_cell)
 
     # Check Budget Index
-    col = 23
+    col = 24
     exp = '=[Total Budget From Project]@row / [Real Budget]@row'
 
     ret = check_cell_formula(client=client, sheet=sheet, rowIdx=rowIdx, row=row, col=col, expect=exp)
