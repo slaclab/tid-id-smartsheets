@@ -77,14 +77,15 @@ def check_resource_files(*, client, div=None, alist=None, folderId=None):
     if folderId is None and div is not None:
         folderId = int(div.resource_folder)
 
-    folder = client.Folders.get_folder(folderId)
+    folder_reports = client.Folders.get_folder_children(folderId,children_resource_types=['reports'])
+    folder_folders = client.Folders.get_folder_children(folderId,children_resource_types=['folders'])
 
     if alist is None:
         alist = navigate.get_active_list(client=client,div=div)
 
-    for s in folder.reports:
+    for s in folder_reports:
         check_resource_file(client=client, sheet=s, alist=alist)
 
-    for f in folder.folders:
+    for f in folder_folders:
         check_resource_files(client=client, alist=alist, folderId=f.id)
 

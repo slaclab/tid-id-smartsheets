@@ -88,5 +88,17 @@ client = smartsheet.Smartsheet(args.key)
 print("")
 
 for p in args.folder:
-    tid_ss_lib_v3.navigate.check_project(client=client,div=tid_ss_lib_v3.configuration.get_division(client=client, div=args.div), folderId=int(p), doFixes=args.fix, doCost=args.doCost, doDownload=args.backup, doTask=args.doTask)
+    try:
+        tid_ss_lib_v3.navigate.check_project(client=client,
+                                             div=tid_ss_lib_v3.configuration.get_division(client=client, div=args.div),
+                                             folderId=int(p),
+                                             doFixes=args.fix,
+                                             doCost=args.doCost,
+                                             doDownload=args.backup,
+                                             doTask=args.doTask)
 
+    except Exception as msg:
+        print("!!!!!!!!!!!!!!!!!!!!! Error Processing Project !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print(f"    Id = {p}")
+        print(f"    {msg}")
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")

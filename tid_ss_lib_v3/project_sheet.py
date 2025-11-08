@@ -107,11 +107,6 @@ def check_row(*, client, sheet, rowIdx, key, div, cData, doFixes, doTask, resour
         elif data['forced'] is not None:
             doRow = False
 
-            if data['forced'] == 'MS_OVERHEAD':
-                data['forced'] = div.ms_overhead
-            elif data['forced'] == 'LAB_RATE':
-                data['forced'] = div.rate_note
-
             if (not (row.cells[idx].value is None and data['forced'] == '')) and (row.cells[idx].value is None or row.cells[idx].value != data['forced']):
                 print(f"   Incorrect value in row {rowIdx+1} {key} cell {idx+1} in project file. Got {row.cells[idx].value} Exp {data['forced']}")
                 doRow = True
@@ -129,6 +124,12 @@ def check_row(*, client, sheet, rowIdx, key, div, cData, doFixes, doTask, resour
 
         # Row has a default value and is empty
         elif data['default'] is not None and (row.cells[idx].value is None or row.cells[idx].value == ''):
+
+            if data['default'] == 'MS_OVERHEAD':
+                data['default'] = div.ms_overhead
+            elif data['default'] == 'LAB_RATE':
+                data['default'] = div.rate_note
+
             print(f"   Missing default value in row {rowIdx+1} {key} cell {idx+1} in project file.")
 
             new_cell = smartsheet.models.Cell()

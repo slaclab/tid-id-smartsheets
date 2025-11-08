@@ -20,36 +20,42 @@ from . import actuals_sheet
 
 import datetime
 import copy
+import time
 
 
 def get_folder_data(*, client, div, folderId, path=None):
-    folder = client.Folders.get_folder(folderId)
+
+    folder_meta = client.Folders.get_folder_metadata(folderId)
+
+    folder_sheets = client.Folders.get_folder_children(folderId,children_resource_types=['sheets'])
+    folder_reports = client.Folders.get_folder_children(folderId,children_resource_types=['reports'])
+    folder_sights = client.Folders.get_folder_children(folderId,children_resource_types=['sights'])
 
     StandardSheets  = ['Project', 'Tracking', 'Actuals', 'PM Scoring', 'Risk Registry']
     StandardSights  = ['Dashboard']
     StandardReports = ['Report']
 
-    ret = {'folder': folder}
+    ret = {'folder_meta': folder_meta}
 
     ret['path'] = path
     ret['tracked'] = False
-    ret['name'] = folder.name
-    ret['url'] = folder.permalink
+    ret['name'] = folder_meta.name
+    ret['url'] = folder_meta.permalink
     ret['sheets'] = {k: None for k in StandardSheets}
     ret['sights'] = {k: None for k in StandardSights}
     ret['reports'] = {k: None for k in StandardReports}
 
-    for s in folder.sheets:
+    for s in folder_sheets.data:
         for k in StandardSheets:
             if k == s.name[-len(k):]:
                 ret['sheets'][k] = s
 
-    for s in folder.reports:
+    for s in folder_reports.data:
         for k in StandardReports:
             if k == s.name[-len(k):]:
                 ret['reports'][k] = s
 
-    for s in folder.sights:
+    for s in folder_sights.data:
         for k in StandardSights:
             if k == s.name[-len(k):]:
                 ret['sights'][k] = s
@@ -58,12 +64,15 @@ def get_folder_data(*, client, div, folderId, path=None):
 
 
 def check_project(*, client, div, folderId, doFixes, doCost=None, doDownload=False, path=None, doTask=False, resourceTable=None):
+    if folderId == 0:
+        return
+
     fdata = get_folder_data(client=client, div=div, folderId=folderId)
 
     if path is not None:
         print(f"Processing project {path} : {folderId}")
     else:
-        print(f"Processing project {fdata['folder'].name} : {folderId}")
+        print(f"Processing project {fdata['folder_meta'].name} : {folderId}")
 
     ##########################################################
     # First Make sure folder has all of the neccessary files
@@ -75,12 +84,12 @@ def check_project(*, client, div, folderId, doFixes, doCost=None, doDownload=Fal
             return
 
         # Check for valid naming, rename if need be
-        elif 'Template Set ' not in fdata['folder'].name and not v.name.startswith(fdata['folder'].name):
+        elif 'Template Set ' not in fdata['folder_meta'].name and not v.name.startswith(fdata['folder_meta'].name):
             print(f"   Bad sheet name {v.name}.")
 
             if doFixes:
                 print(f"   Renaming {v.name}.")
-                client.Sheets.update_sheet(v.id, smartsheet.models.Sheet({'name': fdata['folder'].name + ' ' + k}))
+                client.Sheets.update_sheet(v.id, smartsheet.models.Sheet({'name': fdata['folder_meta'].name + ' ' + k}))
             else:
                 return
 
@@ -91,7 +100,7 @@ def check_project(*, client, div, folderId, doFixes, doCost=None, doDownload=Fal
             return
 
         # Check for valid naming, rename if need be
-        elif 'Template Set ' not in fdata['folder'].name and not v.name.startswith(fdata['folder'].name):
+        elif 'Template Set ' not in fdata['folder_meta'].name and not v.name.startswith(fdata['folder_meta'].name):
             print(f"   Bad report name {v.name}. Please rename manually.")
             return
 
@@ -102,7 +111,7 @@ def check_project(*, client, div, folderId, doFixes, doCost=None, doDownload=Fal
             return
 
         # Check for valid naming, rename if need be
-        elif 'Template Set ' not in fdata['folder'].name and not v.name.startswith(fdata['folder'].name):
+        elif 'Template Set ' not in fdata['folder_meta'].name and not v.name.startswith(fdata['folder_meta'].name):
             print(f"   Bad sight name {v.name}. Please rename manually.")
             return
 
@@ -120,7 +129,7 @@ def check_project(*, client, div, folderId, doFixes, doCost=None, doDownload=Fal
 
     # Check project file
     resources = set()
-    ret = project_sheet.check(client=client, div=div, sheet=fdata['sheets']['Project'], doFixes=doFixes, cData=cData, doCost=doCost, name=fdata['folder'].name, doDownload=doDownload, doTask=doTask, resources=resources, resourceTable=resourceTable)
+    ret = project_sheet.check(client=client, div=div, sheet=fdata['sheets']['Project'], doFixes=doFixes, cData=cData, doCost=doCost, name=fdata['folder_meta'].name, doDownload=doDownload, doTask=doTask, resources=resources, resourceTable=resourceTable)
 
     # Fix tracking file
     if ret:
@@ -137,27 +146,33 @@ def check_project(*, client, div, folderId, doFixes, doCost=None, doDownload=Fal
         print("   Skipping remaining processing")
 
 
-def get_active_list(*, client, div, path=None, folderId=None):
-
-    if path is None and folderId is None:
-        path = div.folder_prefix
-        folderId = int(div.active_folder)
-
-    folder = client.Folders.get_folder(folderId)
+def get_active_list(*, client, div):
+    path = div.folder_prefix
+    folderId = int(div.active_folder)
     ret = {}
 
-    path = path + '/' + folder.name
+    top_folders = client.Folders.get_folder_children(folderId,children_resource_types=['folders'])
 
-    # No sub folders, this might be a project
-    if len(folder.folders) == 0:
+    for sub in top_folders.data:
+        sub_meta = client.Folders.get_folder_metadata(sub.id)
+        sub_path = path + f"/{sub_meta.name}"
+        print(f"Processing sub directory {sub_path}")
 
-        # Skip projects with no sheets
-        if len(folder.sheets) != 0:
-            ret[folderId] = get_folder_data(client=client, div=div, folderId=folder.id, path=path)
+        sub_folders = client.Folders.get_folder_children(sub.id,children_resource_types=['folders'])
 
-    else:
-        for sub in folder.folders:
-            ret.update(get_active_list(client=client, div=div, path=path, folderId=sub.id))
+        for proj in sub_folders.data:
+            proj_meta = client.Folders.get_folder_metadata(proj.id)
+            proj_path = sub_path + f"/{proj_meta.name}"
+
+            print(f"Processing project directory {proj_path}")
+
+            try:
+                ret[proj_meta.id] = get_folder_data(client=client, div=div, folderId=proj_meta.id, path=proj_path)
+            except Exeption as msg:
+                print("!!!!!!!!!!!!!!!!!!!!! Error Getting Folder Data !!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print(f"    Id = {folder_meta.id}")
+                print(f"    {msg}")
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
     return ret
 
@@ -168,13 +183,13 @@ def update_project_actuals(*, client, div, folderId, wbsData):
     fdata = get_folder_data(client=client, div=div, folderId=folderId)
 
     if fdata['sheets']['Actuals'] is None:
-        print(f"Skipping Project {fdata['folder'].name}  which is missing its actuals sheet")
+        print(f"Skipping Project {fdata['folder_meta'].name}  which is missing its actuals sheet")
         return
 
     # Re-read sheet data
     fdata['sheets']['Actuals'] = client.Sheets.get_sheet(fdata['sheets']['Actuals'].id, include='format')
 
     if folderId in wbsData:
-        print(f"Updating Actuals For Project {fdata['folder'].name} : {folderId}")
+        print(f"Updating Actuals For Project {fdata['folder_meta'].name} : {folderId}")
         actuals_sheet.update_actuals(client=client, sheet=fdata['sheets']['Actuals'], wbsData=wbsData[folderId])
 

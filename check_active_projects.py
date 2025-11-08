@@ -137,14 +137,20 @@ for k in args.div:
             if r in p['status']:
                 rt = resourceTable
 
-        tid_ss_lib_v3.navigate.check_project(client=client,
-                                             div=div,
-                                             folderId=p['id'],
-                                             doFixes=args.fix,
-                                             doCost=args.doCost,
-                                             doDownload=doDownload,
-                                             doTask=args.doTask,
-                                             resourceTable=rt)
+        try:
+            tid_ss_lib_v3.navigate.check_project(client=client,
+                                                 div=div,
+                                                 folderId=p['id'],
+                                                 doFixes=args.fix,
+                                                 doCost=args.doCost,
+                                                 doDownload=doDownload,
+                                                 doTask=args.doTask,
+                                                 resourceTable=rt)
+        except Exception as msg:
+            print("!!!!!!!!!!!!!!!!!!!!! Error Processing Project !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            print(f"    Id = {p['id']}")
+            print(f"    {msg}")
+            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
     if len(resourceTable) > 0:
         tid_ss_lib_v3.division_resource.update(client=client, div=div, resourceTable=resourceTable)

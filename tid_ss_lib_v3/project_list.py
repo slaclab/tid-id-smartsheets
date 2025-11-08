@@ -217,5 +217,5 @@ def check(*, client, doFixes, div):
 
     for k, v in folderList.items():
         if v['tracked'] is False:
-            print(f"    Project {v['name']} with id {k} is not tracked")
+            print(f"    Project {v['path']} with id {k} is not tracked")
 
