@@ -85,6 +85,9 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes, projData):
         print(f"    Row {rowIdx+1} contains bad project ID")
         return
 
+    if fid == 0:
+        return
+
     if fid not in folderList:
         print(f"    Row {rowIdx+1} contains unknown project ID {fid}")
         return
