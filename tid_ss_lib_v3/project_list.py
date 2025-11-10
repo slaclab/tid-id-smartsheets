@@ -220,5 +220,10 @@ def check(*, client, doFixes, div, doDownload):
             print(f"    Project {v['path']} with id {k} is not tracked")
 
     if isinstance(doDownload,str):
-        client.Sheets.get_sheet_as_excel(sheet.id, doDownload, str(sheet.name) + '.xlsx')
+        backup_file(client=client, div=div, doDownload=doDownload)
+
+
+def backup_file(*, client, div, doDownload):
+    sheet = client.Sheets.get_sheet(int(div.project_list), include='format')
+    client.Sheets.get_sheet_as_excel(sheet.id, doDownload, str(sheet.name) + '.xlsx')
 
