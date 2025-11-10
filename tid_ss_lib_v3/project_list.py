@@ -197,7 +197,7 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes, projData):
         client.Sheets.update_rows(sheet.id, [new_row])
 
 
-def check(*, client, doFixes, div):
+def check(*, client, doFixes, div, doDownload):
 
     # Get folder list:
     print("Searching active directory for projects ...")
@@ -218,4 +218,7 @@ def check(*, client, doFixes, div):
     for k, v in folderList.items():
         if v['tracked'] is False:
             print(f"    Project {v['path']} with id {k} is not tracked")
+
+    if isinstance(doDownload,str):
+        client.Sheets.get_sheet_as_excel(sheet.id, doDownload, str(sheet.name) + '.xlsx')
 

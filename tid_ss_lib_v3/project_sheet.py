@@ -377,7 +377,7 @@ def check(*, client, sheet, doFixes, div, cData, doCost, name, doDownload, doTas
         write_cost_table(name=name, laborTable=laborTable, msTable=msTable)
 
     if isinstance(doDownload,str):
-        client.Sheets.get_sheet_as_excel(sheet.id, doDownload)
+        client.Sheets.get_sheet_as_excel(sheet.id, doDownload, sheet.name + '.xlsx')
 
     return True
 

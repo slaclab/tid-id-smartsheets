@@ -49,10 +49,18 @@ parser.add_argument(
     help     = "Use to enable fixing of project files.",
 )
 
+parser.add_argument(
+    "--backup",
+    type     = str,
+    required = False,
+    default  = None,
+    help     = "Pass backup director to generate a backup"
+)
+
 # Get the arguments
 args = parser.parse_args()
 
 client = smartsheet.Smartsheet(args.key)
 
-tid_ss_lib_v3.project_list.check(client=client, div=tid_ss_lib_v3.configuration.get_division(client=client, div=args.div), doFixes=args.fix)
+tid_ss_lib_v3.project_list.check(client=client, div=tid_ss_lib_v3.configuration.get_division(client=client, div=args.div), doFixes=args.fix, doDownload=args.backup)
 

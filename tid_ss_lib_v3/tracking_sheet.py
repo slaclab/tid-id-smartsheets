@@ -241,5 +241,5 @@ def check(*, client, sheet, projectSheet, actualsSheet, tData, doFixes, cData, d
         check_other_row(client=client, rowIdx=i, sheet=sheet, tData=tData, doFixes=doFixes)
 
     if isinstance(doDownload,str):
-        client.Sheets.get_sheet_as_excel(sheet.id, doDownload)
+        client.Sheets.get_sheet_as_excel(sheet.id, doDownload, sheet.name + '.xlsx')
 
