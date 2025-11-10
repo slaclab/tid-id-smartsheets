@@ -168,7 +168,7 @@ def get_active_list(*, client, div):
 
             try:
                 ret[proj_meta.id] = get_folder_data(client=client, div=div, folderId=proj_meta.id, path=proj_path)
-            except Exeption as msg:
+            except Exception as msg:
                 print("!!!!!!!!!!!!!!!!!!!!! Error Getting Folder Data !!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 print(f"    Id = {folder_meta.id}")
                 print(f"    {msg}")
