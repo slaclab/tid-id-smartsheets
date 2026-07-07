@@ -13,11 +13,11 @@ jobs:
     steps:
 
       # This step checks out a copy of your repository.
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: 3.8
 
@@ -38,7 +38,7 @@ jobs:
           pyinstaller --onefile check_project_gui.py
 
       - name: Upload
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
@@ -53,11 +53,11 @@ jobs:
     steps:
 
       # This step checks out a copy of your repository.
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: 3.8
 
@@ -78,7 +78,7 @@ jobs:
           pyinstaller --onefile check_project_gui.py
 
       - name: Upload
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
@@ -93,11 +93,11 @@ jobs:
     steps:
 
       # This step checks out a copy of your repository.
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: 3.8
 
@@ -118,7 +118,7 @@ jobs:
           pyinstaller --onefile check_project_gui.py
 
       - name: Upload
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
