@@ -155,6 +155,6 @@ for k in args.div:
     if len(resourceTable) > 0:
         tid_ss_lib_v3.division_resource.update(client=client, div=div, resourceTable=resourceTable)
 
-    if doDownload is not None:
+    if doDownload is not False:
         tid_ss_lib_v3.project_list.backup_file(client=client, div=div, doDownload=doDownload)
 
