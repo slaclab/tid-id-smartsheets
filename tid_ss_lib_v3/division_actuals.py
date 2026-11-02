@@ -19,8 +19,9 @@ import copy
 ColDataActuals = { 'Lookup PA'          : {'position' : 0},
                    'Monthly Actuals'    : {'position' : 2},
                    'Total Actuals'      : {'position' : 3},
-                   'Actuals Start Date' : {'position' : 5},
-                   'Project Folder ID'  : {'position' : 7}}
+                   'Commits'            : {'position' : 4},
+                   'Actuals Start Date' : {'position' : 6},
+                   'Project Folder ID'  : {'position' : 8}}
 
 ColDataWbs = { 'PA Proj_Act'        : {'position' : 2},  # XXXXX-YYYY
                'Period-Month'       : {'position' : 4},  # 01-OCT
