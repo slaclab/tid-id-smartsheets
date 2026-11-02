@@ -59,6 +59,7 @@ def find_columns(*, client, sheet, cData):
 #    'Project Folder ID'  = api id for sheet
 #    'Monthly Actuals'    = $xxxx.xx
 #    'Total Actuals'      = $xxxx.xx
+#    'Commits'            = $xxxx.xx
 #    'Actuals Start Date' = YYYY-MM-DD
 #
 # The second is a dictionary with the project id as the key, each containing the following fields:

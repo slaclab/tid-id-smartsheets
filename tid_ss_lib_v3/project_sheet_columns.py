@@ -36,8 +36,10 @@ ContingencyHours = '=(IF([Risk Factor]@row = "None 0%", 1, '  \
                    'IF([Risk Factor]@row = "High (50% Contingency)", 1.5, ' \
                    '[Risk Factor]@row))))))))))) * [Budgeted Quantity]@row'
 
-ToDelete = [ 'Actual Labor Hours Or M&S Cost', 'Remaining Hours', 'Actual Cost', 'Remaining Funds', 'Cost Variance',
-             'Total Budgeted Cost With Contingency', 'Earned Value With Contingency', 'Cost Variance With Contingency' ]
+#ToDelete = [ 'Actual Labor Hours Or M&S Cost', 'Remaining Hours', 'Actual Cost', 'Remaining Funds', 'Cost Variance',
+#             'Total Budgeted Cost With Contingency', 'Earned Value With Contingency', 'Cost Variance With Contingency' ]
+
+ToDelete = [ ]
 
 # https://smartsheet-platform.github.io/api-docs/#formatting
 #
