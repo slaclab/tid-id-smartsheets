@@ -144,14 +144,14 @@ def check_row(*, client, sheet, rowIdx, folderList, doFixes, projData):
     LookupIndexes = {10: 4,  # Total Budget
                      11: 3,  # Actual Cost
                      12: 5,  # Remaining Funds
-                     14: 9,  # Cost Variance
-                     15: 10, # CPI
-                     16: 11, # Schedule Variance
-                     17: 12, # SPI
-                     18: 13, # Budget Risk
-                     19: 14, # Schedule Risk
-                     20: 15, # Scope    Risk
-                     21: 16} # Description Of Status
+                     14: 10,  # Cost Variance
+                     15: 11, # CPI
+                     16: 12, # Schedule Variance
+                     17: 13, # SPI
+                     18: 14, # Budget Risk
+                     19: 15, # Schedule Risk
+                     20: 16, # Scope    Risk
+                     21: 17} # Description Of Status
 
     for col, enum in LookupIndexes.items():
         exp = "=VLOOKUP([Status Month]@row, {"
